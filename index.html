@@ -2373,13 +2373,22 @@ function repeatOrder() {
 ------------------------------------------------------------- */
 function renderDeals() {
   if (PRODUCTS.length === 0) {
-    // Show spinner and wait for products to load — don't trigger a second fetch
     document.getElementById('featured-deals').innerHTML = '<div class="col-span-3 flex justify-center py-12"><svg class="animate-spin w-6 h-6 text-teal-500" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg></div>';
-    document.getElementById('all-deals').innerHTML = '';
-    // Poll until products available
-    const poll = setInterval(() => {
-      if (PRODUCTS.length > 0) { clearInterval(poll); renderDeals(); }
-    }, 500);
+    // Fetch directly for deals — don't wait for catalog
+    sbRest('MEDICINE', {
+      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,url,status,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
+      order: 'product_name.asc',
+      'mrp': 'not.is.null',
+      'mrp_filter': 'neq.0'
+    }, { range: '0-23' }).then(({ data: rows }) => {
+      if (rows && rows.length > 0) {
+        const mapped = rows.map((r, i) => rowToProduct(r, i)).filter(p => p.mrp > 0);
+        if (PRODUCTS.length === 0) PRODUCTS.push(...mapped);
+        renderDeals();
+      }
+    }).catch(() => {
+      document.getElementById('featured-deals').innerHTML = '<p class="text-slate-400 text-center py-8">Could not load deals</p>';
+    });
     return;
   }
   // Featured = 3 big cards
