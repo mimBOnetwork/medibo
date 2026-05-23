@@ -1325,7 +1325,7 @@
 /* -------------------------------------------------------------
    DATA LAYER  — Direct Supabase connection
 ------------------------------------------------------------- */
-const PAGE_SIZE = 48;
+const PAGE_SIZE = 24;
 
 const SUPABASE_URL = 'https://qkcuoaqrpnmdnejzahdv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrY3VvYXFycG5tZG5lanphaGR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzk3NjYsImV4cCI6MjA5NDk1NTc2Nn0.IBj9QYmYjfaHYU40lfTvuTj8YO4Brz4P-6k7TWcM_hE';
@@ -1493,13 +1493,10 @@ async function fetchProducts(page, append) {
     document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
   } catch (err) {
     console.error('Fetch error:', err);
-    document.getElementById('products-grid').innerHTML = `
-      <div class="col-span-3 text-center py-16 text-slate-400">
-        <div class="text-4xl mb-3">⚠️</div>
-        <p class="font-semibold text-navy-900">Could not load products</p>
-        <p class="text-sm mt-1">${err.message}</p>
-        <button onclick="fetchProducts(0)" class="mt-4 px-4 py-2 rounded-xl bg-navy-900 text-white text-sm font-semibold">Retry</button>
-      </div>`;
+    // Silent auto-retry — keep spinner, retry after 1.5s, no error shown
+    sbIsLoading = false;
+    setTimeout(() => fetchProducts(page, append), 1500);
+    return;
   } finally {
     sbIsLoading = false;
     showCatalogLoading(false);
