@@ -1501,6 +1501,15 @@ const CATEGORIES = [
 const MANUFACTURERS = [];
 const PRODUCTS = [];
 
+// Load from localStorage cache instantly on startup
+try {
+  const cached = localStorage.getItem('medibo_products_cache');
+  if (cached) {
+    const parsed = JSON.parse(cached);
+    if (parsed && parsed.length > 0) PRODUCTS.push(...parsed);
+  }
+} catch(e) {}
+
 const ORDERS = [
   { id:'MB-90342', date:'24 May 2026', items:42, value:84250, savings:18600, status:'in-transit', eta:'In 38 min' },
   { id:'MB-90218', date:'21 May 2026', items:18, value:32480, savings:7240, status:'delivered', eta:'21 May, 11:42 AM' },
@@ -1597,12 +1606,17 @@ async function fetchProducts(page, append) {
     } else {
       PRODUCTS.length = 0;
       PRODUCTS.push(...filtered);
-      // Cache this result for instant repeat
+      // Cache in memory
       _searchCache[cacheKey] = { products: filtered.slice(), total: sbTotalCount };
-      // Keep cache small — max 20 entries
       const keys = Object.keys(_searchCache);
       if (keys.length > 20) delete _searchCache[keys[0]];
     }
+    // Persist to localStorage for instant load next visit
+    try {
+      if (!filters.search && !sbActiveThClass && filters.manufacturers.size === 0) {
+        localStorage.setItem('medibo_products_cache', JSON.stringify(PRODUCTS.slice(0, 48)));
+      }
+    } catch(e) {}
 
     renderProducts();
     renderLoadMore();
