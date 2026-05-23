@@ -2174,7 +2174,7 @@ function updateQty(id, delta) {
 }
 
 function updateCartBadge() {
-  const total = CART.reduce((s,c) => s + c.qty, 0);
+  const total = CART.length; // number of unique products, not total qty
   document.getElementById('cart-badge').textContent = total;
 }
 
