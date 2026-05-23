@@ -23,6 +23,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
 <script>
   tailwind.config = {
     theme: {
@@ -1460,7 +1461,9 @@ async function fetchProducts(page, append) {
       params['therapeutic_class'] = 'eq.' + sbActiveThClass;
     }
     if (filters.search && filters.search.length >= 2) {
-      params['product_name'] = 'ilike.*' + filters.search + '*';
+      const q = filters.search.replace(/[*%]/g, '');
+      // Search product_name OR salt_composition using PostgREST OR filter
+      params['or'] = '(product_name.ilike.*' + q + '*,salt_composition.ilike.*' + q + '*,marketer.ilike.*' + q + '*)';
     }
     if (filters.manufacturers.size > 0) {
       const list = [...filters.manufacturers].map(m => '"' + m.replace(/"/g,'\\"') + '"').join(',');
@@ -1475,7 +1478,29 @@ async function fetchProducts(page, append) {
     sbTotalCount = (total != null) ? total : (rows ? rows.length : 0);
     sbCurrentPage = page;
 
-    const mapped = (rows || []).map((r, i) => rowToProduct(r, page * PAGE_SIZE + i));
+    let mapped = (rows || []).map((r, i) => rowToProduct(r, page * PAGE_SIZE + i));
+
+    // Fuzzy re-rank client-side if there's a search query
+    if (filters.search && filters.search.length >= 2 && window.Fuse && mapped.length > 0) {
+      const fuse = new window.Fuse(mapped, {
+        keys: [
+          { name: 'name', weight: 0.6 },
+          { name: 'salt', weight: 0.3 },
+          { name: 'mfr',  weight: 0.1 }
+        ],
+        threshold: 0.45,      // 0=exact, 1=match anything
+        distance: 100,
+        minMatchCharLength: 2,
+        includeScore: true,
+        ignoreLocation: true
+      });
+      const results = fuse.search(filters.search);
+      // If fuzzy finds good matches use them, otherwise keep original order
+      if (results.length > 0) {
+        mapped = results.map(r => r.item);
+      }
+    }
+
     const filtered = mapped.filter(p => p.b2b <= filters.maxPrice || p.mrp === 0);
 
     if (append) {
