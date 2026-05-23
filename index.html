@@ -2065,7 +2065,7 @@ function productCardGrid(p) {
           <div class="flex items-baseline gap-2 mb-1">
             <span class="font-display font-extrabold text-navy-900 text-xl font-mono">₹${p.mrp}</span>
             <span class="text-xs font-semibold text-slate-400">MRP</span>
-            <span class="text-xs font-semibold text-teal-600 ml-auto">${p.packQty ? p.packQty + " pcs" : "MOQ " + p.moq}</span>
+            <span class="text-xs font-semibold text-teal-600 ml-auto">${p.packQty ? p.packQty : "MOQ " + p.moq}</span>
           </div>
           <div data-cart-id="${p.id}">${cartBtnHTML(p)}</div>
         </div>
@@ -2087,7 +2087,7 @@ function productCardList(p) {
           ${p.deal >= 35 ? `<span class="text-[10px] font-bold text-teal-600">${p.deal}% off</span>` : ''}
         </div>
         <h3 class="font-display font-bold text-navy-900 truncate">${p.name}</h3>
-        <div class="text-xs text-slate-500">${p.salt} · ${p.packQty ? p.packQty + " pcs" : "MOQ " + p.moq}</div>
+        <div class="text-xs text-slate-500">${p.salt} · ${p.packQty ? p.packQty : "MOQ " + p.moq}</div>
       </div>
       <div class="text-right flex-shrink-0">
         <div class="flex items-baseline gap-2 justify-end">
