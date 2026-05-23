@@ -1806,11 +1806,36 @@ function productImageArea(p, size) {
 
 // Remove old auto-rotate — replaced by manual swipe above
 
-function productCardGrid(p) {
+function cartBtnHTML(p) {
+  const safeId = p.id.replace(/'/g,"\\'");
   const cartItem = CART.find(c => c.id === p.id);
   const qty = cartItem ? cartItem.qty : 0;
+  if (qty === 0) {
+    return `<button onclick="addToCart('${safeId}')" class="w-full mt-2 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white text-sm font-semibold flex items-center justify-center gap-1.5 transition">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+      Add to cart
+    </button>`;
+  }
+  return `<div class="w-full mt-2 flex items-center justify-between bg-teal-50 rounded-xl p-1 border border-teal-200">
+    <button onclick="updateQty('${safeId}',-1)" class="w-9 h-9 rounded-lg bg-white text-navy-900 font-bold text-lg shadow-sm">−</button>
+    <span class="font-mono font-bold text-navy-900">${qty}</span>
+    <button onclick="updateQty('${safeId}',1)" class="w-9 h-9 rounded-lg bg-teal-500 text-white font-bold text-lg">+</button>
+  </div>`;
+}
+
+function refreshCartBtn(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  // Update all cards with this product id (grid + list view)
+  document.querySelectorAll('[data-cart-id="' + id + '"]').forEach(el => {
+    el.innerHTML = cartBtnHTML(p);
+  });
+}
+
+function productCardGrid(p) {
+  const safeId = p.id.replace(/'/g,"\\'");
   return `
-    <div class="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
+    <div class="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col" data-id="${p.id}">
       <div class="relative bg-gradient-to-br from-slate-50 to-white overflow-hidden" style="height:200px;">
         ${p.deal >= 35 ? `<div class="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-full bg-teal-500 text-white text-[10px] font-bold uppercase tracking-wider">${p.deal}% off</div>` : ''}
         <div class="absolute top-3 right-3 z-10">${stockBadge(p.stock)}</div>
@@ -1826,17 +1851,7 @@ function productCardGrid(p) {
             <span class="strike text-xs font-mono">₹${p.mrp}</span>
             <span class="text-xs font-semibold text-teal-600 ml-auto">${p.packQty ? p.packQty + " pcs" : "MOQ " + p.moq}</span>
           </div>
-          ${qty === 0
-            ? `<button onclick="addToCart('${p.id}')" class="w-full mt-2 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white text-sm font-semibold flex items-center justify-center gap-1.5 transition">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                Add to cart
-              </button>`
-            : `<div class="w-full mt-2 flex items-center justify-between bg-teal-50 rounded-xl p-1 border border-teal-200">
-                <button onclick="updateQty('${p.id}', -1)" class="w-9 h-9 rounded-lg bg-white text-navy-900 font-bold text-lg shadow-sm">−</button>
-                <span class="font-mono font-bold text-navy-900">${qty}</span>
-                <button onclick="updateQty('${p.id}', 1)" class="w-9 h-9 rounded-lg bg-teal-500 text-white font-bold text-lg">+</button>
-              </div>`
-          }
+          <div data-cart-id="${p.id}">${cartBtnHTML(p)}</div>
         </div>
       </div>
     </div>
@@ -1909,7 +1924,7 @@ function addToCart(id) {
   else CART.push({ id, qty: p.moq });
   updateCartBadge();
   toast(`Added ${p.moq} units of ${p.name}`);
-  if (currentView === 'catalog') renderProducts();
+  refreshCartBtn(id);          // only update this card's button — no blink
   if (currentView === 'cart') renderCart();
 }
 
@@ -1921,7 +1936,7 @@ function updateQty(id, delta) {
   item.qty += delta * step;
   if (item.qty < p.moq) CART = CART.filter(c => c.id !== id);
   updateCartBadge();
-  if (currentView === 'catalog') renderProducts();
+  refreshCartBtn(id);          // only update this card's button — no blink
   if (currentView === 'cart') renderCart();
 }
 
