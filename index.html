@@ -1454,7 +1454,7 @@ function rowToProduct(r, idx) {
   const images = [r.image_url_1, r.image_url_2, r.image_url_3, r.image_url_4, r.image_url_5]
     .filter(u => u && u.trim() !== '' && !u.includes('drive.google.com'));
   const stockRand = Math.random();
-  const stock = stockRand > 0.7 ? 'high' : stockRand > 0.25 ? 'medium' : 'low';
+  const stock = r.status || 'Available';  // use real DB status
   const moqMap = { 'Strip':30,'Tablet':50,'Capsule':30,'Bottle':20,'Vial':10,'Sachet':100,'Tube':20,'Syrup':20,'Injection':15,'Powder':25 };
   const moq = moqMap[packType] || 25;
   return {
@@ -1544,7 +1544,7 @@ async function fetchProducts(page, append) {
     const to   = from + PAGE_SIZE - 1;
 
     const params = {
-      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,url,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
+      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,url,status,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
       // Only sort alphabetically when NOT searching — fuzzy ranking handles search order
       order: (filters.search && filters.search.length >= 2) ? 'product_name.asc' : 'product_name.asc'
     };
@@ -1671,7 +1671,7 @@ function renderLoadMore() {
 async function fetchHomeDeals() {
   try {
     const { data: rows } = await sbRest('MEDICINE', {
-      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,url,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
+      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,url,status,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
       'mrp':  'not.is.null'
     }, { range: '500-507' });
     const mapped = (rows || []).map((r, i) => rowToProduct(r, i));
@@ -1975,10 +1975,14 @@ function getFilteredProducts() {
   return list;
 }
 
-function stockBadge(stock) {
-  if (stock === 'high') return '<span class="text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">In stock</span>';
-  if (stock === 'medium') return '<span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Low stock</span>';
-  return '<span class="text-[10px] font-bold uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full">Limited</span>';
+function stockBadge(status) {
+  const s = (status || 'Available').toUpperCase();
+  if (s === 'AVAILABLE')         return '<span class="text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">In Stock</span>';
+  if (s === 'SOLD OUT')          return '<span class="text-[10px] font-bold uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full">Sold Out</span>';
+  if (s === 'DISCONTINUED')      return '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Discontinued</span>';
+  if (s === 'NOT FOR SALE')      return '<span class="text-[10px] font-bold uppercase tracking-wider text-orange-700 bg-orange-50 px-2 py-0.5 rounded-full">Not For Sale</span>';
+  if (s === 'BANNED FOR SALE')   return '<span class="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 px-2 py-0.5 rounded-full">Banned</span>';
+  return '<span class="text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">In Stock</span>';
 }
 
 function productImageArea(p, size) {
