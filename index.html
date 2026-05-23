@@ -1458,7 +1458,8 @@ async function fetchProducts(page, append) {
 
     const params = {
       select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,url,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
-      order:  'product_name.asc'
+      // Only sort alphabetically when NOT searching — fuzzy ranking handles search order
+      order: (filters.search && filters.search.length >= 2) ? 'product_name.asc' : 'product_name.asc'
     };
     if (sbActiveThClass) {
       params['therapeutic_class'] = 'eq.' + sbActiveThClass;
@@ -1486,25 +1487,38 @@ async function fetchProducts(page, append) {
 
     let mapped = (rows || []).map((r, i) => rowToProduct(r, page * PAGE_SIZE + i));
 
-    // Fuzzy re-rank client-side if there's a search query
-    if (filters.search && filters.search.length >= 2 && window.Fuse && mapped.length > 0) {
-      const fuse = new window.Fuse(mapped, {
-        keys: [
-          { name: 'name', weight: 0.6 },
-          { name: 'salt', weight: 0.3 },
-          { name: 'mfr',  weight: 0.1 }
-        ],
-        threshold: 0.45,      // 0=exact, 1=match anything
-        distance: 100,
-        minMatchCharLength: 2,
-        includeScore: true,
-        ignoreLocation: true
+    // Smart ranking — best match first, no score shown to user
+    if (filters.search && filters.search.length >= 2 && mapped.length > 0) {
+      const q = filters.search.toLowerCase().trim();
+
+      // Score each product: lower = better match
+      mapped = mapped.map(p => {
+        const name = (p.name || '').toLowerCase();
+        const salt = (p.salt || '').toLowerCase();
+        const mfr  = (p.mfr  || '').toLowerCase();
+        let score = 100;
+
+        if (name === q)                          score = 0;   // exact name match
+        else if (name.startsWith(q))             score = 1;   // name starts with query
+        else if (salt === q)                     score = 2;   // exact salt match
+        else if (salt.startsWith(q))             score = 3;   // salt starts with query
+        else if (name.includes(q))               score = 4;   // name contains query
+        else if (salt.includes(q))               score = 5;   // salt contains query
+        else if (mfr.includes(q))                score = 6;   // manufacturer contains
+        else {
+          // Fuzzy: count matching chars
+          let matches = 0;
+          for (let i = 0; i < q.length; i++) {
+            if (name.includes(q[i]) || salt.includes(q[i])) matches++;
+          }
+          score = 7 + (q.length - matches);
+        }
+        return { p, score };
       });
-      const results = fuse.search(filters.search);
-      // If fuzzy finds good matches use them, otherwise keep original order
-      if (results.length > 0) {
-        mapped = results.map(r => r.item);
-      }
+
+      // Sort by score ascending (best first)
+      mapped.sort((a, b) => a.score - b.score);
+      mapped = mapped.map(x => x.p);
     }
 
     const filtered = mapped.filter(p => p.b2b <= filters.maxPrice || p.mrp === 0);
