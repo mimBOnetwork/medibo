@@ -653,15 +653,10 @@
       <h1 class="font-display font-extrabold text-3xl lg:text-4xl text-navy-900">Medicine Catalog</h1>
       <p class="text-sm text-slate-600 mt-1">5,000+ verified SKUs · Live B2B pricing · Same-day dispatch on most orders</p>
 
-      <!-- Search bar -->
-      <div class="mt-6 bg-slate-50 rounded-2xl p-2 flex flex-col sm:flex-row gap-2 ring-1 ring-slate-200">
-        <div class="flex-1 flex items-center gap-3 px-4 py-3 bg-white rounded-xl">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 text-slate-400">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.34-4.34M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/>
-          </svg>
-          <input id="catalog-search" type="text" placeholder="Search by name, salt, or manufacturer" class="w-full text-navy-900 placeholder-slate-400 focus:outline-none text-sm"/>
-        </div>
-        <select id="sort-select" class="px-4 py-3 bg-white rounded-xl text-sm font-medium text-navy-900 focus:outline-none ring-1 ring-slate-200">
+
+      <!-- Sort only — search is in the global sticky bar above -->
+      <div class="mt-4 flex justify-end">
+        <select id="sort-select" class="px-4 py-2.5 bg-white rounded-xl text-sm font-medium text-navy-900 focus:outline-none ring-1 ring-slate-200">
           <option value="relevance">Sort: Relevance</option>
           <option value="price-asc">Price: Low → High</option>
           <option value="price-desc">Price: High → Low</option>
@@ -1660,7 +1655,7 @@ document.querySelectorAll('.route-link').forEach(link => {
 document.getElementById('global-search-input').addEventListener('input', function(e) {
   filters.search = e.target.value;
   // Sync with catalog search input
-  const cs = document.getElementById('catalog-search');
+  const cs = document.getElementById('global-search-input');
   if (cs) cs.value = e.target.value;
   if (currentView !== 'catalog') navigate('catalog');
   debounce(() => fetchProducts(0), 350);
@@ -1824,7 +1819,7 @@ function clearFilters() {
   filters.inStockOnly = false;
   filters.search = '';
   sbActiveThClass = null;
-  document.getElementById('catalog-search').value = '';
+  document.getElementById('global-search-input').value = '';
   document.getElementById('price-range').value = 5000;
   document.getElementById('price-display').textContent = 'Up to ₹5000';
   document.getElementById('in-stock-only').checked = false;
@@ -2318,7 +2313,7 @@ function toast(msg) {
 /* -------------------------------------------------------------
    EVENT LISTENERS  (Supabase-aware)
 ------------------------------------------------------------- */
-document.getElementById('catalog-search').addEventListener('input', e => {
+document.getElementById('global-search-input').addEventListener('input', e => {
   filters.search = e.target.value;
   debounce(() => fetchProducts(0), 400);
 });
@@ -2327,7 +2322,7 @@ document.getElementById('hero-search').addEventListener('keypress', e => {
     filters.search = e.target.value;
     navigate('catalog');
     setTimeout(() => {
-      document.getElementById('catalog-search').value = filters.search;
+      document.getElementById('global-search-input').value = filters.search;
       fetchProducts(0);
     }, 50);
   }
