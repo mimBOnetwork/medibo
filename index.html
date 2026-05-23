@@ -1445,10 +1445,28 @@ let sbTotalCount   = 0;
 let sbIsLoading    = false;
 let sbActiveThClass = null;
 
+/* Search result cache — instant repeat searches */
+const _searchCache = {};
+
 async function fetchProducts(page, append) {
   page = page || 0;
   append = append || false;
   if (sbIsLoading) return;
+
+  // Build cache key
+  const cacheKey = [filters.search, sbActiveThClass, [...filters.manufacturers].sort().join(','), filters.maxPrice, page].join('|');
+  if (!append && _searchCache[cacheKey]) {
+    const cached = _searchCache[cacheKey];
+    PRODUCTS.length = 0;
+    PRODUCTS.push(...cached.products);
+    sbTotalCount = cached.total;
+    sbCurrentPage = page;
+    renderProducts();
+    renderLoadMore();
+    document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
+    return;
+  }
+
   sbIsLoading = true;
   showCatalogLoading(true);
 
@@ -1468,8 +1486,9 @@ async function fetchProducts(page, append) {
     let rawParams = '';
     if (filters.search && filters.search.length >= 2) {
       const q = filters.search.replace(/[%*'"()]/g, '').trim();
-      // Use rawParams so % wildcards aren't double-encoded by URLSearchParams
-      rawParams = 'or=(product_name.ilike.%25' + q + '%25,salt_composition.ilike.%25' + q + '%25,marketer.ilike.%25' + q + '%25)';
+      // Use only product_name ilike — this hits the trigram index and is fast
+      // Salt/marketer search handled by client-side ranking after fetch
+      rawParams = 'product_name=ilike.%25' + q + '%25';
     }
     if (filters.manufacturers.size > 0) {
       const list = [...filters.manufacturers].map(m => '"' + m.replace(/"/g,'\\"') + '"').join(',');
@@ -1528,6 +1547,11 @@ async function fetchProducts(page, append) {
     } else {
       PRODUCTS.length = 0;
       PRODUCTS.push(...filtered);
+      // Cache this result for instant repeat
+      _searchCache[cacheKey] = { products: filtered.slice(), total: sbTotalCount };
+      // Keep cache small — max 20 entries
+      const keys = Object.keys(_searchCache);
+      if (keys.length > 20) delete _searchCache[keys[0]];
     }
 
     renderProducts();
@@ -1689,7 +1713,7 @@ document.getElementById('global-search-input').addEventListener('input', functio
   const cs = document.getElementById('global-search-input');
   if (cs) cs.value = e.target.value;
   if (currentView !== 'catalog') navigate('catalog');
-  debounce(() => fetchProducts(0), 200);
+  debounce(() => fetchProducts(0), 150);
 });
 document.getElementById('global-search-input').addEventListener('keypress', function(e) {
   if (e.key === 'Enter' && currentView !== 'catalog') navigate('catalog');
