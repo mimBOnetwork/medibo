@@ -1334,8 +1334,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
    query language via URL params and works everywhere. */
 async function sbRest(table, params, opts) {
   opts = opts || {};
+  // Build query string — rawParams are appended without encoding
+  const raw = opts.rawParams || '';
   const qs = new URLSearchParams(params).toString();
-  const url = SUPABASE_URL + '/rest/v1/' + encodeURIComponent(table) + (qs ? '?' + qs : '');
+  const fullQs = [qs, raw].filter(Boolean).join('&');
+  const url = SUPABASE_URL + '/rest/v1/' + encodeURIComponent(table) + (fullQs ? '?' + fullQs : '');
   const headers = {
     'apikey': SUPABASE_ANON_KEY,
     'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
@@ -1460,10 +1463,12 @@ async function fetchProducts(page, append) {
     if (sbActiveThClass) {
       params['therapeutic_class'] = 'eq.' + sbActiveThClass;
     }
+
+    let rawParams = '';
     if (filters.search && filters.search.length >= 2) {
-      const q = filters.search.replace(/[*%]/g, '');
-      // Search product_name OR salt_composition using PostgREST OR filter
-      params['or'] = '(product_name.ilike.*' + q + '*,salt_composition.ilike.*' + q + '*,marketer.ilike.*' + q + '*)';
+      const q = filters.search.replace(/[%*'"()]/g, '').trim();
+      // Use rawParams so % wildcards aren't double-encoded by URLSearchParams
+      rawParams = 'or=(product_name.ilike.%25' + q + '%25,salt_composition.ilike.%25' + q + '%25,marketer.ilike.%25' + q + '%25)';
     }
     if (filters.manufacturers.size > 0) {
       const list = [...filters.manufacturers].map(m => '"' + m.replace(/"/g,'\\"') + '"').join(',');
@@ -1472,7 +1477,8 @@ async function fetchProducts(page, append) {
 
     const { data: rows, total } = await sbRest('MEDICINE', params, {
       count: true,
-      range: from + '-' + to
+      range: from + '-' + to,
+      rawParams: rawParams
     });
 
     sbTotalCount = (total != null) ? total : (rows ? rows.length : 0);
@@ -1669,7 +1675,7 @@ document.getElementById('global-search-input').addEventListener('input', functio
   const cs = document.getElementById('global-search-input');
   if (cs) cs.value = e.target.value;
   if (currentView !== 'catalog') navigate('catalog');
-  debounce(() => fetchProducts(0), 350);
+  debounce(() => fetchProducts(0), 200);
 });
 document.getElementById('global-search-input').addEventListener('keypress', function(e) {
   if (e.key === 'Enter' && currentView !== 'catalog') navigate('catalog');
