@@ -1976,13 +1976,14 @@ function getFilteredProducts() {
 }
 
 function stockBadge(status) {
-  const s = (status || 'Available').toUpperCase();
-  if (s === 'AVAILABLE')         return '<span class="text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">In Stock</span>';
-  if (s === 'SOLD OUT')          return '<span class="text-[10px] font-bold uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full">Sold Out</span>';
-  if (s === 'DISCONTINUED')      return '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">Discontinued</span>';
-  if (s === 'NOT FOR SALE')      return '<span class="text-[10px] font-bold uppercase tracking-wider text-orange-700 bg-orange-50 px-2 py-0.5 rounded-full">Not For Sale</span>';
-  if (s === 'BANNED FOR SALE')   return '<span class="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 px-2 py-0.5 rounded-full">Banned</span>';
-  return '<span class="text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">In Stock</span>';
+  const s = (status || 'Available').trim();
+  const su = s.toUpperCase();
+  let color = 'text-teal-700 bg-teal-50';
+  if (su === 'SOLD OUT')         color = 'text-rose-700 bg-rose-50';
+  else if (su === 'DISCONTINUED') color = 'text-slate-600 bg-slate-100';
+  else if (su === 'NOT FOR SALE') color = 'text-orange-700 bg-orange-50';
+  else if (su === 'BANNED FOR SALE') color = 'text-red-700 bg-red-50';
+  return `<span class="text-[10px] font-bold uppercase tracking-wider ${color} px-2 py-0.5 rounded-full">${s}</span>`;
 }
 
 function productImageArea(p, size) {
