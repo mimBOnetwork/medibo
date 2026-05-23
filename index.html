@@ -1518,6 +1518,8 @@ let sbActiveThClass = null;
 /* Search result cache — instant repeat searches */
 const _searchCache = {};
 
+let _fetchRetries = 0;
+
 async function fetchProducts(page, append) {
   page = page || 0;
   append = append || false;
@@ -1573,6 +1575,7 @@ async function fetchProducts(page, append) {
 
     sbTotalCount = (total != null) ? total : (rows ? rows.length : 0);
     sbCurrentPage = page;
+    _fetchRetries = 0;  // reset on success
 
     let mapped = (rows || []).map((r, i) => rowToProduct(r, page * PAGE_SIZE + i));
 
@@ -1629,18 +1632,17 @@ async function fetchProducts(page, append) {
     document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
   } catch (err) {
     console.error('Fetch error:', err);
-    // Silent auto-retry max 3 times
     sbIsLoading = false;
-    if ((page._retries || 0) < 3) {
-      const retryPage = page;
-      retryPage._retries = (retryPage._retries || 0) + 1;
-      setTimeout(() => fetchProducts(retryPage, append), 2000);
+    _fetchRetries++;
+    if (_fetchRetries <= 3) {
+      setTimeout(() => fetchProducts(page, append), 2000);
     } else {
+      _fetchRetries = 0;
       showCatalogLoading(false);
       document.getElementById('products-grid').innerHTML =
         `<div class="col-span-3 text-center py-12 text-slate-400">
-          <p class="font-semibold text-navy-900">Could not load products</p>
-          <button onclick="fetchProducts(0)" class="mt-3 px-4 py-2 rounded-xl bg-navy-900 text-white text-sm font-semibold">Retry</button>
+          <p class="font-semibold text-navy-900 mb-3">Could not load products</p>
+          <button onclick="_fetchRetries=0;fetchProducts(0)" class="px-4 py-2 rounded-xl bg-navy-900 text-white text-sm font-semibold">Retry</button>
         </div>`;
     }
     return;
