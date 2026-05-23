@@ -233,6 +233,22 @@
 </header>
 
 <!-- =========================================================
+     STICKY SEARCH BAR (below nav, hidden on cart page)
+     ========================================================= -->
+<div id="global-search-bar" class="sticky top-[105px] lg:top-16 z-40 glass border-b border-slate-200/70 px-3 sm:px-6 lg:px-8 py-2.5">
+  <div class="max-w-7xl mx-auto">
+    <div class="relative flex items-center">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-4 w-5 h-5 text-slate-400 pointer-events-none">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+      </svg>
+      <input id="global-search-input" type="text" placeholder="Search medicines, salts, manufacturers…"
+        class="w-full pl-12 pr-4 py-3 rounded-2xl bg-white border border-slate-200 text-sm text-navy-900 placeholder-slate-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 shadow-sm font-medium transition"
+        style="font-size:16px"/>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
      VIEW: HOME
      ========================================================= -->
 <section id="view-home" class="view active">
@@ -1601,6 +1617,9 @@ function navigate(route) {
     a.classList.toggle('active', a.dataset.route === route);
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Hide search bar on cart page only
+  const gsb = document.getElementById('global-search-bar');
+  if (gsb) gsb.style.display = (route === 'cart') ? 'none' : '';
   // Refresh dynamic views on entry
   if (route === 'catalog') renderProducts();
   if (route === 'cart') renderCart();
@@ -1614,6 +1633,19 @@ document.querySelectorAll('.route-link').forEach(link => {
     e.preventDefault();
     navigate(link.dataset.route);
   });
+});
+
+// Global search bar — always visible, drives catalog
+document.getElementById('global-search-input').addEventListener('input', function(e) {
+  filters.search = e.target.value;
+  // Sync with catalog search input
+  const cs = document.getElementById('catalog-search');
+  if (cs) cs.value = e.target.value;
+  if (currentView !== 'catalog') navigate('catalog');
+  debounce(() => fetchProducts(0), 350);
+});
+document.getElementById('global-search-input').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter' && currentView !== 'catalog') navigate('catalog');
 });
 
 /* -------------------------------------------------------------
