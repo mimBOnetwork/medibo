@@ -174,27 +174,112 @@
 <body class="min-h-screen">
 
 <!-- =========================================================
+     MOBILE SIDEBAR OVERLAY + DRAWER
+     ========================================================= -->
+<div id="sidebar-overlay" onclick="closeSidebar()" class="lg:hidden fixed inset-0 bg-black/50 z-[60] hidden"></div>
+<aside id="mobile-sidebar" class="lg:hidden fixed top-0 left-0 h-full w-72 bg-white z-[70] shadow-2xl transform -translate-x-full transition-transform duration-300 flex flex-col">
+  <!-- Sidebar header -->
+  <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+    <a href="#" data-route="home" onclick="closeSidebar()" class="route-link flex items-center gap-2.5">
+      <div class="relative w-9 h-9 rounded-xl bg-navy-900 flex items-center justify-center shadow-lg">
+        <svg viewBox="0 0 24 24" class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 3v18M3 12h18" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="9.5" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
+        </svg>
+        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-teal-400 ring-2 ring-white"></span>
+      </div>
+      <div class="leading-none">
+        <div class="font-display font-extrabold text-xl text-navy-900 tracking-tight">Medibo</div>
+        <div class="text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mt-0.5">B2B Pharma</div>
+      </div>
+    </a>
+    <button onclick="closeSidebar()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-lg font-light">✕</button>
+  </div>
+
+  <!-- Search inside sidebar -->
+  <div class="px-4 py-3 border-b border-slate-100">
+    <div class="relative flex items-center">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+      </svg>
+      <input id="sidebar-search-input" type="text" placeholder="Search medicines…"
+        class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-teal-400 font-medium"
+        style="font-size:16px"
+        oninput="document.getElementById('global-search-input').value=this.value;document.getElementById('global-search-input').dispatchEvent(new Event('input'))"/>
+    </div>
+  </div>
+
+  <!-- Nav links -->
+  <nav class="flex-1 overflow-y-auto py-3">
+    <a href="#" data-route="catalog" onclick="navigate('catalog');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"/></svg>
+      Catalog
+    </a>
+    <a href="#" data-route="categories" onclick="navigate('categories');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
+      Categories
+    </a>
+    <a href="#" data-route="bulk" onclick="navigate('bulk');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
+      Bulk Upload
+    </a>
+    <a href="#" data-route="deals" onclick="navigate('deals');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"/></svg>
+      Deals
+    </a>
+    <a href="#" data-route="orders" onclick="navigate('orders');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25"/></svg>
+      My Orders
+    </a>
+    <a href="#" data-route="dashboard" onclick="navigate('dashboard');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25"/></svg>
+      Dashboard
+    </a>
+    <a href="#" data-route="cart" onclick="navigate('cart');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218a.75.75 0 0 0 .72-.54l1.892-6.18a.75.75 0 0 0-.72-.96H5.106M7.5 14.25l-1.135-4.255"/></svg>
+      Cart
+    </a>
+  </nav>
+
+  <!-- Live stock badge at bottom -->
+  <div class="px-5 py-4 border-t border-slate-100">
+    <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-teal-50 text-teal-700 text-xs font-semibold w-fit">
+      <span class="w-1.5 h-1.5 rounded-full bg-teal-500 pulse-dot"></span>
+      Live stock · 1,00,000+ medicines
+    </div>
+  </div>
+</aside>
+
+<!-- =========================================================
      STICKY HEADER
      ========================================================= -->
 <header class="sticky top-0 z-50 glass border-b border-slate-200/70">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16">
-      <!-- Logo -->
-      <a href="#" data-route="home" class="flex items-center gap-2.5 route-link">
-        <div class="relative w-9 h-9 rounded-xl bg-navy-900 flex items-center justify-center shadow-lg">
-          <svg viewBox="0 0 24 24" class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2.2">
+    <div class="flex items-center justify-between h-14 lg:h-16">
+
+      <!-- Mobile: hamburger -->
+      <button onclick="openSidebar()" class="lg:hidden w-9 h-9 flex flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-slate-100 transition">
+        <span class="w-5 h-0.5 bg-navy-900 rounded-full"></span>
+        <span class="w-5 h-0.5 bg-navy-900 rounded-full"></span>
+        <span class="w-4 h-0.5 bg-navy-900 rounded-full"></span>
+      </button>
+
+      <!-- Logo (center on mobile, left on desktop) -->
+      <a href="#" data-route="home" class="route-link flex items-center gap-2.5 lg:mr-auto">
+        <div class="relative w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-navy-900 flex items-center justify-center shadow-lg">
+          <svg viewBox="0 0 24 24" class="w-4 h-4 lg:w-5 lg:h-5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M12 3v18M3 12h18" stroke-linecap="round"/>
             <circle cx="12" cy="12" r="9.5" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
           </svg>
           <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-teal-400 ring-2 ring-white"></span>
         </div>
         <div class="leading-none">
-          <div class="font-display font-extrabold text-xl text-navy-900 tracking-tight">Medibo</div>
-          <div class="text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mt-0.5">B2B Pharma</div>
+          <div class="font-display font-extrabold text-lg lg:text-xl text-navy-900 tracking-tight">Medibo</div>
+          <div class="text-[9px] lg:text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mt-0.5">B2B Pharma</div>
         </div>
       </a>
 
-      <!-- Nav -->
+      <!-- Desktop nav -->
       <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-700">
         <a href="#" data-route="catalog" class="route-link nav-link">Catalog</a>
         <a href="#" data-route="categories" class="route-link nav-link">Categories</a>
@@ -205,12 +290,12 @@
       </nav>
 
       <!-- Actions -->
-      <div class="flex items-center gap-2 sm:gap-3">
+      <div class="flex items-center gap-2">
         <button class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold">
           <span class="w-1.5 h-1.5 rounded-full bg-teal-500 pulse-dot"></span>
           Live stock
         </button>
-        <a href="#" data-route="cart" class="route-link relative flex items-center gap-2 px-3 py-2 rounded-xl bg-navy-900 text-white hover:bg-navy-800 transition">
+        <a href="#" data-route="cart" class="route-link relative flex items-center gap-1.5 px-3 py-2 rounded-xl bg-navy-900 text-white hover:bg-navy-800 transition">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218a.75.75 0 0 0 .72-.54l1.892-6.18a.75.75 0 0 0-.72-.96H5.106M7.5 14.25l-1.135-4.255"/>
           </svg>
@@ -220,23 +305,12 @@
       </div>
     </div>
   </div>
-  <!-- Mobile nav -->
-  <div class="lg:hidden border-t border-slate-200 px-2 py-2 overflow-x-auto scrollbar-hide">
-    <div class="flex gap-2 text-xs font-semibold min-w-max">
-      <a href="#" data-route="catalog" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">Catalog</a>
-      <a href="#" data-route="categories" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">Categories</a>
-      <a href="#" data-route="bulk" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">Bulk Upload</a>
-      <a href="#" data-route="deals" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">Deals</a>
-      <a href="#" data-route="orders" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">My Orders</a>
-      <a href="#" data-route="dashboard" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">Dashboard</a>
-    </div>
-  </div>
 </header>
 
 <!-- =========================================================
      STICKY SEARCH BAR (below nav, hidden on cart page)
      ========================================================= -->
-<div id="global-search-bar" class="sticky top-[105px] lg:top-16 z-40 glass border-b border-slate-200/70 px-3 sm:px-6 lg:px-8 py-2.5">
+<div id="global-search-bar" class="sticky top-14 lg:top-16 z-40 glass border-b border-slate-200/70 px-3 sm:px-6 lg:px-8 py-2.5">
   <div class="max-w-7xl mx-auto">
     <div class="relative flex items-center">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-4 w-5 h-5 text-slate-400 pointer-events-none">
@@ -1830,6 +1904,17 @@ function renderFilters() {
   const mfrsM = document.getElementById('filter-manufacturers-mobile');
   if (mfrsM) mfrsM.innerHTML = mfrHTML;
   // Note: change events are now delegated at document level
+}
+
+function openSidebar() {
+  document.getElementById('mobile-sidebar').style.transform = 'translateX(0)';
+  document.getElementById('sidebar-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('mobile-sidebar').style.transform = 'translateX(-100%)';
+  document.getElementById('sidebar-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
 }
 
 function openMobileFilter() {
