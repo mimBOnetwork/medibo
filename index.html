@@ -901,10 +901,10 @@
     </div>
 
     <div id="cart-content" class="mt-8 grid lg:grid-cols-3 gap-6 lg:gap-8">
-      <div class="lg:col-span-2 space-y-4" id="cart-items"></div>
+      <div class="lg:col-span-2 space-y-3" id="cart-items"></div>
 
-      <!-- Summary -->
-      <div class="lg:col-span-1">
+      <!-- Summary — full width on mobile, sidebar on desktop -->
+      <div class="lg:col-span-1 order-last lg:order-none">
         <div class="bg-white rounded-2xl border border-slate-200 p-6 sticky top-24">
           <h3 class="font-display font-bold text-lg text-navy-900 mb-5">Order summary</h3>
 
@@ -1954,26 +1954,34 @@ function renderCart() {
   const wrap = document.getElementById('cart-items');
   wrap.innerHTML = CART.map(c => {
     const p = PRODUCTS.find(x => x.id === c.id);
+    if (!p) return '';
     return `
-      <div class="bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-4">
-        <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-50 to-white p-2 flex-shrink-0 flex items-center justify-center">${productImageArea(p,"small")}</div>
-        <div class="flex-1 min-w-0">
-          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">${p.mfr}</div>
-          <h3 class="font-display font-bold text-navy-900 truncate">${p.name}</h3>
-          <div class="text-xs text-slate-500 mt-0.5">${p.salt} · ${p.tag}</div>
-          <div class="mt-2 flex items-center gap-3">
-            <div class="inline-flex items-center gap-2 bg-slate-100 rounded-lg p-0.5">
-              <button onclick="updateQty('${p.id}', -1)" class="w-7 h-7 rounded-md bg-white text-navy-900 font-bold">−</button>
-              <input type="number" value="${c.qty}" onchange="setQty('${p.id}', this.value)" class="w-12 text-center bg-transparent font-mono font-bold text-navy-900 text-sm focus:outline-none"/>
-              <button onclick="updateQty('${p.id}', 1)" class="w-7 h-7 rounded-md bg-teal-500 text-white font-bold">+</button>
+      <div class="bg-white rounded-2xl border border-slate-200 p-4">
+        <!-- Top row: image + info -->
+        <div class="flex gap-3">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-slate-50 flex-shrink-0 overflow-hidden flex items-center justify-center">
+            ${productImageArea(p, 'small')}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">${p.mfr}</div>
+            <h3 class="font-display font-bold text-navy-900 text-sm leading-snug">${p.name}</h3>
+            <div class="text-xs text-slate-500 mt-0.5 truncate">${p.salt} · ${p.tag}</div>
+            <div class="mt-1 font-display font-extrabold text-navy-900 font-mono text-base">
+              ₹${(p.b2b * c.qty).toLocaleString()}
+              <span class="text-xs strike font-mono text-slate-400 ml-1">₹${(p.mrp * c.qty).toLocaleString()}</span>
             </div>
-            <span class="text-xs text-slate-500">@ ₹${p.b2b}/unit</span>
-            <button onclick="removeFromCart('${p.id}')" class="ml-auto text-xs text-rose-600 font-semibold hover:underline">Remove</button>
           </div>
         </div>
-        <div class="text-right flex-shrink-0">
-          <div class="font-display font-extrabold text-navy-900 font-mono">₹${(p.b2b*c.qty).toLocaleString()}</div>
-          <div class="text-xs strike font-mono">₹${(p.mrp*c.qty).toLocaleString()}</div>
+        <!-- Bottom row: qty controls + per unit + remove -->
+        <div class="mt-3 flex items-center justify-between gap-2 flex-wrap">
+          <div class="inline-flex items-center bg-slate-100 rounded-xl p-1 gap-1">
+            <button onclick="updateQty('${p.id}',-1)" class="w-8 h-8 rounded-lg bg-white text-navy-900 font-bold text-base shadow-sm flex items-center justify-center">−</button>
+            <input type="number" value="${c.qty}" onchange="setQty('${p.id}',this.value)"
+              class="w-12 text-center bg-transparent font-mono font-bold text-navy-900 text-sm focus:outline-none"/>
+            <button onclick="updateQty('${p.id}',1)" class="w-8 h-8 rounded-lg bg-teal-500 text-white font-bold text-base flex items-center justify-center">+</button>
+          </div>
+          <span class="text-xs text-slate-500 font-medium">@ ₹${p.b2b}/unit</span>
+          <button onclick="removeFromCart('${p.id}')" class="text-xs text-rose-500 font-semibold px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 transition">Remove</button>
         </div>
       </div>
     `;
