@@ -1698,42 +1698,87 @@ function stockBadge(stock) {
 
 function productImageArea(p, size) {
   size = size || 'large';
-  const wh = size === 'large' ? 'w-32 h-32' : 'w-16 h-16';
   const imgs = p.images || [];
+  const pid = 'img_' + (p.id || '').replace(/[^a-zA-Z0-9]/g,'').slice(0,20) + '_' + Math.random().toString(36).slice(2,6);
+
   if (imgs.length === 0) {
-    // Fallback: coloured pill SVG
+    const wh = size === 'large' ? 'w-full h-full' : 'w-full h-full';
     return `<div class="${wh} flex items-center justify-center">${productSvg(p, size === 'large' ? '' : 'small')}</div>`;
   }
-  const pid = p.id.replace(/[^a-zA-Z0-9]/g,'').slice(0,20);
+
   if (imgs.length === 1) {
-    return `<img src="${imgs[0]}" alt="${p.name}" class="${wh} object-contain" onerror="this.style.display='none'">`;
+    return `<img src="${imgs[0]}" alt="${p.name}"
+      class="w-full h-full object-cover rounded-lg"
+      onerror="this.parentNode.innerHTML='${productSvg(p,'').replace(/'/g,"&#39;").replace(/`/g,'&#96;')}'">`;
   }
-  // Multiple images: show thumbnails strip + main image
+
+  // Multiple images: full-fill main + thumbnail dots + auto-rotate
+  const thumbs = imgs.map((u, i) => `
+    <img src="${u}" data-idx="${i}" data-pid="${pid}"
+      class="thumb-${pid} w-8 h-8 object-cover rounded cursor-pointer border-2 ${i===0?'border-teal-400':'border-transparent'}"
+      onclick="switchImg('${pid}',${i})"
+      onerror="this.style.display='none'">`).join('');
+
+  // Store URLs for auto-rotate in a data attribute
+  const urlsJson = JSON.stringify(imgs).replace(/"/g,'&quot;');
+
   return `
-    <div class="flex flex-col items-center gap-1 w-full">
-      <img id="main-${pid}" src="${imgs[0]}" alt="${p.name}"
-           class="${wh} object-contain"
-           onerror="this.style.display='none'">
-      <div class="flex gap-1 flex-wrap justify-center">
-        ${imgs.map((u,i) => `
-          <img src="${u}" alt="img${i+1}"
-               class="w-8 h-8 object-contain rounded border ${i===0?'border-teal-400':'border-slate-200'} cursor-pointer"
-               onclick="document.getElementById('main-${pid}').src='${u}';this.parentNode.querySelectorAll('img').forEach(t=>t.classList.replace('border-teal-400','border-slate-200'));this.classList.replace('border-slate-200','border-teal-400')"
-               onerror="this.parentNode.removeChild(this)">
-        `).join('')}
+    <div class="flex flex-col w-full h-full gap-1">
+      <div class="flex-1 w-full overflow-hidden rounded-lg">
+        <img id="main_${pid}" src="${imgs[0]}" alt="${p.name}"
+          class="w-full h-full object-cover"
+          data-urls="${urlsJson}" data-cur="0" data-pid="${pid}"
+          onerror="this.style.display='none'">
       </div>
+      <div class="flex gap-1 justify-center flex-wrap">${thumbs}</div>
     </div>`;
 }
+
+// Called by thumbnail click
+function switchImg(pid, idx) {
+  const main = document.getElementById('main_' + pid);
+  if (!main) return;
+  const urls = JSON.parse(main.dataset.urls || '[]');
+  if (!urls[idx]) return;
+  main.src = urls[idx];
+  main.dataset.cur = idx;
+  document.querySelectorAll('.thumb_' + pid).forEach((t,i) => {
+    t.classList.toggle('border-teal-400', i === idx);
+    t.classList.toggle('border-transparent', i !== idx);
+  });
+}
+
+// Auto-rotate all product images every 2 seconds
+setInterval(function() {
+  document.querySelectorAll('img[data-urls]').forEach(function(main) {
+    try {
+      const urls = JSON.parse(main.dataset.urls || '[]');
+      if (urls.length < 2) return;
+      const cur = parseInt(main.dataset.cur || '0');
+      const next = (cur + 1) % urls.length;
+      main.src = urls[next];
+      main.dataset.cur = next;
+      const pid = main.dataset.pid;
+      if (pid) {
+        document.querySelectorAll('[data-pid="' + pid + '"]').forEach(function(t) {
+          const ti = parseInt(t.dataset.idx || '0');
+          t.classList.toggle('border-teal-400', ti === next);
+          t.classList.toggle('border-transparent', ti !== next);
+        });
+      }
+    } catch(e) {}
+  });
+}, 2000);
 
 function productCardGrid(p) {
   const cartItem = CART.find(c => c.id === p.id);
   const qty = cartItem ? cartItem.qty : 0;
   return `
     <div class="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
-      <div class="relative bg-gradient-to-br from-slate-50 to-white p-4 flex flex-col items-center justify-center min-h-[160px]">
-        ${p.deal >= 35 ? `<div class="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-teal-500 text-white text-[10px] font-bold uppercase tracking-wider">${p.deal}% off</div>` : ''}
-        <div class="absolute top-3 right-3">${stockBadge(p.stock)}</div>
-        ${productImageArea(p, 'large')}
+      <div class="relative bg-gradient-to-br from-slate-50 to-white overflow-hidden" style="height:200px;">
+        ${p.deal >= 35 ? `<div class="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-full bg-teal-500 text-white text-[10px] font-bold uppercase tracking-wider">${p.deal}% off</div>` : ''}
+        <div class="absolute top-3 right-3 z-10">${stockBadge(p.stock)}</div>
+        <div class="w-full h-full">${productImageArea(p, 'large')}</div>
       </div>
       <div class="p-4 flex-1 flex flex-col">
         <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">${p.mfr}</div>
