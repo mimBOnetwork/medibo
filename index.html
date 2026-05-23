@@ -241,7 +241,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-4 w-5 h-5 text-slate-400 pointer-events-none">
         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
       </svg>
-      <input id="global-search-input" type="text" placeholder="Search medicines, salts, manufacturers…"
+      <input id="global-search-input" type="text" placeholder="Search medicines by name…"
         class="w-full pl-12 pr-4 py-3 rounded-2xl bg-white border border-slate-200 text-sm text-navy-900 placeholder-slate-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 shadow-sm font-medium transition"
         style="font-size:16px"/>
     </div>
@@ -1634,6 +1634,27 @@ document.querySelectorAll('.route-link').forEach(link => {
     navigate(link.dataset.route);
   });
 });
+
+// Rotating search placeholder
+(function() {
+  const hints = [
+    'medicines by name…',
+    'by salt composition…',
+    'by brand name…',
+    'by manufacturer…',
+    'e.g. Paracetamol 500mg…',
+    'e.g. Amoxicillin…',
+    'e.g. Sun Pharma…',
+    'e.g. Azithromycin…',
+  ];
+  let idx = 0;
+  const input = document.getElementById('global-search-input');
+  function rotatePlaceholder() {
+    idx = (idx + 1) % hints.length;
+    input.placeholder = 'Search ' + hints[idx];
+  }
+  setInterval(rotatePlaceholder, 4000);
+})();
 
 // Global search bar — always visible, drives catalog
 document.getElementById('global-search-input').addEventListener('input', function(e) {
