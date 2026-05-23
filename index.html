@@ -1629,9 +1629,20 @@ async function fetchProducts(page, append) {
     document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
   } catch (err) {
     console.error('Fetch error:', err);
-    // Silent auto-retry — keep spinner, retry after 1.5s, no error shown
+    // Silent auto-retry max 3 times
     sbIsLoading = false;
-    setTimeout(() => fetchProducts(page, append), 1500);
+    if ((page._retries || 0) < 3) {
+      const retryPage = page;
+      retryPage._retries = (retryPage._retries || 0) + 1;
+      setTimeout(() => fetchProducts(retryPage, append), 2000);
+    } else {
+      showCatalogLoading(false);
+      document.getElementById('products-grid').innerHTML =
+        `<div class="col-span-3 text-center py-12 text-slate-400">
+          <p class="font-semibold text-navy-900">Could not load products</p>
+          <button onclick="fetchProducts(0)" class="mt-3 px-4 py-2 rounded-xl bg-navy-900 text-white text-sm font-semibold">Retry</button>
+        </div>`;
+    }
     return;
   } finally {
     sbIsLoading = false;
