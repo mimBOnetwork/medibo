@@ -2143,8 +2143,6 @@ function addToCart(id) {
   if (existing) existing.qty += 1;
   else CART.push({ id, qty: 1 });
   updateCartBadge();
-  const unit = p.packType || 'unit';
-  toast(`Added 1 ${unit} of ${p.name}`);
   refreshCartBtn(id);
   if (currentView === 'cart') renderCart();
 }
