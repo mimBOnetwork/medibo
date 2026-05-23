@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Medibo — Bulk Medicine Ordering for Pharmacies & Hospitals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Manrope', 'sans-serif'],
+          sans: ['Inter', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+        colors: {
+          navy: {
+            50:  '#f0f4fa',
+            100: '#dbe4f3',
+            200: '#b6c8e6',
+            300: '#7f9bd1',
+            400: '#4a6eb8',
+            500: '#2a4d99',
+            600: '#1d3a7c',
+            700: '#172d61',
+            800: '#0f1f44',
+            900: '#0a1530',
+            950: '#050b1c',
+          },
+          teal: {
+            50:  '#ecfdf7',
+            100: '#d1fae9',
+            200: '#a3f3d4',
+            300: '#6ee5bb',
+            400: '#34d39e',
+            500: '#10b981',
+            600: '#059669',
+            700: '#047857',
+          },
+        },
+        boxShadow: {
+          'card': '0 1px 2px rgba(15,31,68,0.04), 0 4px 12px rgba(15,31,68,0.06)',
+          'card-hover': '0 8px 24px rgba(15,31,68,0.10), 0 2px 6px rgba(15,31,68,0.06)',
+          'glow-teal': '0 0 0 4px rgba(16,185,129,0.12)',
+        },
+      },
+    },
+  };
+</script>
+<style>
+  :root {
+    --grad-hero: radial-gradient(1200px 600px at 80% -10%, rgba(16,185,129,0.18), transparent 60%),
+                 radial-gradient(900px 500px at 0% 0%, rgba(42,77,153,0.25), transparent 55%),
+                 linear-gradient(180deg, #0a1530 0%, #0f1f44 100%);
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f7f9fc;
+    color: #0f1f44;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-display { font-family: 'Manrope', sans-serif; letter-spacing: -0.02em; }
+  .hero-bg { background: var(--grad-hero); }
+  .grain::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.5; pointer-events: none; mix-blend-mode: overlay;
+  }
+  .dotgrid {
+    background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  @keyframes float-pill { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .float-pill { animation: float-pill 4s ease-in-out infinite; }
+  .float-pill.delay-1 { animation-delay: 0.6s; }
+  .float-pill.delay-2 { animation-delay: 1.2s; }
+  .float-pill.delay-3 { animation-delay: 1.8s; }
+  @keyframes pulse-dot { 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:0.5; transform:scale(0.8)} }
+  .pulse-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
+  @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+  .marquee { animation: marquee 40s linear infinite; }
+  .marquee-track { display: flex; gap: 3rem; width: max-content; }
+  /* Tab transitions */
+  .view { display: none; }
+  .view.active { display: block; animation: fadeUp .35s ease both; }
+  @keyframes fadeUp { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)} }
+  /* Stagger reveal */
+  @keyframes reveal { from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:translateY(0)} }
+  .stagger > * { opacity: 0; animation: reveal .6s ease forwards; }
+  .stagger > *:nth-child(1){ animation-delay: .05s; }
+  .stagger > *:nth-child(2){ animation-delay: .12s; }
+  .stagger > *:nth-child(3){ animation-delay: .19s; }
+  .stagger > *:nth-child(4){ animation-delay: .26s; }
+  .stagger > *:nth-child(5){ animation-delay: .33s; }
+  .stagger > *:nth-child(6){ animation-delay: .40s; }
+  .stagger > *:nth-child(7){ animation-delay: .47s; }
+  .stagger > *:nth-child(8){ animation-delay: .54s; }
+  /* Pill icon backgrounds */
+  .pill-icon {
+    background: linear-gradient(135deg, #10b981 0%, #2a4d99 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .ring-soft { box-shadow: inset 0 0 0 1px rgba(15,31,68,0.08); }
+  .btn-primary {
+    background: #0f1f44; color: white; transition: all .2s ease;
+  }
+  .btn-primary:hover { background: #172d61; transform: translateY(-1px); box-shadow: 0 10px 20px -8px rgba(15,31,68,0.4); }
+  .btn-teal { background: #10b981; color: white; transition: all .2s ease; }
+  .btn-teal:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 10px 20px -8px rgba(16,185,129,0.5); }
+  .product-card { transition: all .25s ease; }
+  .product-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(15,31,68,0.10); }
+  .nav-link { position: relative; }
+  .nav-link::after {
+    content: ''; position: absolute; left: 0; bottom: -6px; height: 2px; width: 0%;
+    background: #10b981; transition: width .25s ease;
+  }
+  .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+  .glass {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+  }
+  /* Custom checkbox */
+  .chk { appearance: none; width: 16px; height: 16px; border: 1.5px solid #cbd5e1; border-radius: 4px; cursor: pointer; position: relative; }
+  .chk:checked { background: #10b981; border-color: #10b981; }
+  .chk:checked::after { content:'✓'; color: white; font-size: 11px; position:absolute; top:-2px; left:2px; font-weight: 700; }
+  /* Range */
+  input[type=range] { accent-color: #10b981; }
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #0f1f44; color: white; padding: 12px 20px; border-radius: 999px;
+    box-shadow: 0 10px 30px rgba(15,31,68,0.3); opacity: 0; transition: all .3s ease; z-index: 100;
+    font-weight: 500; font-size: 14px;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* Drag area */
+  .drop-zone.dragover { background: #ecfdf7; border-color: #10b981; }
+  /* Pricing strikethrough */
+  .strike { text-decoration: line-through; color: #94a3b8; }
+  /* Track stepper */
+  .track-step .dot { width: 14px; height: 14px; border-radius: 999px; border: 2px solid #cbd5e1; background: white; }
+  .track-step.done .dot { background: #10b981; border-color: #10b981; }
+  .track-step.current .dot { background: white; border-color: #10b981; box-shadow: 0 0 0 4px rgba(16,185,129,0.2); }
+  .track-line { background: #e2e8f0; }
+  .track-line.done { background: #10b981; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- =========================================================
+     STICKY HEADER
+     ========================================================= -->
+<header class="sticky top-0 z-50 glass border-b border-slate-200/70">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a href="#" data-route="home" class="flex items-center gap-2.5 route-link">
+        <div class="relative w-9 h-9 rounded-xl bg-navy-900 flex items-center justify-center shadow-lg">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M12 3v18M3 12h18" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="9.5" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
+          </svg>
+          <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-teal-400 ring-2 ring-white"></span>
+        </div>
+        <div class="leading-none">
+          <div class="font-display font-extrabold text-xl text-navy-900 tracking-tight">Medibo</div>
+          <div class="text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mt-0.5">B2B Pharma</div>
+        </div>
+      </a>
+
+      <!-- Nav -->
+      <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-700">
+        <a href="#" data-route="catalog" class="route-link nav-link">Catalog</a>
+        <a href="#" data-route="categories" class="route-link nav-link">Categories</a>
+        <a href="#" data-route="bulk" class="route-link nav-link">Bulk Upload</a>
+        <a href="#" data-route="deals" class="route-link nav-link">Deals</a>
+        <a href="#" data-route="orders" class="route-link nav-link">My Orders</a>
+        <a href="#" data-route="dashboard" class="route-link nav-link">Dashboard</a>
+      </nav>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold">
+          <span class="w-1.5 h-1.5 rounded-full bg-teal-500 pulse-dot"></span>
+          Live stock
+        </button>
+        <a href="#" data-route="cart" class="route-link relative flex items-center gap-2 px-3 py-2 rounded-xl bg-navy-900 text-white hover:bg-navy-800 transition">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218a.75.75 0 0 0 .72-.54l1.892-6.18a.75.75 0 0 0-.72-.96H5.106M7.5 14.25l-1.135-4.255"/>
+          </svg>
+          <span class="text-sm font-semibold hidden sm:block">Cart</span>
+          <span id="cart-badge" class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 rounded-full bg-teal-400 text-navy-900 text-[11px] font-bold flex items-center justify-center ring-2 ring-white">0</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <!-- Mobile nav -->
+  <div class="lg:hidden border-t border-slate-200 px-2 py-2 overflow-x-auto scrollbar-hide">
+    <div class="flex gap-2 text-xs font-semibold min-w-max">
+      <a href="#" data-route="catalog" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">Catalog</a>
+      <a href="#" data-route="categories" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">Categories</a>
+      <a href="#" data-route="bulk" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">Bulk Upload</a>
+      <a href="#" data-route="deals" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">Deals</a>
+      <a href="#" data-route="orders" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">My Orders</a>
+      <a href="#" data-route="dashboard" class="route-link px-3 py-1.5 rounded-full bg-slate-100 text-slate-700">Dashboard</a>
+    </div>
+  </div>
+</header>
+
+<!-- =========================================================
+     VIEW: HOME
+     ========================================================= -->
+<section id="view-home" class="view active">
+
+  <!-- HERO -->
+  <div class="relative overflow-hidden hero-bg grain">
+    <div class="absolute inset-0 dotgrid opacity-40"></div>
+    <!-- Floating pills -->
+    <div class="absolute top-24 right-10 hidden lg:block float-pill">
+      <div class="w-14 h-7 rounded-full bg-teal-400 shadow-2xl rotate-12"></div>
+    </div>
+    <div class="absolute top-48 right-40 hidden lg:block float-pill delay-2">
+      <div class="w-10 h-5 rounded-full bg-white/20 backdrop-blur shadow-xl -rotate-12"></div>
+    </div>
+    <div class="absolute bottom-32 right-24 hidden lg:block float-pill delay-3">
+      <div class="w-16 h-8 rounded-full bg-teal-300/40 shadow-2xl rotate-45"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 lg:pt-24 lg:pb-32">
+      <div class="grid lg:grid-cols-12 gap-12 items-center">
+        <div class="lg:col-span-7 stagger">
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-white text-xs font-medium mb-6">
+            <span class="w-1.5 h-1.5 rounded-full bg-teal-400 pulse-dot"></span>
+            India's fastest B2B pharma supply network
+          </div>
+
+          <h1 class="font-display text-white text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-[1.05] tracking-tight">
+            Bulk Medicine<br/>
+            Ordering,<br/>
+            <span class="relative inline-block">
+              <span class="bg-gradient-to-r from-teal-300 to-teal-400 bg-clip-text text-transparent">Reimagined.</span>
+              <svg class="absolute -bottom-3 left-0 w-full" viewBox="0 0 200 8" fill="none">
+                <path d="M2 5C50 2 100 2 198 5" stroke="#34d39e" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+            </span>
+          </h1>
+          <p class="mt-6 text-lg text-slate-300 max-w-xl leading-relaxed">
+            For pharmacies, hospital procurement teams, and medical stores. Order 5,000+ verified medicines at wholesale prices — delivered in <span class="text-teal-300 font-semibold">4–12 hours</span>.
+          </p>
+          <p class="mt-2 text-sm text-slate-400 font-medium">Powered by Medibo · GST compliant · Drug license verified</p>
+
+          <!-- Hero search -->
+          <div class="mt-8 bg-white rounded-2xl p-2 shadow-2xl shadow-navy-950/40 ring-1 ring-white/10 flex flex-col sm:flex-row gap-2">
+            <div class="flex-1 flex items-center gap-3 px-4 py-3">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 text-slate-400">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.34-4.34M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/>
+              </svg>
+              <input id="hero-search" type="text" placeholder="Search medicine, salt or manufacturer — e.g. Paracetamol 500mg" class="w-full text-navy-900 placeholder-slate-400 focus:outline-none text-base"/>
+            </div>
+            <button onclick="navigate('catalog')" class="btn-teal px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
+              Search
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0-4 4m4-4H3"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Suggestions -->
+          <div class="mt-3 flex flex-wrap gap-2 text-xs">
+            <span class="text-slate-400 mr-1">Popular:</span>
+            <button onclick="navigate('catalog')" class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">Paracetamol</button>
+            <button onclick="navigate('catalog')" class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">Amoxicillin</button>
+            <button onclick="navigate('catalog')" class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">Insulin</button>
+            <button onclick="navigate('catalog')" class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">Cipla</button>
+            <button onclick="navigate('catalog')" class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">Surgical gloves</button>
+          </div>
+
+          <!-- CTAs -->
+          <div class="mt-8 flex flex-col sm:flex-row gap-3">
+            <button onclick="navigate('catalog')" class="btn-teal px-7 py-4 rounded-xl font-semibold text-base flex items-center justify-center gap-2">
+              Browse Catalog
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0-4 4m4-4H3"/>
+              </svg>
+            </button>
+            <button onclick="navigate('bulk')" class="px-7 py-4 rounded-xl font-semibold text-base bg-white/10 backdrop-blur border border-white/20 text-white hover:bg-white/20 transition flex items-center justify-center gap-2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/>
+              </svg>
+              Upload Bulk Order
+            </button>
+          </div>
+        </div>
+
+        <!-- Hero side card -->
+        <div class="lg:col-span-5 relative">
+          <div class="relative rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-5">
+              <div>
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-teal-300">Live order</div>
+                <div class="font-display text-xl font-bold text-white mt-1">#MB-90342</div>
+              </div>
+              <div class="px-2.5 py-1 rounded-full bg-teal-500/20 text-teal-300 text-[11px] font-bold">OUT FOR DELIVERY</div>
+            </div>
+            <div class="space-y-3 mb-5">
+              <div class="flex justify-between text-sm">
+                <div class="text-slate-300">Apollo Pharmacy · Bandra</div>
+                <div class="text-white font-mono font-semibold">42 items</div>
+              </div>
+              <div class="flex justify-between text-sm">
+                <div class="text-slate-300">Order value</div>
+                <div class="text-white font-mono font-semibold">₹ 84,250</div>
+              </div>
+              <div class="flex justify-between text-sm">
+                <div class="text-slate-300">Saved vs MRP</div>
+                <div class="text-teal-300 font-mono font-semibold">₹ 18,600</div>
+              </div>
+            </div>
+            <!-- Tracker -->
+            <div class="flex items-center">
+              <div class="track-step done"><div class="dot"></div></div>
+              <div class="flex-1 h-0.5 track-line done"></div>
+              <div class="track-step done"><div class="dot"></div></div>
+              <div class="flex-1 h-0.5 track-line done"></div>
+              <div class="track-step current"><div class="dot"></div></div>
+              <div class="flex-1 h-0.5 track-line"></div>
+              <div class="track-step"><div class="dot"></div></div>
+            </div>
+            <div class="flex justify-between mt-2 text-[10px] uppercase tracking-wider text-slate-400 font-semibold">
+              <span>Placed</span><span>Packed</span><span class="text-teal-300">In transit</span><span>Delivered</span>
+            </div>
+            <div class="mt-5 pt-5 border-t border-white/10 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-navy-700 flex items-center justify-center font-bold text-white text-sm">RK</div>
+              <div class="flex-1">
+                <div class="text-sm text-white font-semibold">Rakesh K. · Delivery partner</div>
+                <div class="text-xs text-slate-400">ETA 38 minutes · 2.4 km away</div>
+              </div>
+              <button class="w-9 h-9 rounded-full bg-teal-500 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-4 h-4">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Floating mini card -->
+          <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-2xl border border-slate-100 hidden md:block float-pill">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                </svg>
+              </div>
+              <div>
+                <div class="text-xs text-slate-500 font-medium">Saved this month</div>
+                <div class="font-display font-bold text-navy-900 text-lg">₹ 2,40,800</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="mt-16 lg:mt-24 grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-5">
+          <div class="font-display font-extrabold text-white text-3xl lg:text-4xl">5,000<span class="text-teal-400">+</span></div>
+          <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold mt-1">Medicines & SKUs</div>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-5">
+          <div class="font-display font-extrabold text-white text-3xl lg:text-4xl">4–12<span class="text-teal-400 text-xl"> hrs</span></div>
+          <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold mt-1">Delivery window</div>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-5">
+          <div class="font-display font-extrabold text-white text-3xl lg:text-4xl">500<span class="text-teal-400">+</span></div>
+          <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold mt-1">Cities served</div>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-5">
+          <div class="font-display font-extrabold text-white text-3xl lg:text-4xl">18,400<span class="text-teal-400">+</span></div>
+          <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold mt-1">Pharmacies on Medibo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRUST MARQUEE -->
+  <div class="border-y border-slate-200 bg-white py-6 overflow-hidden">
+    <div class="flex items-center gap-12 marquee-track marquee text-slate-400 font-display font-bold text-xl whitespace-nowrap">
+      <span>Cipla</span><span>·</span><span>Sun Pharma</span><span>·</span><span>Dr. Reddy's</span><span>·</span><span>Lupin</span><span>·</span>
+      <span>Mankind</span><span>·</span><span>Glenmark</span><span>·</span><span>Zydus</span><span>·</span><span>Torrent</span><span>·</span>
+      <span>Alkem</span><span>·</span><span>Abbott</span><span>·</span><span>Pfizer</span><span>·</span><span>Himalaya</span><span>·</span>
+      <!-- duplicate -->
+      <span>Cipla</span><span>·</span><span>Sun Pharma</span><span>·</span><span>Dr. Reddy's</span><span>·</span><span>Lupin</span><span>·</span>
+      <span>Mankind</span><span>·</span><span>Glenmark</span><span>·</span><span>Zydus</span><span>·</span><span>Torrent</span><span>·</span>
+      <span>Alkem</span><span>·</span><span>Abbott</span><span>·</span><span>Pfizer</span><span>·</span><span>Himalaya</span><span>·</span>
+    </div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-10">
+      <div>
+        <div class="text-xs font-bold uppercase tracking-[0.18em] text-teal-600 mb-2">Shop by category</div>
+        <h2 class="font-display font-extrabold text-3xl lg:text-4xl text-navy-900">Everything your pharmacy stocks.</h2>
+      </div>
+      <button onclick="navigate('categories')" class="text-sm font-semibold text-navy-900 flex items-center gap-1.5 hover:gap-2 transition-all">
+        View all categories
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0-4 4m4-4H3"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4 stagger" id="home-categories"></div>
+  </div>
+
+  <!-- VALUE PROPS -->
+  <div class="bg-white border-y border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div class="rounded-3xl bg-gradient-to-br from-navy-900 to-navy-800 p-8 text-white relative overflow-hidden">
+          <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-teal-500/20 blur-3xl"></div>
+          <div class="relative">
+            <div class="w-12 h-12 rounded-2xl bg-teal-500 flex items-center justify-center mb-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <h3 class="font-display text-2xl font-bold mb-2">Quick commerce<br/>for medicine.</h3>
+            <p class="text-sm text-slate-300 mb-5">Place orders in seconds. Get bulk inventory at your counter the same day across 500+ cities.</p>
+            <div class="flex items-baseline gap-1">
+              <span class="font-display text-4xl font-extrabold">4hr</span>
+              <span class="text-sm text-slate-400">avg metro delivery</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200 p-8 bg-slate-50 relative overflow-hidden">
+          <div class="w-12 h-12 rounded-2xl bg-navy-900 flex items-center justify-center mb-5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#34d39e" stroke-width="2" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"/>
+            </svg>
+          </div>
+          <h3 class="font-display text-2xl font-bold mb-2 text-navy-900">Verified at every step.</h3>
+          <p class="text-sm text-slate-600 mb-5">Authorized distributor network. Cold-chain tracked. Batch & expiry visibility on every SKU.</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-3 py-1 rounded-full bg-white border border-slate-200 text-xs font-semibold text-navy-900">ISO 9001</span>
+            <span class="px-3 py-1 rounded-full bg-white border border-slate-200 text-xs font-semibold text-navy-900">WHO-GDP</span>
+            <span class="px-3 py-1 rounded-full bg-white border border-slate-200 text-xs font-semibold text-navy-900">GST compliant</span>
+          </div>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200 p-8 bg-white relative overflow-hidden">
+          <div class="w-12 h-12 rounded-2xl bg-teal-100 flex items-center justify-center mb-5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.307a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"/>
+            </svg>
+          </div>
+          <h3 class="font-display text-2xl font-bold mb-2 text-navy-900">Up to 38% off MRP.</h3>
+          <p class="text-sm text-slate-600 mb-5">Volume discounts auto-applied. Live stock pricing. No haggling, no hidden fees.</p>
+          <div>
+            <div class="text-xs text-slate-500 font-medium mb-1">This month's savings · all pharmacies</div>
+            <div class="font-display text-3xl font-extrabold text-navy-900">₹ 4.2 Cr</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOT DEALS PREVIEW -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+      <div>
+        <div class="text-xs font-bold uppercase tracking-[0.18em] text-teal-600 mb-2">Trending today</div>
+        <h2 class="font-display font-extrabold text-3xl lg:text-4xl text-navy-900">Hot deals on bulk SKUs.</h2>
+      </div>
+      <button onclick="navigate('deals')" class="text-sm font-semibold text-navy-900 flex items-center gap-1.5 hover:gap-2 transition-all">
+        See all deals
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0-4 4m4-4H3"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 stagger" id="home-deals"></div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="bg-navy-900 text-white relative overflow-hidden">
+    <div class="absolute inset-0 dotgrid opacity-30"></div>
+    <div class="absolute top-0 right-0 w-96 h-96 rounded-full bg-teal-500/10 blur-3xl"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+      <div class="max-w-2xl mb-12">
+        <div class="text-xs font-bold uppercase tracking-[0.18em] text-teal-400 mb-3">How Medibo works</div>
+        <h2 class="font-display font-extrabold text-3xl lg:text-5xl tracking-tight leading-tight">Four steps from order to counter.</h2>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- step -->
+        <div class="relative">
+          <div class="font-mono text-teal-400 text-sm mb-3">01</div>
+          <div class="font-display text-xl font-bold mb-2">Verify & onboard</div>
+          <p class="text-sm text-slate-300">Upload your GSTIN and drug license. Verified businesses go live in under 4 hours.</p>
+          <div class="absolute right-0 top-0 hidden lg:block opacity-20">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75"/></svg>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="font-mono text-teal-400 text-sm mb-3">02</div>
+          <div class="font-display text-xl font-bold mb-2">Search or upload</div>
+          <p class="text-sm text-slate-300">Find SKUs by name, salt, or manufacturer — or upload your weekly order sheet directly.</p>
+        </div>
+        <div class="relative">
+          <div class="font-mono text-teal-400 text-sm mb-3">03</div>
+          <div class="font-display text-xl font-bold mb-2">Smart matching</div>
+          <p class="text-sm text-slate-300">Our engine maps your order to the cheapest in-stock batches. You confirm. We pack.</p>
+        </div>
+        <div class="relative">
+          <div class="font-mono text-teal-400 text-sm mb-3">04</div>
+          <div class="font-display text-xl font-bold mb-2">Delivered, tracked</div>
+          <p class="text-sm text-slate-300">4–12 hour delivery with live tracking and GST invoice in your dashboard.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="bg-slate-50 border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <div class="text-xs font-bold uppercase tracking-[0.18em] text-teal-600 mb-3">From our partners</div>
+        <h2 class="font-display font-extrabold text-3xl lg:text-4xl text-navy-900">Trusted by pharmacies that don't have time to wait.</h2>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="rounded-2xl bg-white p-6 border border-slate-200 shadow-card">
+          <div class="flex gap-1 mb-4">
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+          </div>
+          <p class="font-display text-lg text-navy-900 leading-snug mb-5">"We used to keep three suppliers on call. Medibo replaced all of them. Better prices, faster delivery."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-navy-700 to-teal-600 flex items-center justify-center text-white font-bold text-sm">SP</div>
+            <div>
+              <div class="text-sm font-semibold text-navy-900">Sneha Patil</div>
+              <div class="text-xs text-slate-500">Owner · Wellness Pharmacy, Pune</div>
+            </div>
+          </div>
+        </div>
+        <div class="rounded-2xl bg-white p-6 border border-slate-200 shadow-card">
+          <div class="flex gap-1 mb-4">
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+          </div>
+          <p class="font-display text-lg text-navy-900 leading-snug mb-5">"The bulk upload is a lifesaver. Our weekly procurement now takes 12 minutes, not 4 hours."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-navy-800 flex items-center justify-center text-white font-bold text-sm">AR</div>
+            <div>
+              <div class="text-sm font-semibold text-navy-900">Dr. Arun Reddy</div>
+              <div class="text-xs text-slate-500">Head of Pharmacy · Krishna Hospitals</div>
+            </div>
+          </div>
+        </div>
+        <div class="rounded-2xl bg-white p-6 border border-slate-200 shadow-card">
+          <div class="flex gap-1 mb-4">
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
+          </div>
+          <p class="font-display text-lg text-navy-900 leading-snug mb-5">"Live stock and batch visibility means zero short expiries on our shelves. Genuinely game-changing."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-navy-700 flex items-center justify-center text-white font-bold text-sm">MJ</div>
+            <div>
+              <div class="text-sm font-semibold text-navy-900">Mohit Jain</div>
+              <div class="text-xs text-slate-500">Procurement Manager · MedPlus chain</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BIG CTA -->
+  <div class="bg-navy-950 relative overflow-hidden">
+    <div class="absolute inset-0 hero-bg opacity-80"></div>
+    <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 text-center">
+      <h2 class="font-display font-extrabold text-white text-4xl lg:text-6xl tracking-tight leading-tight">Your shelves, restocked<br/><span class="bg-gradient-to-r from-teal-300 to-teal-400 bg-clip-text text-transparent">before lunch.</span></h2>
+      <p class="mt-6 text-slate-300 max-w-xl mx-auto">Join 18,400+ pharmacies and hospital pharmacies using Medibo to cut procurement time, costs, and headaches.</p>
+      <div class="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+        <button onclick="navigate('catalog')" class="btn-teal px-7 py-4 rounded-xl font-semibold">Start your first order</button>
+        <button onclick="navigate('dashboard')" class="px-7 py-4 rounded-xl font-semibold bg-white/10 backdrop-blur border border-white/20 text-white hover:bg-white/20 transition">Book a demo</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     VIEW: CATALOG
+     ========================================================= -->
+<section id="view-catalog" class="view">
+  <div class="bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+        <a href="#" data-route="home" class="route-link hover:text-navy-900">Home</a>
+        <span>›</span>
+        <span class="text-navy-900 font-semibold">Catalog</span>
+      </div>
+      <h1 class="font-display font-extrabold text-3xl lg:text-4xl text-navy-900">Medicine Catalog</h1>
+      <p class="text-sm text-slate-600 mt-1">5,000+ verified SKUs · Live B2B pricing · Same-day dispatch on most orders</p>
+
+      <!-- Search bar -->
+      <div class="mt-6 bg-slate-50 rounded-2xl p-2 flex flex-col sm:flex-row gap-2 ring-1 ring-slate-200">
+        <div class="flex-1 flex items-center gap-3 px-4 py-3 bg-white rounded-xl">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 text-slate-400">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.34-4.34M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/>
+          </svg>
+          <input id="catalog-search" type="text" placeholder="Search by name, salt, or manufacturer" class="w-full text-navy-900 placeholder-slate-400 focus:outline-none text-sm"/>
+        </div>
+        <select id="sort-select" class="px-4 py-3 bg-white rounded-xl text-sm font-medium text-navy-900 focus:outline-none ring-1 ring-slate-200">
+          <option value="relevance">Sort: Relevance</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="discount">Highest discount</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
+    <div class="grid lg:grid-cols-12 gap-6 lg:gap-8">
+      <!-- Filters -->
+      <aside class="lg:col-span-3">
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 sticky top-24">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="font-display font-bold text-navy-900">Filters</h3>
+            <button onclick="clearFilters()" class="text-xs text-teal-600 font-semibold hover:underline">Clear all</button>
+          </div>
+
+          <div class="space-y-6 max-h-[70vh] overflow-y-auto pr-1">
+            <div>
+              <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3">Category</div>
+              <div class="space-y-2" id="filter-categories"></div>
+            </div>
+
+            <div>
+              <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3">Manufacturer</div>
+              <div class="space-y-2" id="filter-manufacturers"></div>
+            </div>
+
+            <div>
+              <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3">Price range (₹)</div>
+              <div class="px-1">
+                <input id="price-range" type="range" min="0" max="5000" value="5000" class="w-full"/>
+                <div class="flex justify-between text-xs text-slate-500 mt-1 font-mono">
+                  <span>₹0</span>
+                  <span id="price-display">Up to ₹5000</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3">Stock</div>
+              <label class="flex items-center gap-2 text-sm text-slate-700">
+                <input id="in-stock-only" type="checkbox" class="chk"/>
+                In stock only
+              </label>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Catalog grid -->
+      <div class="lg:col-span-9">
+        <div class="flex items-center justify-between mb-4">
+          <div class="text-sm text-slate-600">
+            <span id="result-count" class="font-bold text-navy-900">0</span> products
+          </div>
+          <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            <button id="grid-view-btn" onclick="setView('grid')" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white text-navy-900 shadow-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 inline -mt-0.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
+            </button>
+            <button id="list-view-btn" onclick="setView('list')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-500">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 inline -mt-0.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="products-grid"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     VIEW: CATEGORIES
+     ========================================================= -->
+<section id="view-categories" class="view">
+  <div class="bg-gradient-to-b from-navy-900 to-navy-800 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <div class="flex items-center gap-2 text-xs text-slate-400 mb-3">
+        <a href="#" data-route="home" class="route-link hover:text-white">Home</a>
+        <span>›</span>
+        <span class="text-white font-semibold">Categories</span>
+      </div>
+      <h1 class="font-display font-extrabold text-4xl lg:text-5xl tracking-tight">Browse by category</h1>
+      <p class="text-slate-300 mt-2 max-w-xl">From allopathic essentials to surgical supplies — everything your pharmacy stocks, in one place.</p>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5 stagger" id="all-categories"></div>
+  </div>
+</section>
+
+<!-- =========================================================
+     VIEW: BULK UPLOAD
+     ========================================================= -->
+<section id="view-bulk" class="view">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+    <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+      <a href="#" data-route="home" class="route-link hover:text-navy-900">Home</a>
+      <span>›</span>
+      <span class="text-navy-900 font-semibold">Bulk Upload</span>
+    </div>
+    <h1 class="font-display font-extrabold text-3xl lg:text-5xl text-navy-900 tracking-tight">Upload Your Bulk Order</h1>
+    <p class="text-slate-600 mt-3 max-w-2xl">Drop in your weekly procurement sheet — Excel, CSV, or PDF. Our matcher reads it, finds the SKUs, and shows you what's in stock at the best price.</p>
+
+    <div class="mt-10 grid lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        <!-- Drop zone -->
+        <div id="drop-zone" class="drop-zone relative rounded-3xl border-2 border-dashed border-slate-300 bg-white p-10 lg:p-16 text-center transition">
+          <div class="absolute inset-0 dotgrid opacity-30 rounded-3xl pointer-events-none"></div>
+          <div class="relative">
+            <div class="mx-auto w-20 h-20 rounded-2xl bg-teal-50 flex items-center justify-center mb-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" class="w-10 h-10">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/>
+              </svg>
+            </div>
+            <h2 class="font-display font-bold text-2xl text-navy-900">Drag & drop your order file</h2>
+            <p class="text-slate-500 mt-2 text-sm">or click to browse · Excel, CSV, or PDF · up to 25 MB</p>
+            <button onclick="simulateUpload()" class="mt-6 btn-primary px-6 py-3 rounded-xl font-semibold inline-flex items-center gap-2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              Choose file
+            </button>
+            <div class="mt-6 flex items-center justify-center gap-2 flex-wrap text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+              <span>Supported:</span>
+              <span class="px-2 py-1 rounded-md bg-slate-100">.xlsx</span>
+              <span class="px-2 py-1 rounded-md bg-slate-100">.csv</span>
+              <span class="px-2 py-1 rounded-md bg-slate-100">.pdf</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview table -->
+        <div id="upload-preview" class="mt-8 hidden">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-display font-bold text-xl text-navy-900">Smart match preview</h3>
+              <p class="text-xs text-slate-500 mt-0.5">8 items matched · 1 partial · 0 unrecognized</p>
+            </div>
+            <button onclick="addBulkToCart()" class="btn-teal px-5 py-2.5 rounded-xl text-sm font-semibold">Add matched to cart</button>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th class="px-4 py-3 text-left">Your line item</th>
+                    <th class="px-4 py-3 text-left">Matched SKU</th>
+                    <th class="px-4 py-3 text-right">Qty</th>
+                    <th class="px-4 py-3 text-right">Price</th>
+                    <th class="px-4 py-3 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="preview-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side info -->
+      <div class="space-y-4">
+        <div class="rounded-2xl bg-navy-900 text-white p-6 relative overflow-hidden">
+          <div class="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-teal-500/20 blur-2xl"></div>
+          <div class="relative">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-teal-300 mb-2">How it works</div>
+            <h3 class="font-display font-bold text-xl mb-4">Three steps to a packed cart.</h3>
+            <ol class="space-y-3 text-sm">
+              <li class="flex gap-3">
+                <span class="w-6 h-6 rounded-full bg-teal-500 text-navy-900 flex items-center justify-center font-bold text-xs flex-shrink-0">1</span>
+                <span class="text-slate-300">Drop your file. We read brand name, salt, pack size & qty.</span>
+              </li>
+              <li class="flex gap-3">
+                <span class="w-6 h-6 rounded-full bg-teal-500 text-navy-900 flex items-center justify-center font-bold text-xs flex-shrink-0">2</span>
+                <span class="text-slate-300">Smart matcher pairs each line to the best in-stock SKU.</span>
+              </li>
+              <li class="flex gap-3">
+                <span class="w-6 h-6 rounded-full bg-teal-500 text-navy-900 flex items-center justify-center font-bold text-xs flex-shrink-0">3</span>
+                <span class="text-slate-300">Review, edit, and push to cart in one click.</span>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-white border border-slate-200 p-6">
+          <h3 class="font-display font-bold text-navy-900 mb-3">Need a template?</h3>
+          <p class="text-sm text-slate-600 mb-4">Download our example sheet to ensure perfect matches every time.</p>
+          <button class="w-full px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-navy-900 text-sm font-semibold flex items-center justify-center gap-2 transition">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9 4.5-4.5 4.5 4.5M12 3v13.5"/></svg>
+            Download .xlsx template
+          </button>
+        </div>
+
+        <div class="rounded-2xl bg-teal-50 border border-teal-200 p-6">
+          <div class="flex items-start gap-3">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2" class="w-5 h-5 flex-shrink-0 mt-0.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75"/></svg>
+            <div>
+              <div class="font-semibold text-navy-900 text-sm">99.4% match accuracy</div>
+              <div class="text-xs text-teal-800 mt-1">Trained on 14M+ pharmacy orders. Handles brand aliases, regional names, and partial spellings.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     VIEW: CART
+     ========================================================= -->
+<section id="view-cart" class="view">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+    <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+      <a href="#" data-route="home" class="route-link hover:text-navy-900">Home</a>
+      <span>›</span>
+      <span class="text-navy-900 font-semibold">Cart & Checkout</span>
+    </div>
+    <h1 class="font-display font-extrabold text-3xl lg:text-4xl text-navy-900">Your Cart</h1>
+
+    <div id="cart-empty" class="hidden mt-12 text-center bg-white rounded-3xl border border-slate-200 py-20 px-6">
+      <div class="mx-auto w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center mb-5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218a.75.75 0 0 0 .72-.54l1.892-6.18a.75.75 0 0 0-.72-.96H5.106M7.5 14.25l-1.135-4.255"/></svg>
+      </div>
+      <h3 class="font-display font-bold text-xl text-navy-900">Your cart is empty</h3>
+      <p class="text-slate-500 text-sm mt-1 max-w-sm mx-auto">Add items from the catalog or upload a bulk order to get started.</p>
+      <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+        <button onclick="navigate('catalog')" class="btn-primary px-6 py-3 rounded-xl text-sm font-semibold">Browse catalog</button>
+        <button onclick="navigate('bulk')" class="px-6 py-3 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-navy-900">Upload bulk order</button>
+      </div>
+    </div>
+
+    <div id="cart-content" class="mt-8 grid lg:grid-cols-3 gap-6 lg:gap-8">
+      <div class="lg:col-span-2 space-y-4" id="cart-items"></div>
+
+      <!-- Summary -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 sticky top-24">
+          <h3 class="font-display font-bold text-lg text-navy-900 mb-5">Order summary</h3>
+
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between text-slate-600">
+              <span>Items subtotal (MRP)</span>
+              <span class="font-mono" id="sum-mrp">₹ 0</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>Medibo B2B discount</span>
+              <span class="font-mono text-teal-600 font-semibold" id="sum-discount">– ₹ 0</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>GST (12% on net)</span>
+              <span class="font-mono" id="sum-gst">₹ 0</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>Delivery</span>
+              <span class="font-mono text-teal-600 font-semibold">FREE</span>
+            </div>
+          </div>
+
+          <div class="my-5 border-t border-slate-200"></div>
+
+          <div class="flex justify-between items-baseline mb-1">
+            <span class="text-navy-900 font-semibold">Total payable</span>
+            <span class="font-display font-extrabold text-2xl text-navy-900 font-mono" id="sum-total">₹ 0</span>
+          </div>
+          <div class="text-xs text-teal-600 font-semibold mb-5" id="sum-savings">You save ₹ 0 vs MRP</div>
+
+          <!-- Delivery slot -->
+          <div class="mb-4">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Delivery slot</div>
+            <div class="grid grid-cols-2 gap-2">
+              <button class="slot-btn px-3 py-2 rounded-xl border border-teal-500 bg-teal-50 text-teal-700 text-xs font-semibold flex flex-col items-start gap-0.5" data-slot="express">
+                <span>Express</span>
+                <span class="text-[10px] font-normal text-teal-600">Today · 4 hrs</span>
+              </button>
+              <button class="slot-btn px-3 py-2 rounded-xl border border-slate-200 hover:border-slate-300 text-navy-900 text-xs font-semibold flex flex-col items-start gap-0.5" data-slot="standard">
+                <span>Standard</span>
+                <span class="text-[10px] font-normal text-slate-500">Tomorrow · 9–12 AM</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Business details -->
+          <div class="mb-4 space-y-2">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Business details</div>
+            <input type="text" placeholder="Pharmacy / Hospital name" value="Apollo Pharmacy · Bandra" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-teal-500"/>
+            <input type="text" placeholder="GSTIN (e.g. 27ABCDE1234F1Z5)" value="27AABCA1234B1Z6" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-teal-500"/>
+            <input type="text" placeholder="Drug License Number" value="MH-FDA-MUM-W-25841" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-teal-500"/>
+          </div>
+
+          <button onclick="placeOrder()" class="w-full btn-teal py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2">
+            Place order
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0-4 4m4-4H3"/></svg>
+          </button>
+
+          <div class="mt-4 flex items-center justify-center gap-3 text-[11px] text-slate-400 font-medium">
+            <span class="flex items-center gap-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg> Secure</span>
+            <span>·</span>
+            <span>GST invoice included</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     VIEW: ORDERS
+     ========================================================= -->
+<section id="view-orders" class="view">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+    <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+      <a href="#" data-route="home" class="route-link hover:text-navy-900">Home</a>
+      <span>›</span>
+      <span class="text-navy-900 font-semibold">My Orders</span>
+    </div>
+    <h1 class="font-display font-extrabold text-3xl lg:text-4xl text-navy-900">My Orders</h1>
+    <p class="text-sm text-slate-600 mt-1">Track shipments, repeat past orders, and download GST invoices.</p>
+
+    <!-- Tabs -->
+    <div class="mt-6 flex gap-2 border-b border-slate-200">
+      <button class="px-4 py-2.5 text-sm font-semibold text-navy-900 border-b-2 border-teal-500">All orders <span class="ml-1 text-xs text-slate-400">4</span></button>
+      <button class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:text-navy-900">In transit <span class="ml-1 text-xs">1</span></button>
+      <button class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:text-navy-900">Delivered <span class="ml-1 text-xs">2</span></button>
+      <button class="px-4 py-2.5 text-sm font-semibold text-slate-500 hover:text-navy-900">Repeat orders</button>
+    </div>
+
+    <!-- Order cards -->
+    <div class="mt-6 space-y-4" id="orders-list"></div>
+
+    <!-- Frequently ordered -->
+    <div class="mt-12">
+      <h2 class="font-display font-bold text-xl text-navy-900 mb-4">Frequently ordered</h2>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="frequent-orders"></div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     VIEW: DEALS
+     ========================================================= -->
+<section id="view-deals" class="view">
+  <div class="bg-gradient-to-br from-teal-500 to-teal-600 text-white relative overflow-hidden">
+    <div class="absolute inset-0 dotgrid opacity-20"></div>
+    <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/10 blur-3xl"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <div class="flex items-center gap-2 text-xs text-teal-100 mb-3">
+        <a href="#" data-route="home" class="route-link hover:text-white">Home</a>
+        <span>›</span>
+        <span class="text-white font-semibold">Deals & Offers</span>
+      </div>
+      <div class="grid lg:grid-cols-2 gap-8 items-end">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur text-white text-xs font-semibold mb-4">
+            <span>🔥</span> Limited-time wholesale offers
+          </div>
+          <h1 class="font-display font-extrabold text-4xl lg:text-6xl tracking-tight leading-tight">Deals & Bulk Offers</h1>
+          <p class="text-teal-100 mt-3 max-w-xl">Slashes up to 38% off MRP. Volume rebates auto-applied. Stock cleared in hours.</p>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/15">
+            <div class="font-display font-extrabold text-3xl">142</div>
+            <div class="text-xs text-teal-100 uppercase font-semibold tracking-wider mt-1">Active deals</div>
+          </div>
+          <div class="bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/15">
+            <div class="font-display font-extrabold text-3xl">38%</div>
+            <div class="text-xs text-teal-100 uppercase font-semibold tracking-wider mt-1">Max discount</div>
+          </div>
+          <div class="bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/15">
+            <div class="font-display font-extrabold text-3xl">24<span class="text-lg">hr</span></div>
+            <div class="text-xs text-teal-100 uppercase font-semibold tracking-wider mt-1">Avg validity</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+    <!-- Featured deals -->
+    <h2 class="font-display font-bold text-2xl text-navy-900 mb-5">Featured wholesale offers</h2>
+    <div class="grid lg:grid-cols-3 gap-5" id="featured-deals"></div>
+
+    <h2 class="font-display font-bold text-2xl text-navy-900 mt-12 mb-5">All deals</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger" id="all-deals"></div>
+  </div>
+</section>
+
+<!-- =========================================================
+     VIEW: DASHBOARD
+     ========================================================= -->
+<section id="view-dashboard" class="view">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+          <a href="#" data-route="home" class="route-link hover:text-navy-900">Home</a>
+          <span>›</span>
+          <span class="text-navy-900 font-semibold">Business Account</span>
+        </div>
+        <h1 class="font-display font-extrabold text-3xl lg:text-4xl text-navy-900">Welcome back, Apollo Pharmacy</h1>
+        <p class="text-sm text-slate-600 mt-1">Bandra branch · Verified pharmacy · Member since Aug 2024</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1.5 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold flex items-center gap-1.5">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75"/></svg>
+          Verified
+        </span>
+        <span class="px-3 py-1.5 rounded-full bg-navy-900 text-white text-xs font-semibold">Gold tier</span>
+      </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="rounded-2xl bg-white border border-slate-200 p-5">
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Spent this month</div>
+        <div class="font-display font-extrabold text-3xl text-navy-900 mt-2 font-mono">₹ 4,82,150</div>
+        <div class="flex items-center gap-1 mt-2 text-xs text-teal-600 font-semibold">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5"/></svg>
+          ₹ 1,42,300 vs Sep
+        </div>
+      </div>
+      <div class="rounded-2xl bg-white border border-slate-200 p-5">
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Saved vs MRP</div>
+        <div class="font-display font-extrabold text-3xl text-teal-600 mt-2 font-mono">₹ 1,08,420</div>
+        <div class="text-xs text-slate-500 mt-2">22.5% effective discount</div>
+      </div>
+      <div class="rounded-2xl bg-white border border-slate-200 p-5">
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Orders placed</div>
+        <div class="font-display font-extrabold text-3xl text-navy-900 mt-2">24</div>
+        <div class="text-xs text-slate-500 mt-2">2 in transit · 22 delivered</div>
+      </div>
+      <div class="rounded-2xl bg-navy-900 text-white p-5 relative overflow-hidden">
+        <div class="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-teal-500/30 blur-2xl"></div>
+        <div class="relative">
+          <div class="text-xs font-semibold text-teal-300 uppercase tracking-wider">Avg delivery time</div>
+          <div class="font-display font-extrabold text-3xl mt-2">5.4 <span class="text-lg">hrs</span></div>
+          <div class="text-xs text-slate-300 mt-2">2.3 hrs faster than avg</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 grid lg:grid-cols-3 gap-6">
+      <!-- Chart -->
+      <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200 p-6">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h3 class="font-display font-bold text-lg text-navy-900">Procurement trend</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Last 6 months · all categories</p>
+          </div>
+          <select class="text-xs font-semibold text-navy-900 bg-slate-50 px-3 py-1.5 rounded-lg ring-1 ring-slate-200 focus:outline-none">
+            <option>Last 6 months</option>
+            <option>This year</option>
+          </select>
+        </div>
+        <svg viewBox="0 0 600 240" class="w-full">
+          <!-- Grid -->
+          <defs>
+            <linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <g stroke="#e2e8f0" stroke-width="1">
+            <line x1="40" y1="40" x2="580" y2="40"/>
+            <line x1="40" y1="90" x2="580" y2="90"/>
+            <line x1="40" y1="140" x2="580" y2="140"/>
+            <line x1="40" y1="190" x2="580" y2="190"/>
+          </g>
+          <g font-family="JetBrains Mono" font-size="10" fill="#94a3b8">
+            <text x="0" y="44">5L</text>
+            <text x="0" y="94">4L</text>
+            <text x="0" y="144">3L</text>
+            <text x="0" y="194">2L</text>
+          </g>
+          <!-- Area -->
+          <path d="M 70 150 L 160 130 L 250 100 L 340 110 L 430 70 L 520 55 L 580 50 L 580 190 L 70 190 Z" fill="url(#areaGrad)"/>
+          <!-- Line -->
+          <path d="M 70 150 L 160 130 L 250 100 L 340 110 L 430 70 L 520 55 L 580 50" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Dots -->
+          <g fill="#10b981">
+            <circle cx="70" cy="150" r="4"/>
+            <circle cx="160" cy="130" r="4"/>
+            <circle cx="250" cy="100" r="4"/>
+            <circle cx="340" cy="110" r="4"/>
+            <circle cx="430" cy="70" r="4"/>
+            <circle cx="520" cy="55" r="4"/>
+            <circle cx="580" cy="50" r="5" stroke="white" stroke-width="2"/>
+          </g>
+          <g font-family="Inter" font-size="10" fill="#64748b" font-weight="600">
+            <text x="62" y="215">May</text>
+            <text x="152" y="215">Jun</text>
+            <text x="242" y="215">Jul</text>
+            <text x="332" y="215">Aug</text>
+            <text x="422" y="215">Sep</text>
+            <text x="512" y="215">Oct</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Top categories -->
+      <div class="rounded-2xl bg-white border border-slate-200 p-6">
+        <h3 class="font-display font-bold text-lg text-navy-900 mb-1">Top categories</h3>
+        <p class="text-xs text-slate-500 mb-5">By spend this month</p>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between text-sm mb-1.5">
+              <span class="font-medium text-navy-900">Allopathic</span>
+              <span class="text-slate-500 font-mono">₹ 2.4L</span>
+            </div>
+            <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-teal-500 rounded-full" style="width:82%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1.5">
+              <span class="font-medium text-navy-900">Surgical & devices</span>
+              <span class="text-slate-500 font-mono">₹ 1.1L</span>
+            </div>
+            <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-navy-700 rounded-full" style="width:48%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1.5">
+              <span class="font-medium text-navy-900">OTC & wellness</span>
+              <span class="text-slate-500 font-mono">₹ 64K</span>
+            </div>
+            <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-teal-400 rounded-full" style="width:28%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-sm mb-1.5">
+              <span class="font-medium text-navy-900">Ayurvedic</span>
+              <span class="text-slate-500 font-mono">₹ 42K</span>
+            </div>
+            <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-navy-400 rounded-full" style="width:18%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent activity + account -->
+    <div class="mt-6 grid lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200 p-6">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="font-display font-bold text-lg text-navy-900">Recent activity</h3>
+          <button onclick="navigate('orders')" class="text-xs font-semibold text-teal-600 hover:underline">View all orders →</button>
+        </div>
+        <div class="space-y-1" id="recent-activity"></div>
+      </div>
+      <div class="rounded-2xl bg-navy-900 text-white p-6 relative overflow-hidden">
+        <div class="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-teal-500/20 blur-3xl"></div>
+        <div class="relative">
+          <div class="text-xs font-bold uppercase tracking-wider text-teal-300 mb-2">Business profile</div>
+          <h3 class="font-display font-bold text-xl mb-5">Apollo Pharmacy · Bandra</h3>
+          <div class="space-y-3 text-sm">
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">GSTIN</div>
+              <div class="font-mono text-white">27AABCA1234B1Z6</div>
+            </div>
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Drug License</div>
+              <div class="font-mono text-white">MH-FDA-MUM-W-25841</div>
+            </div>
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Delivery address</div>
+              <div class="text-white">Shop 12, Linking Rd, Bandra West, Mumbai 400050</div>
+            </div>
+          </div>
+          <button class="mt-5 w-full px-4 py-2.5 rounded-xl bg-white/10 backdrop-blur border border-white/15 text-white text-sm font-semibold hover:bg-white/20 transition">Edit business details</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
+<footer class="bg-navy-950 text-slate-400 relative overflow-hidden">
+  <div class="absolute inset-0 dotgrid opacity-20"></div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <div class="grid lg:grid-cols-5 gap-10">
+      <div class="lg:col-span-2">
+        <div class="flex items-center gap-2.5 mb-4">
+          <div class="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
+            <svg viewBox="0 0 24 24" class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 3v18M3 12h18" stroke-linecap="round"/>
+              <circle cx="12" cy="12" r="9.5" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
+            </svg>
+          </div>
+          <div class="font-display font-extrabold text-xl text-white">Medibo</div>
+        </div>
+        <p class="text-sm leading-relaxed max-w-sm">India's quick-commerce platform for B2B medicine procurement. Built for pharmacies, hospital pharmacies, and medical stores.</p>
+        <div class="mt-5 flex gap-2">
+          <span class="px-2.5 py-1 rounded-full bg-white/5 text-[11px] font-semibold">ISO 9001</span>
+          <span class="px-2.5 py-1 rounded-full bg-white/5 text-[11px] font-semibold">GST compliant</span>
+          <span class="px-2.5 py-1 rounded-full bg-white/5 text-[11px] font-semibold">WHO-GDP</span>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-white font-display font-bold mb-4 text-sm">Platform</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" data-route="catalog" class="route-link hover:text-teal-400">Catalog</a></li>
+          <li><a href="#" data-route="bulk" class="route-link hover:text-teal-400">Bulk upload</a></li>
+          <li><a href="#" data-route="deals" class="route-link hover:text-teal-400">Deals</a></li>
+          <li><a href="#" data-route="categories" class="route-link hover:text-teal-400">Categories</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-display font-bold mb-4 text-sm">Business</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-teal-400">For pharmacies</a></li>
+          <li><a href="#" class="hover:text-teal-400">For hospitals</a></li>
+          <li><a href="#" class="hover:text-teal-400">For medical stores</a></li>
+          <li><a href="#" class="hover:text-teal-400">Become a partner</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-white font-display font-bold mb-4 text-sm">Support</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-teal-400">Help center</a></li>
+          <li><a href="#" class="hover:text-teal-400">Contact</a></li>
+          <li><a href="#" class="hover:text-teal-400">Status</a></li>
+          <li><a href="#" class="hover:text-teal-400">Compliance</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+      <div>© 2026 Medibo Healthcare Pvt. Ltd. · All rights reserved</div>
+      <div class="flex gap-5"><a href="#" class="hover:text-teal-400">Privacy</a><a href="#" class="hover:text-teal-400">Terms</a><a href="#" class="hover:text-teal-400">Cookies</a></div>
+    </div>
+  </div>
+</footer>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- =========================================================
+     DATA + LOGIC
+     ========================================================= -->
+<script>
+/* -------------------------------------------------------------
+   DATA LAYER  — Direct Supabase connection
+------------------------------------------------------------- */
+const PAGE_SIZE = 48;
+
+const SUPABASE_URL = 'https://qkcuoaqrpnmdnejzahdv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrY3VvYXFycG5tZG5lanphaGR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzk3NjYsImV4cCI6MjA5NDk1NTc2Nn0.IBj9QYmYjfaHYU40lfTvuTj8YO4Brz4P-6k7TWcM_hE';
+
+/* Plain-fetch REST wrapper.
+   The supabase-js client triggers a DataCloneError inside iframe sandboxes
+   (postMessage cannot clone Headers). The REST endpoint takes the same
+   query language via URL params and works everywhere. */
+async function sbRest(table, params, opts) {
+  opts = opts || {};
+  const qs = new URLSearchParams(params).toString();
+  const url = SUPABASE_URL + '/rest/v1/' + encodeURIComponent(table) + (qs ? '?' + qs : '');
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+    'Accept': 'application/json'
+  };
+  if (opts.count) headers['Prefer'] = 'count=exact';
+  if (opts.range) headers['Range'] = opts.range;
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error('Supabase ' + res.status + ': ' + body);
+  }
+  const data = await res.json();
+  let total = null;
+  if (opts.count) {
+    const cr = res.headers.get('content-range');
+    if (cr && cr.indexOf('/') !== -1) total = parseInt(cr.split('/')[1], 10);
+  }
+  return { data, total };
+}
+
+// Map a raw DB row → internal product shape
+function rowToProduct(r, idx) {
+  const rawMrp = parseFloat((r.mrp || '0').replace(/[^\d.]/g, '')) || 0;
+  const b2b    = Math.round(rawMrp * 0.72);
+  const deal   = rawMrp > 0 ? Math.round(((rawMrp - b2b) / rawMrp) * 100) : 0;
+  const packType = (r.pack_type || 'Tablet').trim();
+  const tag    = packType + (r.pack_size ? ' · ' + r.pack_size : '');
+  const catMap = {
+    'ANTI INFECTIVES': 'Anti-Infectives', 'ANTI DIABETIC': 'Diabetic Care',
+    'CARDIAC': 'Cardiac', 'RESPIRATORY': 'Respiratory', 'GASTRO INTESTINAL': 'GI',
+    'PAIN ANALGESICS': 'Pain & Analgesics', 'NEURO CNS': 'Neuro / CNS',
+    'VITAMINS MINERALS NUTRIENTS': 'Vitamins & Supps', 'DERMA': 'Dermatology',
+    'GYNAECOLOGICAL': "Women's Health", 'BLOOD RELATED': 'Blood Related',
+    'HORMONES': 'Hormones', 'UROLOGY': 'Urology', 'OPHTHAL': 'Ophthal',
+    'ANTI MALARIALS': 'Anti-Malarials', 'ANTI NEOPLASTICS': 'Oncology',
+    'VACCINES': 'Vaccines', 'STOMATOLOGICALS': 'Dental', 'OTOLOGICALS': 'ENT',
+    'OTHERS': 'Others',
+  };
+  const cat = catMap[r.therapeutic_class] || r.therapeutic_class || 'Others';
+  const imgColors = ['#10b981','#2a4d99','#0ea5e9','#f43f5e','#ec4899','#ef4444','#f59e0b','#06b6d4','#8b5cf6','#059669'];
+  const img = imgColors[idx % imgColors.length];
+  const stockRand = Math.random();
+  const stock = stockRand > 0.7 ? 'high' : stockRand > 0.25 ? 'medium' : 'low';
+  const moqMap = { 'Strip':30,'Tablet':50,'Capsule':30,'Bottle':20,'Vial':10,'Sachet':100,'Tube':20,'Syrup':20,'Injection':15,'Powder':25 };
+  const moq = moqMap[packType] || 25;
+  return {
+    id: r.url || ('p' + idx),
+    name: r.product_name || 'Unknown',
+    salt: r.salt_composition || '',
+    mfr: r.marketer || 'Unknown',
+    cat, mrp: rawMrp, b2b, moq, stock, img, tag, deal,
+    rx: r.rx_required === 'Rx',
+    therapeutic: r.therapeutic_class || '',
+    packType,
+  };
+}
+
+/* -------------------------------------------------------------
+   STATIC CATEGORY METADATA
+------------------------------------------------------------- */
+const CATEGORIES = [
+  { name: 'Anti-Infectives',   dbClass: 'ANTI INFECTIVES',             count: 0, icon: 'M19.428 15.428a2 2 0 0 0-1.022-.547l-2.387-.477a6 6 0 0 0-3.86.517l-.318.158a6 6 0 0 1-3.86.517L6.05 15.21a2 2 0 0 0-1.806.547M8 4h8l-1 1v5.172a2 2 0 0 0 .586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 0 0 9 10.172V5L8 4z', color: 'from-teal-500 to-teal-600' },
+  { name: 'Diabetic Care',     dbClass: 'ANTI DIABETIC',               count: 0, icon: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z', color: 'from-rose-500 to-pink-600' },
+  { name: 'Cardiac',           dbClass: 'CARDIAC',                     count: 0, icon: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z', color: 'from-red-500 to-rose-600' },
+  { name: 'Respiratory',       dbClass: 'RESPIRATORY',                 count: 0, icon: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z', color: 'from-cyan-500 to-teal-500' },
+  { name: 'GI',                dbClass: 'GASTRO INTESTINAL',           count: 0, icon: 'M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814', color: 'from-emerald-500 to-teal-500' },
+  { name: 'Pain & Analgesics', dbClass: 'PAIN ANALGESICS',             count: 0, icon: 'M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6Z', color: 'from-orange-500 to-red-500' },
+  { name: 'Vitamins & Supps',  dbClass: 'VITAMINS MINERALS NUTRIENTS', count: 0, icon: 'M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814', color: 'from-yellow-500 to-amber-500' },
+  { name: 'Neuro / CNS',       dbClass: 'NEURO CNS',                   count: 0, icon: 'M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25', color: 'from-navy-600 to-teal-600' },
+  { name: 'Dermatology',       dbClass: 'DERMA',                       count: 0, icon: 'M2.25 15.75 7.409 8.844a2.25 2.25 0 0 1 3.182-.094l5.319 5.319m-4.5-4.5 1.401-1.401a2.25 2.25 0 0 1 3.182-.094l4.5 4.5', color: 'from-pink-500 to-rose-500' },
+  { name: "Women's Health",    dbClass: 'GYNAECOLOGICAL',              count: 0, icon: 'M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Z', color: 'from-fuchsia-500 to-pink-500' },
+  { name: 'Oncology',          dbClass: 'ANTI NEOPLASTICS',            count: 0, icon: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z', color: 'from-navy-700 to-navy-900' },
+  { name: 'Vaccines',          dbClass: 'VACCINES',                    count: 0, icon: 'M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z', color: 'from-amber-500 to-orange-500' },
+];
+
+const MANUFACTURERS = [];
+const PRODUCTS = [];
+
+const ORDERS = [
+  { id:'MB-90342', date:'24 May 2026', items:42, value:84250, savings:18600, status:'in-transit', eta:'In 38 min' },
+  { id:'MB-90218', date:'21 May 2026', items:18, value:32480, savings:7240, status:'delivered', eta:'21 May, 11:42 AM' },
+  { id:'MB-90087', date:'17 May 2026', items:64, value:142800, savings:31400, status:'delivered', eta:'17 May, 4:18 PM' },
+  { id:'MB-89940', date:'14 May 2026', items:9, value:18420, savings:3840, status:'delivered', eta:'14 May, 9:14 AM' },
+];
+
+/* Pagination state */
+let sbCurrentPage  = 0;
+let sbTotalCount   = 0;
+let sbIsLoading    = false;
+let sbActiveThClass = null;
+
+async function fetchProducts(page, append) {
+  page = page || 0;
+  append = append || false;
+  if (sbIsLoading) return;
+  sbIsLoading = true;
+  showCatalogLoading(true);
+
+  try {
+    const from = page * PAGE_SIZE;
+    const to   = from + PAGE_SIZE - 1;
+
+    const params = {
+      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_type,therapeutic_class,rx_required,url',
+      order:  'product_name.asc'
+    };
+    if (sbActiveThClass) {
+      params['therapeutic_class'] = 'eq.' + sbActiveThClass;
+    }
+    if (filters.search && filters.search.length >= 2) {
+      params['product_name'] = 'ilike.*' + filters.search + '*';
+    }
+    if (filters.manufacturers.size > 0) {
+      const list = [...filters.manufacturers].map(m => '"' + m.replace(/"/g,'\\"') + '"').join(',');
+      params['marketer'] = 'in.(' + list + ')';
+    }
+
+    const { data: rows, total } = await sbRest('MEDICINE', params, {
+      count: true,
+      range: from + '-' + to
+    });
+
+    sbTotalCount = (total != null) ? total : (rows ? rows.length : 0);
+    sbCurrentPage = page;
+
+    const mapped = (rows || []).map((r, i) => rowToProduct(r, page * PAGE_SIZE + i));
+    const filtered = mapped.filter(p => p.b2b <= filters.maxPrice || p.mrp === 0);
+
+    if (append) {
+      PRODUCTS.push(...filtered);
+    } else {
+      PRODUCTS.length = 0;
+      PRODUCTS.push(...filtered);
+    }
+
+    renderProducts();
+    renderLoadMore();
+    document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
+  } catch (err) {
+    console.error('Fetch error:', err);
+    document.getElementById('products-grid').innerHTML = `
+      <div class="col-span-3 text-center py-16 text-slate-400">
+        <div class="text-4xl mb-3">⚠️</div>
+        <p class="font-semibold text-navy-900">Could not load products</p>
+        <p class="text-sm mt-1">${err.message}</p>
+        <button onclick="fetchProducts(0)" class="mt-4 px-4 py-2 rounded-xl bg-navy-900 text-white text-sm font-semibold">Retry</button>
+      </div>`;
+  } finally {
+    sbIsLoading = false;
+    showCatalogLoading(false);
+  }
+}
+
+function showCatalogLoading(show) {
+  let el = document.getElementById('catalog-loading');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'catalog-loading';
+    el.className = 'col-span-3 flex justify-center py-12';
+    el.innerHTML = '<div class="flex items-center gap-3 text-slate-500"><svg class="animate-spin w-5 h-5 text-teal-500" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg><span class="font-medium text-sm">Fetching from Supabase…</span></div>';
+    const grid = document.getElementById('products-grid');
+    if (grid && grid.parentNode) grid.parentNode.appendChild(el);
+  }
+  el.classList.toggle('hidden', !show);
+}
+
+function renderLoadMore() {
+  let el = document.getElementById('load-more-btn');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'load-more-btn';
+    el.className = 'col-span-full flex justify-center mt-6';
+    const grid = document.getElementById('products-grid');
+    if (grid && grid.parentNode) grid.parentNode.appendChild(el);
+  }
+  const loaded = (sbCurrentPage + 1) * PAGE_SIZE;
+  if (loaded < sbTotalCount) {
+    el.innerHTML = '<button onclick="fetchProducts(' + (sbCurrentPage + 1) + ', true)" class="px-8 py-3 rounded-xl bg-white border border-slate-200 text-navy-900 font-semibold text-sm hover:border-teal-400 hover:shadow-card transition">Load more · ' + (sbTotalCount - loaded).toLocaleString() + ' remaining</button>';
+  } else if (sbTotalCount > 0) {
+    el.innerHTML = '<p class="text-xs text-slate-400 font-medium">' + sbTotalCount.toLocaleString() + ' medicines shown</p>';
+  }
+}
+
+async function fetchHomeDeals() {
+  try {
+    const { data: rows } = await sbRest('MEDICINE', {
+      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_type,therapeutic_class,rx_required,url',
+      'mrp':  'not.is.null'
+    }, { range: '500-507' });
+    const mapped = (rows || []).map((r, i) => rowToProduct(r, i));
+    const el = document.getElementById('home-deals');
+    if (el) el.innerHTML = mapped.slice(0,4).map(productCardGrid).join('');
+  } catch(e) {
+    console.error('Home deals error:', e);
+    const el = document.getElementById('home-deals');
+    if (el) el.innerHTML = '<p class="text-slate-400 text-sm col-span-4 text-center py-8">Preview unavailable</p>';
+  }
+}
+
+async function fetchManufacturers() {
+  try {
+    /* PostgREST has no DISTINCT; pull a sample and dedupe client-side. */
+    const { data } = await sbRest('MEDICINE', {
+      select: 'marketer',
+      'marketer': 'not.is.null',
+      order:    'marketer.asc',
+      limit:    '2000'
+    });
+    const seen = new Set();
+    const list = [];
+    for (const row of (data || [])) {
+      const m = (row.marketer || '').trim();
+      if (m && !seen.has(m)) {
+        seen.add(m);
+        list.push(m);
+        if (list.length >= 40) break;
+      }
+    }
+    MANUFACTURERS.length = 0;
+    MANUFACTURERS.push(...list);
+    renderFilters();
+  } catch(e) { console.error('Manufacturers error:', e); }
+}
+
+/* Debounce for search */
+let _searchDebounce;
+function debounce(fn, ms) {
+  clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(fn, ms);
+}
+
+let CART = [];
+let currentView = 'home';
+let viewMode = 'grid';
+let filters = { categories: new Set(), manufacturers: new Set(), maxPrice: 5000, inStockOnly: false, search: '', sort: 'relevance' };
+
+/* -------------------------------------------------------------
+   SUPABASE FETCH LAYER
+------------------------------------------------------------- */
+/* -------------------------------------------------------------
+   ROUTING
+------------------------------------------------------------- */
+function navigate(route) {
+  currentView = route;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + route);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('[data-route]').forEach(a => {
+    a.classList.toggle('active', a.dataset.route === route);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Refresh dynamic views on entry
+  if (route === 'catalog') renderProducts();
+  if (route === 'cart') renderCart();
+  if (route === 'orders') renderOrders();
+  if (route === 'deals') renderDeals();
+  if (route === 'categories') renderAllCategories();
+}
+
+document.querySelectorAll('.route-link').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    navigate(link.dataset.route);
+  });
+});
+
+/* -------------------------------------------------------------
+   CATEGORY PILL RENDERER
+------------------------------------------------------------- */
+function renderCategoryCard(c, idx) {
+  return `
+    <button onclick="navigateToCategory('${c.name}')" class="group text-left bg-white rounded-2xl p-4 lg:p-5 border border-slate-200 hover:border-teal-300 hover:shadow-card-hover transition-all">
+      <div class="w-11 h-11 rounded-xl bg-gradient-to-br ${c.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="${c.icon}"/></svg>
+      </div>
+      <div class="font-display font-bold text-navy-900 text-sm">${c.name}</div>
+      <div class="text-xs text-slate-500 mt-0.5 font-mono">${c.count.toLocaleString()} SKUs</div>
+    </button>
+  `;
+}
+
+function renderHomeCategories() {
+  document.getElementById('home-categories').innerHTML = CATEGORIES.slice(0,6).map(renderCategoryCard).join('');
+}
+function renderAllCategories() {
+  document.getElementById('all-categories').innerHTML = CATEGORIES.map(renderCategoryCard).join('');
+}
+function navigateToCategory(name) {
+  filters.categories = new Set([name]);
+  const catMeta = CATEGORIES.find(c => c.name === name);
+  sbActiveThClass = catMeta ? catMeta.dbClass : null;
+  navigate('catalog');
+  // fetch happens inside navigate → renderProducts is called; but we need fetchProducts
+  setTimeout(() => fetchProducts(0), 50);
+}
+
+/* -------------------------------------------------------------
+   PRODUCT IMAGE (SVG)
+------------------------------------------------------------- */
+function productSvg(p, size='large') {
+  const w = size === 'large' ? 200 : 80;
+  // Pill / capsule / bottle based on tag
+  let shape = '';
+  if (p.cat === 'Devices') {
+    shape = `<rect x="50" y="50" width="100" height="100" rx="14" fill="${p.img}" opacity="0.15"/>
+             <rect x="65" y="65" width="70" height="70" rx="10" fill="${p.img}"/>
+             <circle cx="100" cy="100" r="12" fill="white"/>
+             <circle cx="100" cy="100" r="6" fill="${p.img}"/>`;
+  } else if (p.cat === 'Surgical') {
+    shape = `<rect x="40" y="60" width="120" height="80" rx="8" fill="${p.img}" opacity="0.15"/>
+             <rect x="50" y="70" width="100" height="60" rx="6" fill="${p.img}"/>
+             <text x="100" y="105" text-anchor="middle" font-family="JetBrains Mono" font-size="14" font-weight="700" fill="white">Rx</text>`;
+  } else if (p.tag.includes('Syrup') || p.tag.includes('Bottle') || p.tag.includes('Vial') || p.tag.includes('ml')) {
+    shape = `<path d="M85 50 L115 50 L115 70 L122 80 L122 150 Q122 162 110 162 L90 162 Q78 162 78 150 L78 80 L85 70 Z" fill="${p.img}" opacity="0.15"/>
+             <path d="M85 50 L115 50 L115 70 L122 80 L122 150 Q122 162 110 162 L90 162 Q78 162 78 150 L78 80 L85 70 Z" fill="none" stroke="${p.img}" stroke-width="3"/>
+             <rect x="83" y="100" width="34" height="50" fill="${p.img}" opacity="0.6"/>
+             <rect x="83" y="100" width="34" height="6" fill="white" opacity="0.5"/>`;
+  } else if (p.tag.includes('Capsule')) {
+    shape = `<g transform="rotate(-25 100 100)">
+              <rect x="50" y="85" width="50" height="30" rx="15" fill="${p.img}"/>
+              <rect x="100" y="85" width="50" height="30" rx="15" fill="${p.img}" opacity="0.4"/>
+              <line x1="100" y1="85" x2="100" y2="115" stroke="white" stroke-width="1"/>
+             </g>`;
+  } else if (p.tag.includes('Tube')) {
+    shape = `<path d="M60 80 L70 60 L130 60 L140 80 L140 145 Q140 155 130 155 L70 155 Q60 155 60 145 Z" fill="${p.img}" opacity="0.15"/>
+             <path d="M60 80 L70 60 L130 60 L140 80 L140 145 Q140 155 130 155 L70 155 Q60 155 60 145 Z" fill="none" stroke="${p.img}" stroke-width="3"/>
+             <rect x="60" y="100" width="80" height="20" fill="${p.img}"/>`;
+  } else if (p.tag.includes('Sachet')) {
+    shape = `<path d="M55 65 L145 65 L140 145 L60 145 Z" fill="${p.img}" opacity="0.15"/>
+             <path d="M55 65 L145 65 L140 145 L60 145 Z" fill="none" stroke="${p.img}" stroke-width="3"/>
+             <rect x="65" y="95" width="70" height="6" fill="${p.img}"/>
+             <rect x="65" y="105" width="50" height="4" fill="${p.img}" opacity="0.5"/>`;
+  } else if (p.tag.includes('Powder')) {
+    shape = `<rect x="65" y="55" width="70" height="105" rx="6" fill="${p.img}" opacity="0.15"/>
+             <rect x="65" y="55" width="70" height="105" rx="6" fill="none" stroke="${p.img}" stroke-width="3"/>
+             <rect x="80" y="48" width="40" height="14" rx="3" fill="${p.img}"/>
+             <text x="100" y="115" text-anchor="middle" font-family="Inter" font-size="11" font-weight="700" fill="${p.img}">${p.mfr.substring(0,4).toUpperCase()}</text>`;
+  } else {
+    // Default: tablet pill
+    shape = `<rect x="50" y="80" width="100" height="40" rx="20" fill="${p.img}" opacity="0.15"/>
+             <rect x="50" y="80" width="100" height="40" rx="20" fill="${p.img}"/>
+             <line x1="100" y1="80" x2="100" y2="120" stroke="white" stroke-width="2" opacity="0.4"/>
+             <circle cx="75" cy="100" r="3" fill="white" opacity="0.5"/>
+             <circle cx="125" cy="100" r="3" fill="white" opacity="0.5"/>`;
+  }
+  return `<svg viewBox="0 0 200 200" class="w-full h-full">${shape}</svg>`;
+}
+
+/* -------------------------------------------------------------
+   FILTERS
+------------------------------------------------------------- */
+function renderFilters() {
+  const cats = document.getElementById('filter-categories');
+  cats.innerHTML = CATEGORIES.map(c => `
+    <label class="flex items-center justify-between text-sm text-slate-700 cursor-pointer hover:text-navy-900">
+      <span class="flex items-center gap-2">
+        <input type="checkbox" class="chk filter-cat" value="${c.name}" ${filters.categories.has(c.name)?'checked':''}/>
+        ${c.name}
+      </span>
+    </label>
+  `).join('');
+
+  const mfrs = document.getElementById('filter-manufacturers');
+  if (MANUFACTURERS.length === 0) {
+    mfrs.innerHTML = '<p class="text-xs text-slate-400">Loading…</p>';
+  } else {
+    mfrs.innerHTML = MANUFACTURERS.map(m => `
+      <label class="flex items-center text-sm text-slate-700 cursor-pointer hover:text-navy-900">
+        <input type="checkbox" class="chk filter-mfr mr-2" value="${m}" ${filters.manufacturers.has(m)?'checked':''}/>
+        ${m}
+      </label>
+    `).join('');
+  }
+  // Note: change events are now delegated at document level
+}
+
+function clearFilters() {
+  filters.categories.clear();
+  filters.manufacturers.clear();
+  filters.maxPrice = 5000;
+  filters.inStockOnly = false;
+  filters.search = '';
+  sbActiveThClass = null;
+  document.getElementById('catalog-search').value = '';
+  document.getElementById('price-range').value = 5000;
+  document.getElementById('price-display').textContent = 'Up to ₹5000';
+  document.getElementById('in-stock-only').checked = false;
+  renderFilters();
+  fetchProducts(0);
+}
+
+/* -------------------------------------------------------------
+   PRODUCTS RENDERING
+------------------------------------------------------------- */
+function getFilteredProducts() {
+  // PRODUCTS is already server-filtered from Supabase; apply only local sort + stock filter
+  let list = PRODUCTS.slice();
+  if (filters.inStockOnly) list = list.filter(p => p.stock !== 'low');
+  if (filters.sort === 'price-asc')  list.sort((a,b)=>a.b2b-b.b2b);
+  if (filters.sort === 'price-desc') list.sort((a,b)=>b.b2b-a.b2b);
+  if (filters.sort === 'discount')   list.sort((a,b)=>b.deal-a.deal);
+  return list;
+}
+
+function stockBadge(stock) {
+  if (stock === 'high') return '<span class="text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">In stock</span>';
+  if (stock === 'medium') return '<span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Low stock</span>';
+  return '<span class="text-[10px] font-bold uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full">Limited</span>';
+}
+
+function productCardGrid(p) {
+  const cartItem = CART.find(c => c.id === p.id);
+  const qty = cartItem ? cartItem.qty : 0;
+  return `
+    <div class="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
+      <div class="relative bg-gradient-to-br from-slate-50 to-white p-4 aspect-square flex items-center justify-center">
+        ${p.deal >= 35 ? `<div class="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-teal-500 text-white text-[10px] font-bold uppercase tracking-wider">${p.deal}% off</div>` : ''}
+        <div class="absolute top-3 right-3">${stockBadge(p.stock)}</div>
+        <div class="w-32 h-32">${productSvg(p)}</div>
+      </div>
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">${p.mfr}</div>
+        <h3 class="font-display font-bold text-navy-900 leading-snug mb-1">${p.name}</h3>
+        <div class="text-xs text-slate-500 mb-3">${p.salt} · ${p.tag}</div>
+        <div class="mt-auto">
+          <div class="flex items-baseline gap-2 mb-1">
+            <span class="font-display font-extrabold text-navy-900 text-xl font-mono">₹${p.b2b}</span>
+            <span class="strike text-xs font-mono">₹${p.mrp}</span>
+            <span class="text-xs font-semibold text-teal-600 ml-auto">MOQ ${p.moq}</span>
+          </div>
+          ${qty === 0
+            ? `<button onclick="addToCart('${p.id}')" class="w-full mt-2 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white text-sm font-semibold flex items-center justify-center gap-1.5 transition">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                Add to cart
+              </button>`
+            : `<div class="w-full mt-2 flex items-center justify-between bg-teal-50 rounded-xl p-1 border border-teal-200">
+                <button onclick="updateQty('${p.id}', -1)" class="w-9 h-9 rounded-lg bg-white text-navy-900 font-bold text-lg shadow-sm">−</button>
+                <span class="font-mono font-bold text-navy-900">${qty}</span>
+                <button onclick="updateQty('${p.id}', 1)" class="w-9 h-9 rounded-lg bg-teal-500 text-white font-bold text-lg">+</button>
+              </div>`
+          }
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function productCardList(p) {
+  const cartItem = CART.find(c => c.id === p.id);
+  const qty = cartItem ? cartItem.qty : 0;
+  return `
+    <div class="product-card bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-4">
+      <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-50 to-white p-2 flex-shrink-0">${productSvg(p,'small')}</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1 flex-wrap">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${p.mfr}</span>
+          ${stockBadge(p.stock)}
+          ${p.deal >= 35 ? `<span class="text-[10px] font-bold text-teal-600">${p.deal}% off</span>` : ''}
+        </div>
+        <h3 class="font-display font-bold text-navy-900 truncate">${p.name}</h3>
+        <div class="text-xs text-slate-500">${p.salt} · ${p.tag} · MOQ ${p.moq}</div>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <div class="flex items-baseline gap-2 justify-end">
+          <span class="font-display font-extrabold text-navy-900 font-mono">₹${p.b2b}</span>
+          <span class="strike text-xs font-mono">₹${p.mrp}</span>
+        </div>
+        ${qty === 0
+          ? `<button onclick="addToCart('${p.id}')" class="mt-2 px-4 py-2 rounded-xl bg-navy-900 hover:bg-navy-800 text-white text-xs font-semibold">Add</button>`
+          : `<div class="mt-2 inline-flex items-center gap-2 bg-teal-50 rounded-lg p-0.5 border border-teal-200">
+              <button onclick="updateQty('${p.id}', -1)" class="w-7 h-7 rounded-md bg-white text-navy-900 font-bold">−</button>
+              <span class="font-mono font-bold text-navy-900 text-sm px-1">${qty}</span>
+              <button onclick="updateQty('${p.id}', 1)" class="w-7 h-7 rounded-md bg-teal-500 text-white font-bold">+</button>
+            </div>`
+        }
+      </div>
+    </div>
+  `;
+}
+
+function renderProducts() {
+  const list = getFilteredProducts();
+  document.getElementById('result-count').textContent = list.length;
+  const wrap = document.getElementById('products-grid');
+  if (viewMode === 'grid') {
+    wrap.className = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 stagger';
+    wrap.innerHTML = list.map(productCardGrid).join('');
+  } else {
+    wrap.className = 'space-y-3 stagger';
+    wrap.innerHTML = list.map(productCardList).join('');
+  }
+}
+
+function setView(mode) {
+  viewMode = mode;
+  document.getElementById('grid-view-btn').className = mode==='grid' ? 'px-3 py-1.5 rounded-md text-xs font-semibold bg-white text-navy-900 shadow-sm' : 'px-3 py-1.5 rounded-md text-xs font-semibold text-slate-500';
+  document.getElementById('list-view-btn').className = mode==='list' ? 'px-3 py-1.5 rounded-md text-xs font-semibold bg-white text-navy-900 shadow-sm' : 'px-3 py-1.5 rounded-md text-xs font-semibold text-slate-500';
+  document.getElementById('grid-view-btn').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 inline -mt-0.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>`;
+  document.getElementById('list-view-btn').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 inline -mt-0.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>`;
+  renderProducts();
+}
+
+/* -------------------------------------------------------------
+   CART
+------------------------------------------------------------- */
+function addToCart(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  const existing = CART.find(c => c.id === id);
+  if (existing) existing.qty += p.moq;
+  else CART.push({ id, qty: p.moq });
+  updateCartBadge();
+  toast(`Added ${p.moq} units of ${p.name}`);
+  if (currentView === 'catalog') renderProducts();
+  if (currentView === 'cart') renderCart();
+}
+
+function updateQty(id, delta) {
+  const p = PRODUCTS.find(x => x.id === id);
+  const item = CART.find(c => c.id === id);
+  if (!item) return;
+  const step = Math.max(1, Math.floor(p.moq / 5));
+  item.qty += delta * step;
+  if (item.qty < p.moq) CART = CART.filter(c => c.id !== id);
+  updateCartBadge();
+  if (currentView === 'catalog') renderProducts();
+  if (currentView === 'cart') renderCart();
+}
+
+function updateCartBadge() {
+  const total = CART.reduce((s,c) => s + c.qty, 0);
+  document.getElementById('cart-badge').textContent = total;
+}
+
+function renderCart() {
+  const empty = CART.length === 0;
+  document.getElementById('cart-empty').classList.toggle('hidden', !empty);
+  document.getElementById('cart-content').classList.toggle('hidden', empty);
+  if (empty) return;
+
+  const wrap = document.getElementById('cart-items');
+  wrap.innerHTML = CART.map(c => {
+    const p = PRODUCTS.find(x => x.id === c.id);
+    return `
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-4">
+        <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-50 to-white p-2 flex-shrink-0">${productSvg(p,'small')}</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">${p.mfr}</div>
+          <h3 class="font-display font-bold text-navy-900 truncate">${p.name}</h3>
+          <div class="text-xs text-slate-500 mt-0.5">${p.salt} · ${p.tag}</div>
+          <div class="mt-2 flex items-center gap-3">
+            <div class="inline-flex items-center gap-2 bg-slate-100 rounded-lg p-0.5">
+              <button onclick="updateQty('${p.id}', -1)" class="w-7 h-7 rounded-md bg-white text-navy-900 font-bold">−</button>
+              <input type="number" value="${c.qty}" onchange="setQty('${p.id}', this.value)" class="w-12 text-center bg-transparent font-mono font-bold text-navy-900 text-sm focus:outline-none"/>
+              <button onclick="updateQty('${p.id}', 1)" class="w-7 h-7 rounded-md bg-teal-500 text-white font-bold">+</button>
+            </div>
+            <span class="text-xs text-slate-500">@ ₹${p.b2b}/unit</span>
+            <button onclick="removeFromCart('${p.id}')" class="ml-auto text-xs text-rose-600 font-semibold hover:underline">Remove</button>
+          </div>
+        </div>
+        <div class="text-right flex-shrink-0">
+          <div class="font-display font-extrabold text-navy-900 font-mono">₹${(p.b2b*c.qty).toLocaleString()}</div>
+          <div class="text-xs strike font-mono">₹${(p.mrp*c.qty).toLocaleString()}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Totals
+  let mrpTotal = 0, b2bTotal = 0;
+  CART.forEach(c => {
+    const p = PRODUCTS.find(x => x.id === c.id);
+    mrpTotal += p.mrp * c.qty;
+    b2bTotal += p.b2b * c.qty;
+  });
+  const discount = mrpTotal - b2bTotal;
+  const gst = Math.round(b2bTotal * 0.12);
+  const total = b2bTotal + gst;
+
+  document.getElementById('sum-mrp').textContent = '₹ ' + mrpTotal.toLocaleString();
+  document.getElementById('sum-discount').textContent = '– ₹ ' + discount.toLocaleString();
+  document.getElementById('sum-gst').textContent = '₹ ' + gst.toLocaleString();
+  document.getElementById('sum-total').textContent = '₹ ' + total.toLocaleString();
+  document.getElementById('sum-savings').textContent = 'You save ₹ ' + discount.toLocaleString() + ' vs MRP';
+}
+
+function setQty(id, val) {
+  const p = PRODUCTS.find(x => x.id === id);
+  const item = CART.find(c => c.id === id);
+  const n = parseInt(val) || 0;
+  if (!item) return;
+  if (n < p.moq) { removeFromCart(id); return; }
+  item.qty = n;
+  updateCartBadge();
+  renderCart();
+}
+
+function removeFromCart(id) {
+  CART = CART.filter(c => c.id !== id);
+  updateCartBadge();
+  renderCart();
+  if (currentView === 'catalog') renderProducts();
+}
+
+function placeOrder() {
+  if (CART.length === 0) return;
+  toast('Order placed! Tracking ID: MB-' + Math.floor(90000 + Math.random()*9999));
+  CART = [];
+  updateCartBadge();
+  setTimeout(() => navigate('orders'), 800);
+}
+
+document.querySelectorAll('.slot-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.slot-btn').forEach(b => {
+      b.className = 'slot-btn px-3 py-2 rounded-xl border border-slate-200 hover:border-slate-300 text-navy-900 text-xs font-semibold flex flex-col items-start gap-0.5';
+    });
+    btn.className = 'slot-btn px-3 py-2 rounded-xl border border-teal-500 bg-teal-50 text-teal-700 text-xs font-semibold flex flex-col items-start gap-0.5';
+  });
+});
+
+/* -------------------------------------------------------------
+   ORDERS
+------------------------------------------------------------- */
+function renderOrders() {
+  const statusColor = {
+    'in-transit': { bg:'bg-amber-50', text:'text-amber-700', label:'In transit', dot:'bg-amber-500' },
+    'delivered': { bg:'bg-teal-50', text:'text-teal-700', label:'Delivered', dot:'bg-teal-500' },
+  };
+  document.getElementById('orders-list').innerHTML = ORDERS.map(o => {
+    const s = statusColor[o.status];
+    const progress = o.status === 'delivered' ? 100 : 65;
+    return `
+      <div class="bg-white rounded-2xl border border-slate-200 p-5">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-display font-extrabold text-navy-900 text-lg">#${o.id}</span>
+              <span class="px-2 py-0.5 rounded-full ${s.bg} ${s.text} text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full ${s.dot} ${o.status==='in-transit'?'pulse-dot':''}"></span>${s.label}
+              </span>
+            </div>
+            <div class="text-xs text-slate-500">${o.date} · ${o.items} items</div>
+          </div>
+          <div class="text-right">
+            <div class="font-display font-extrabold text-navy-900 font-mono">₹ ${o.value.toLocaleString()}</div>
+            <div class="text-xs text-teal-600 font-semibold">Saved ₹ ${o.savings.toLocaleString()}</div>
+          </div>
+        </div>
+
+        <div class="mt-5">
+          <div class="flex items-center">
+            <div class="track-step ${progress>=25?'done':''}"><div class="dot"></div></div>
+            <div class="flex-1 h-0.5 track-line ${progress>=50?'done':''}"></div>
+            <div class="track-step ${progress>=50?'done':''} ${progress===65?'current':''}"><div class="dot"></div></div>
+            <div class="flex-1 h-0.5 track-line ${progress>=75?'done':''}"></div>
+            <div class="track-step ${progress>=75?'done':''}"><div class="dot"></div></div>
+            <div class="flex-1 h-0.5 track-line ${progress===100?'done':''}"></div>
+            <div class="track-step ${progress===100?'done':''}"><div class="dot"></div></div>
+          </div>
+          <div class="flex justify-between mt-2 text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+            <span>Placed</span><span>Packed</span><span>${o.status==='in-transit'?'<span class="text-amber-600">In transit</span>':'Shipped'}</span><span>${o.status==='delivered'?'<span class="text-teal-600">Delivered</span>':'Delivered'}</span>
+          </div>
+        </div>
+
+        <div class="mt-5 pt-5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+          <div class="text-xs text-slate-600">
+            <span class="font-semibold text-navy-900">${o.status==='in-transit'?'ETA':'Delivered'}:</span> ${o.eta}
+          </div>
+          <div class="flex gap-2">
+            <button class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-navy-900">Invoice</button>
+            ${o.status==='in-transit'
+              ? `<button class="px-4 py-2 rounded-xl bg-navy-900 hover:bg-navy-800 text-xs font-semibold text-white">Track live</button>`
+              : `<button onclick="repeatOrder()" class="px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-600 text-xs font-semibold text-white">Repeat order</button>`
+            }
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Frequently ordered
+  const freq = PRODUCTS.slice(0,4);
+  document.getElementById('frequent-orders').innerHTML = freq.map(p => `
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col">
+      <div class="w-full aspect-square rounded-xl bg-gradient-to-br from-slate-50 to-white p-3 mb-3">${productSvg(p,'small')}</div>
+      <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${p.mfr}</div>
+      <div class="font-display font-bold text-navy-900 text-sm leading-snug mt-0.5">${p.name}</div>
+      <div class="text-xs text-slate-500 mt-0.5">${p.tag}</div>
+      <div class="mt-2 flex items-center justify-between">
+        <span class="font-display font-extrabold text-navy-900 font-mono text-sm">₹${p.b2b}</span>
+        <button onclick="addToCart('${p.id}')" class="w-7 h-7 rounded-lg bg-teal-500 text-white font-bold text-sm flex items-center justify-center">+</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function repeatOrder() {
+  PRODUCTS.slice(0,5).forEach(p => addToCart(p.id));
+  navigate('cart');
+}
+
+/* -------------------------------------------------------------
+   DEALS
+------------------------------------------------------------- */
+function renderDeals() {
+  if (PRODUCTS.length === 0) { fetchProducts(0).then(renderDeals); return; }
+  // Featured = 3 big cards
+  const featured = PRODUCTS.slice(0,3);
+  document.getElementById('featured-deals').innerHTML = featured.map((p, idx) => `
+    <div class="rounded-3xl bg-gradient-to-br ${idx===0?'from-navy-900 to-navy-800':idx===1?'from-teal-600 to-teal-700':'from-navy-700 to-teal-700'} text-white p-6 relative overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-3xl"></div>
+      <div class="relative">
+        <div class="inline-block px-2 py-0.5 rounded-full bg-white/15 backdrop-blur text-[10px] font-bold uppercase tracking-wider mb-4">${p.deal}% off · today only</div>
+        <div class="w-24 h-24 mb-4">${productSvg({...p, img:'#ffffff'})}</div>
+        <div class="text-[11px] opacity-80 font-semibold uppercase tracking-wider">${p.mfr}</div>
+        <h3 class="font-display font-bold text-xl leading-tight mt-1">${p.name}</h3>
+        <p class="text-sm opacity-80 mt-1">${p.salt} · ${p.tag}</p>
+        <div class="mt-4 flex items-baseline gap-2">
+          <span class="font-display font-extrabold text-2xl font-mono">₹${p.b2b}</span>
+          <span class="text-sm strike font-mono opacity-60">₹${p.mrp}</span>
+        </div>
+        <button onclick="addToCart('${p.id}')" class="mt-4 px-5 py-2.5 rounded-xl bg-white text-navy-900 text-sm font-bold">Add to cart</button>
+      </div>
+    </div>
+  `).join('');
+
+  // All
+  document.getElementById('all-deals').innerHTML = PRODUCTS.slice(0,24).map(productCardGrid).join('');
+}
+
+/* -------------------------------------------------------------
+   BULK UPLOAD
+------------------------------------------------------------- */
+function simulateUpload() {
+  const preview = document.getElementById('upload-preview');
+  preview.classList.remove('hidden');
+  const items = PRODUCTS.slice(0,9);
+  document.getElementById('preview-tbody').innerHTML = items.map((p, i) => {
+    const status = i === 3 ? 'partial' : 'matched';
+    return `
+      <tr class="border-t border-slate-100">
+        <td class="px-4 py-3">
+          <div class="font-medium text-navy-900">${p.name.toLowerCase()}</div>
+          <div class="text-xs text-slate-400">From file row ${i+2}</div>
+        </td>
+        <td class="px-4 py-3">
+          <div class="font-medium text-navy-900">${p.name}</div>
+          <div class="text-xs text-slate-500">${p.mfr} · ${p.tag}</div>
+        </td>
+        <td class="px-4 py-3 text-right font-mono font-semibold text-navy-900">${p.moq * 2}</td>
+        <td class="px-4 py-3 text-right">
+          <div class="font-mono font-semibold text-navy-900">₹${p.b2b}</div>
+          <div class="text-[10px] text-teal-600 font-bold">${p.deal}% off MRP</div>
+        </td>
+        <td class="px-4 py-3 text-center">
+          ${status === 'matched'
+            ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 text-[11px] font-bold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Matched</span>'
+            : '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[11px] font-bold">Partial</span>'
+          }
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function addBulkToCart() {
+  PRODUCTS.slice(0,9).forEach(p => addToCart(p.id));
+  setTimeout(() => navigate('cart'), 600);
+}
+
+const dropZone = document.getElementById('drop-zone');
+['dragenter','dragover'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.add('dragover'); }));
+['dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); dropZone.classList.remove('dragover'); }));
+dropZone.addEventListener('drop', simulateUpload);
+
+/* -------------------------------------------------------------
+   DASHBOARD ACTIVITY
+------------------------------------------------------------- */
+function renderActivity() {
+  const events = [
+    { type:'order', text:'Order #MB-90342 placed', sub:'42 items · ₹84,250', time:'2 hours ago', icon:'M9 12.75 11.25 15 15 9.75', color:'bg-teal-100 text-teal-700' },
+    { type:'invoice', text:'Invoice ready for #MB-90218', sub:'GST invoice generated', time:'Yesterday', icon:'M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25', color:'bg-slate-100 text-navy-700' },
+    { type:'delivery', text:'Order #MB-90087 delivered', sub:'Signed by Anand R.', time:'7 days ago', icon:'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75', color:'bg-teal-100 text-teal-700' },
+    { type:'savings', text:'You unlocked Gold tier rebate', sub:'+2% on all orders this month', time:'10 days ago', icon:'M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z', color:'bg-amber-100 text-amber-700' },
+  ];
+  document.getElementById('recent-activity').innerHTML = events.map(e => `
+    <div class="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
+      <div class="w-9 h-9 rounded-xl ${e.color} flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="${e.icon}"/></svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-semibold text-navy-900">${e.text}</div>
+        <div class="text-xs text-slate-500">${e.sub}</div>
+      </div>
+      <div class="text-xs text-slate-400 font-medium flex-shrink-0">${e.time}</div>
+    </div>
+  `).join('');
+}
+
+/* -------------------------------------------------------------
+   HOME DEALS PREVIEW
+------------------------------------------------------------- */
+function renderHomeDeals() {
+  // Now handled by fetchHomeDeals() which pulls from Supabase
+  fetchHomeDeals();
+}
+
+/* -------------------------------------------------------------
+   TOAST
+------------------------------------------------------------- */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* -------------------------------------------------------------
+   EVENT LISTENERS  (Supabase-aware)
+------------------------------------------------------------- */
+document.getElementById('catalog-search').addEventListener('input', e => {
+  filters.search = e.target.value;
+  debounce(() => fetchProducts(0), 400);
+});
+document.getElementById('hero-search').addEventListener('keypress', e => {
+  if (e.key === 'Enter') {
+    filters.search = e.target.value;
+    navigate('catalog');
+    setTimeout(() => {
+      document.getElementById('catalog-search').value = filters.search;
+      fetchProducts(0);
+    }, 50);
+  }
+});
+document.getElementById('sort-select').addEventListener('change', e => {
+  filters.sort = e.target.value;
+  renderProducts();  // sort is client-side
+});
+document.getElementById('price-range').addEventListener('input', e => {
+  filters.maxPrice = parseInt(e.target.value);
+  document.getElementById('price-display').textContent = 'Up to ₹' + filters.maxPrice;
+  debounce(() => fetchProducts(0), 500);
+});
+document.getElementById('in-stock-only').addEventListener('change', e => {
+  filters.inStockOnly = e.target.checked;
+  renderProducts();
+});
+
+/* Manufacturer filter – server-side re-fetch */
+document.addEventListener('change', e => {
+  if (e.target.classList.contains('filter-mfr')) {
+    if (e.target.checked) filters.manufacturers.add(e.target.value);
+    else filters.manufacturers.delete(e.target.value);
+    fetchProducts(0);
+  }
+  if (e.target.classList.contains('filter-cat')) {
+    if (e.target.checked) filters.categories.add(e.target.value);
+    else filters.categories.delete(e.target.value);
+    // map UI category name → DB therapeutic_class
+    if (filters.categories.size === 1) {
+      const catName = [...filters.categories][0];
+      const catMeta = CATEGORIES.find(c => c.name === catName);
+      sbActiveThClass = catMeta ? catMeta.dbClass : null;
+    } else {
+      sbActiveThClass = null;
+    }
+    fetchProducts(0);
+  }
+});
+
+/* -------------------------------------------------------------
+   INIT  (async bootstrap)
+------------------------------------------------------------- */
+(async function init() {
+  renderHomeCategories();
+  renderFilters();        // renders with empty MANUFACTURERS first
+  renderAllCategories();
+  renderActivity();
+  updateCartBadge();
+
+  // Fire both in parallel
+  await Promise.all([
+    fetchProducts(0),
+    fetchHomeDeals(),
+    fetchManufacturers(),
+  ]);
+})();
+</script>
+
+</body>
+</html>
