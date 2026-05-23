@@ -1324,6 +1324,9 @@ function rowToProduct(r, idx) {
   const cat = catMap[r.therapeutic_class] || r.therapeutic_class || 'Others';
   const imgColors = ['#10b981','#2a4d99','#0ea5e9','#f43f5e','#ec4899','#ef4444','#f59e0b','#06b6d4','#8b5cf6','#059669'];
   const img = imgColors[idx % imgColors.length];
+  // Collect real image URLs — skip Google Drive links (they are broken)
+  const images = [r.image_url_1, r.image_url_2, r.image_url_3, r.image_url_4, r.image_url_5]
+    .filter(u => u && u.trim() !== '' && !u.includes('drive.google.com'));
   const stockRand = Math.random();
   const stock = stockRand > 0.7 ? 'high' : stockRand > 0.25 ? 'medium' : 'low';
   const moqMap = { 'Strip':30,'Tablet':50,'Capsule':30,'Bottle':20,'Vial':10,'Sachet':100,'Tube':20,'Syrup':20,'Injection':15,'Powder':25 };
@@ -1333,7 +1336,7 @@ function rowToProduct(r, idx) {
     name: r.product_name || 'Unknown',
     salt: r.salt_composition || '',
     mfr: r.marketer || 'Unknown',
-    cat, mrp: rawMrp, b2b, moq, stock, img, tag, deal,
+    cat, mrp: rawMrp, b2b, moq, stock, img, images, tag, deal,
     rx: r.rx_required === 'Rx',
     therapeutic: r.therapeutic_class || '',
     packType,
@@ -1386,7 +1389,7 @@ async function fetchProducts(page, append) {
     const to   = from + PAGE_SIZE - 1;
 
     const params = {
-      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_type,therapeutic_class,rx_required,url',
+      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_type,therapeutic_class,rx_required,url,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
       order:  'product_name.asc'
     };
     if (sbActiveThClass) {
@@ -1469,7 +1472,7 @@ function renderLoadMore() {
 async function fetchHomeDeals() {
   try {
     const { data: rows } = await sbRest('MEDICINE', {
-      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_type,therapeutic_class,rx_required,url',
+      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_type,therapeutic_class,rx_required,url,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
       'mrp':  'not.is.null'
     }, { range: '500-507' });
     const mapped = (rows || []).map((r, i) => rowToProduct(r, i));
@@ -1693,15 +1696,44 @@ function stockBadge(stock) {
   return '<span class="text-[10px] font-bold uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full">Limited</span>';
 }
 
+function productImageArea(p, size) {
+  size = size || 'large';
+  const wh = size === 'large' ? 'w-32 h-32' : 'w-16 h-16';
+  const imgs = p.images || [];
+  if (imgs.length === 0) {
+    // Fallback: coloured pill SVG
+    return `<div class="${wh} flex items-center justify-center">${productSvg(p, size === 'large' ? '' : 'small')}</div>`;
+  }
+  const pid = p.id.replace(/[^a-zA-Z0-9]/g,'').slice(0,20);
+  if (imgs.length === 1) {
+    return `<img src="${imgs[0]}" alt="${p.name}" class="${wh} object-contain" onerror="this.style.display='none'">`;
+  }
+  // Multiple images: show thumbnails strip + main image
+  return `
+    <div class="flex flex-col items-center gap-1 w-full">
+      <img id="main-${pid}" src="${imgs[0]}" alt="${p.name}"
+           class="${wh} object-contain"
+           onerror="this.style.display='none'">
+      <div class="flex gap-1 flex-wrap justify-center">
+        ${imgs.map((u,i) => `
+          <img src="${u}" alt="img${i+1}"
+               class="w-8 h-8 object-contain rounded border ${i===0?'border-teal-400':'border-slate-200'} cursor-pointer"
+               onclick="document.getElementById('main-${pid}').src='${u}';this.parentNode.querySelectorAll('img').forEach(t=>t.classList.replace('border-teal-400','border-slate-200'));this.classList.replace('border-slate-200','border-teal-400')"
+               onerror="this.parentNode.removeChild(this)">
+        `).join('')}
+      </div>
+    </div>`;
+}
+
 function productCardGrid(p) {
   const cartItem = CART.find(c => c.id === p.id);
   const qty = cartItem ? cartItem.qty : 0;
   return `
     <div class="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
-      <div class="relative bg-gradient-to-br from-slate-50 to-white p-4 aspect-square flex items-center justify-center">
+      <div class="relative bg-gradient-to-br from-slate-50 to-white p-4 flex flex-col items-center justify-center min-h-[160px]">
         ${p.deal >= 35 ? `<div class="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-teal-500 text-white text-[10px] font-bold uppercase tracking-wider">${p.deal}% off</div>` : ''}
         <div class="absolute top-3 right-3">${stockBadge(p.stock)}</div>
-        <div class="w-32 h-32">${productSvg(p)}</div>
+        ${productImageArea(p, 'large')}
       </div>
       <div class="p-4 flex-1 flex flex-col">
         <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">${p.mfr}</div>
@@ -1735,7 +1767,7 @@ function productCardList(p) {
   const qty = cartItem ? cartItem.qty : 0;
   return `
     <div class="product-card bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-4">
-      <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-50 to-white p-2 flex-shrink-0">${productSvg(p,'small')}</div>
+      <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-50 to-white p-2 flex-shrink-0 flex items-center justify-center">${productImageArea(p,"small")}</div>
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 mb-1 flex-wrap">
           <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${p.mfr}</span>
@@ -1828,7 +1860,7 @@ function renderCart() {
     const p = PRODUCTS.find(x => x.id === c.id);
     return `
       <div class="bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-4">
-        <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-50 to-white p-2 flex-shrink-0">${productSvg(p,'small')}</div>
+        <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-slate-50 to-white p-2 flex-shrink-0 flex items-center justify-center">${productImageArea(p,"small")}</div>
         <div class="flex-1 min-w-0">
           <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">${p.mfr}</div>
           <h3 class="font-display font-bold text-navy-900 truncate">${p.name}</h3>
