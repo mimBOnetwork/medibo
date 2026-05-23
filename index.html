@@ -1464,6 +1464,7 @@ function rowToProduct(r, idx) {
     mfr: r.marketer || 'Unknown',
     cat, mrp: rawMrp, b2b, moq, stock, img, images, tag, deal,
     packQty: r.pack_qty || '',
+    packSize: r.pack_size || '',
     rx: r.rx_required === 'Rx',
     therapeutic: r.therapeutic_class || '',
     packType,
@@ -2022,16 +2023,19 @@ function cartBtnHTML(p) {
   const safeId = p.id.replace(/'/g,"\\'");
   const cartItem = CART.find(c => c.id === p.id);
   const qty = cartItem ? cartItem.qty : 0;
+  const unit = (p.packType || '').trim();  // e.g. "Strip", "Bottle", "Vial"
+
   if (qty === 0) {
     return `<button onclick="addToCart('${safeId}')" class="w-full mt-2 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white text-sm font-semibold flex items-center justify-center gap-1.5 transition">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
       Add to cart
     </button>`;
   }
+
   return `<div class="w-full mt-2 flex items-center justify-between bg-teal-50 rounded-xl p-1 border border-teal-200">
-    <button onclick="updateQty('${safeId}',-1)" class="w-9 h-9 rounded-lg bg-white text-navy-900 font-bold text-lg shadow-sm">−</button>
-    <span class="font-mono font-bold text-navy-900">${qty}</span>
-    <button onclick="updateQty('${safeId}',1)" class="w-9 h-9 rounded-lg bg-teal-500 text-white font-bold text-lg">+</button>
+    <button onclick="updateQtyOnly('${safeId}',-1)" class="w-9 h-9 rounded-lg bg-white text-navy-900 font-bold text-lg shadow-sm flex items-center justify-center">−</button>
+    <span class="font-mono font-bold text-navy-900 text-sm"><span id="qty-num-${safeId}">${qty}</span>${unit ? `<span class="font-normal text-slate-500 text-xs ml-1">${unit}</span>` : ''}</span>
+    <button onclick="updateQtyOnly('${safeId}',1)" class="w-9 h-9 rounded-lg bg-teal-500 text-white font-bold text-lg flex items-center justify-center">+</button>
   </div>`;
 }
 
@@ -2132,11 +2136,32 @@ function addToCart(id) {
   const p = PRODUCTS.find(x => x.id === id);
   if (!p) return;
   const existing = CART.find(c => c.id === id);
-  if (existing) existing.qty += p.moq;
-  else CART.push({ id, qty: p.moq });
+  if (existing) existing.qty += 1;
+  else CART.push({ id, qty: 1 });
   updateCartBadge();
-  toast(`Added ${p.moq} units of ${p.name}`);
-  refreshCartBtn(id);          // only update this card's button — no blink
+  const unit = p.packType || 'unit';
+  toast(`Added 1 ${unit} of ${p.name}`);
+  refreshCartBtn(id);
+  if (currentView === 'cart') renderCart();
+}
+
+function updateQtyOnly(id, delta) {
+  const p = PRODUCTS.find(x => x.id === id);
+  const item = CART.find(c => c.id === id);
+  if (!item || !p) return;
+  item.qty += delta;
+  if (item.qty < 1) {
+    // Remove from cart — need full button refresh
+    CART = CART.filter(c => c.id !== id);
+    updateCartBadge();
+    refreshCartBtn(id);
+    if (currentView === 'cart') renderCart();
+    return;
+  }
+  // Just update the number span — no blink, no re-render
+  const numEl = document.getElementById('qty-num-' + id.replace(/'/g,"\\'"));
+  if (numEl) numEl.textContent = item.qty;
+  updateCartBadge();
   if (currentView === 'cart') renderCart();
 }
 
