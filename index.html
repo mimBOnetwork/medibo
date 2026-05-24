@@ -2307,15 +2307,17 @@ let CURRENT_USER = null;
 let CURRENT_PROFILE = null;
 
 async function initAuth() {
-  // Check for fresh Google OAuth callback
+  // Check for fresh Google OAuth callback FIRST before hash disappears
   const hash = window.location.hash;
   if (hash && hash.includes('access_token')) {
-    const params = new URLSearchParams(hash.replace('#', ''));
+    const params = new URLSearchParams(hash.replace(/^#/, ''));
     const token = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
     if (token) {
-      localStorage.setItem('medibo_session', JSON.stringify({ access_token: token }));
+      localStorage.setItem('medibo_session', JSON.stringify({ access_token: token, refresh_token: refreshToken }));
       localStorage.setItem('medibo_fresh_login', '1');
-      window.location.hash = '';
+      // Clear hash without page reload
+      history.replaceState(null, '', window.location.pathname);
     }
   }
 
@@ -2328,13 +2330,21 @@ async function initAuth() {
       const res = await fetch(SUPABASE_URL + '/auth/v1/user', {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + session.access_token }
       });
+
+      if (res.status === 403 || res.status === 401) {
+        // Token expired — clear session so user sees Login button
+        localStorage.removeItem('medibo_session');
+        localStorage.removeItem('medibo_fresh_login');
+        updateAuthUI();
+        return;
+      }
+
       if (res.ok) {
         const user = await res.json();
         CURRENT_USER = { ...user, access_token: session.access_token };
         await loadProfile();
 
         if (!CURRENT_PROFILE) {
-          // Only show registration form if this is a fresh Google login
           if (freshLogin) {
             localStorage.removeItem('medibo_fresh_login');
             setTimeout(() => {
@@ -2345,7 +2355,6 @@ async function initAuth() {
               if (user.email) document.getElementById('prof-email').value = user.email;
             }, 300);
           }
-          // No profile but not fresh login — just show Login button, do nothing
           updateAuthUI();
           return;
         }
@@ -2355,7 +2364,7 @@ async function initAuth() {
         return;
       }
     }
-  } catch(e) {}
+  } catch(e) { console.error('initAuth error:', e); }
   updateAuthUI();
 }
 
