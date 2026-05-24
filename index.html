@@ -2073,6 +2073,14 @@ function debounce(fn, ms) {
 }
 
 let CART = [];
+try {
+  const savedCart = localStorage.getItem('medibo_cart');
+  if (savedCart) CART = JSON.parse(savedCart);
+} catch(e) {}
+
+function saveCart() {
+  try { localStorage.setItem('medibo_cart', JSON.stringify(CART)); } catch(e) {}
+}
 let currentView = 'home';
 let viewMode = 'grid';
 let filters = { categories: new Set(), manufacturers: new Set(), maxPrice: 5000, inStockOnly: false, search: '', sort: 'relevance' };
@@ -2824,7 +2832,7 @@ function addToCart(id) {
   const existing = CART.find(c => c.id === id);
   if (existing) existing.qty += 1;
   else CART.push({ id, qty: 1 });
-  updateCartBadge();
+  updateCartBadge(); saveCart();
   refreshCartBtn(id);
   if (currentView === 'cart') renderCart();
 }
@@ -2836,12 +2844,12 @@ function updateQtyOnly(id, delta) {
   item.qty += delta;
   if (item.qty < 1) {
     CART = CART.filter(c => c.id !== id);
-    updateCartBadge();
+    updateCartBadge(); saveCart();
     refreshCartBtn(id);
     if (currentView === 'cart') renderCart();
     return;
   }
-  updateCartBadge();
+  updateCartBadge(); saveCart();
   // Find the qty span by data-cart-id container, then the span inside it
   document.querySelectorAll('[data-cart-id="' + id + '"]').forEach(el => {
     const span = el.querySelector('[data-qty-display]');
@@ -2862,7 +2870,7 @@ function updateQty(id, delta) {
   const step = Math.max(1, Math.floor(p.moq / 5));
   item.qty += delta * step;
   if (item.qty < p.moq) CART = CART.filter(c => c.id !== id);
-  updateCartBadge();
+  updateCartBadge(); saveCart();
   refreshCartBtn(id);          // only update this card's button — no blink
   if (currentView === 'cart') renderCart();
 }
@@ -2939,13 +2947,13 @@ function setQty(id, val) {
   if (!item) return;
   if (n < p.moq) { removeFromCart(id); return; }
   item.qty = n;
-  updateCartBadge();
+  updateCartBadge(); saveCart();
   renderCart();
 }
 
 function removeFromCart(id) {
   CART = CART.filter(c => c.id !== id);
-  updateCartBadge();
+  updateCartBadge(); saveCart();
   renderCart();
   if (currentView === 'catalog') renderProducts();
 }
@@ -2959,7 +2967,7 @@ function placeOrder() {
   }
   toast('Order placed! Tracking ID: MB-' + Math.floor(90000 + Math.random()*9999));
   CART = [];
-  updateCartBadge();
+  updateCartBadge(); saveCart();
   setTimeout(() => navigate('orders'), 800);
 }
 
@@ -3251,7 +3259,7 @@ document.addEventListener('change', e => {
   renderFilters();
   renderAllCategories();
   renderActivity();
-  updateCartBadge();
+  updateCartBadge(); saveCart();
   initAuth();
 
   // Fire both in parallel
