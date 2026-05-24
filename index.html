@@ -1745,7 +1745,7 @@ function navigate(route) {
   const gsb = document.getElementById('global-search-bar');
   if (gsb) gsb.style.display = (route === 'cart') ? 'none' : '';
   // Refresh dynamic views on entry
-  if (route === 'catalog') renderProducts();
+  if (route === 'catalog') { _fetchRetries = 0; renderProducts(); }
   if (route === 'cart') renderCart();
   if (route === 'orders') renderOrders();
   if (route === 'deals') renderDeals();
@@ -2379,7 +2379,7 @@ function renderDeals() {
       select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,url,status,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
       order: 'product_name.asc',
       'mrp': 'not.is.null',
-      'mrp_filter': 'neq.0'
+      
     }, { range: '0-23' }).then(({ data: rows }) => {
       if (rows && rows.length > 0) {
         const mapped = rows.map((r, i) => rowToProduct(r, i)).filter(p => p.mrp > 0);
