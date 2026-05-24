@@ -820,7 +820,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
     <div class="flex items-center justify-between mb-3">
       <div class="text-sm text-slate-600">
-        <span id="result-count" class="font-bold text-navy-900">0</span> products
+        Showing <span id="result-count" class="font-bold text-navy-900">0</span> products
       </div>
       <div class="flex items-center gap-2">
         <select id="sort-select" class="px-3 py-1.5 bg-white rounded-lg text-xs font-medium text-navy-900 focus:outline-none ring-1 ring-slate-200">
@@ -2147,7 +2147,6 @@ function renderLoadMore() {
         <div class="w-48 h-1 bg-slate-100 rounded-full overflow-hidden">
           <div id="autoload-bar" class="h-full bg-teal-400 rounded-full" style="width:0%;transition:width 5s linear;"></div>
         </div>
-        <p class="text-xs text-slate-400 font-medium">Loading more in <span id="autoload-count">5</span>s · ${remaining.toLocaleString()} remaining</p>
       </div>`;
 
     // Start progress bar
@@ -2156,18 +2155,8 @@ function renderLoadMore() {
       if (bar) bar.style.width = '100%';
     });
 
-    // Countdown
-    let sec = 5;
-    const countdown = setInterval(() => {
-      sec--;
-      const countEl = document.getElementById('autoload-count');
-      if (countEl) countEl.textContent = sec;
-      if (sec <= 0) clearInterval(countdown);
-    }, 1000);
-
     // Auto-load after 5s
     el._autoLoad = setTimeout(() => {
-      clearInterval(countdown);
       fetchProducts(sbCurrentPage + 1, true);
     }, 5000);
 
