@@ -44,16 +44,15 @@
   });
 </script>
 <script>
-  // Run BEFORE paint — hide home view if another route is saved
+  // Run BEFORE paint — show only the saved route, hide everything else
   (function() {
     try {
-      var route = localStorage.getItem('medibo_route');
-      if (route && route !== 'home') {
-        var style = document.createElement('style');
-        style.id = 'route-override';
-        style.textContent = '#view-home { display: none !important; } #view-' + route + ' { display: block !important; animation: none !important; }';
-        document.head.appendChild(style);
-      }
+      var route = localStorage.getItem('medibo_route') || 'home';
+      var style = document.createElement('style');
+      style.id = 'route-override';
+      // Hide ALL views, then show only the target one
+      style.textContent = '.view { display: none !important; } #view-' + route + ' { display: block !important; animation: none !important; }';
+      document.head.appendChild(style);
     } catch(e) {}
   })();
 </script>
@@ -2062,25 +2061,31 @@ let filters = { categories: new Set(), manufacturers: new Set(), maxPrice: 5000,
    ROUTING
 ------------------------------------------------------------- */
 function navigate(route) {
+  // Remove pre-paint override immediately
+  const override = document.getElementById('route-override');
+  if (override) override.remove();
+
   currentView = route;
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  // Hide ALL views first, then show only target
+  document.querySelectorAll('.view').forEach(v => {
+    v.classList.remove('active');
+    v.style.display = '';
+  });
   const el = document.getElementById('view-' + route);
   if (el) el.classList.add('active');
+
   document.querySelectorAll('[data-route]').forEach(a => {
     a.classList.toggle('active', a.dataset.route === route);
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  // Save current route for refresh restore
   try { localStorage.setItem('medibo_route', route); } catch(e) {}
-  // Hide search bar on cart page only
   const gsb = document.getElementById('global-search-bar');
   if (gsb) gsb.style.display = (route === 'cart') ? 'none' : '';
-  // Refresh dynamic views on entry
   if (route === 'catalog') { _fetchRetries = 0; renderProducts(); renderCategoryScrollBar(); }
   if (route === 'cart') renderCart();
   if (route === 'orders') renderOrders();
   if (route === 'deals') renderDeals();
-  if (route === 'categories') renderAllCategories();
+  if (route === 'categories') { navigate('catalog'); return; }
   if (route === 'profile') renderProfile();
 }
 
@@ -3282,24 +3287,22 @@ document.addEventListener('change', e => {
    INIT  (async bootstrap)
 ------------------------------------------------------------- */
 (async function init() {
-  // Restore route FIRST before anything renders — prevents homepage flash
+  // Restore route FIRST before anything renders
   try {
-    const savedRoute = localStorage.getItem('medibo_route');
-    if (savedRoute && savedRoute !== 'home') {
-      currentView = savedRoute;
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      const el = document.getElementById('view-' + savedRoute);
-      if (el) el.classList.add('active');
-      document.querySelectorAll('[data-route]').forEach(a => {
-        a.classList.toggle('active', a.dataset.route === savedRoute);
-      });
-      const gsb = document.getElementById('global-search-bar');
-      if (gsb) gsb.style.display = (savedRoute === 'cart') ? 'none' : '';
-    }
+    const savedRoute = localStorage.getItem('medibo_route') || 'home';
+    currentView = savedRoute;
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const el = document.getElementById('view-' + savedRoute);
+    if (el) el.classList.add('active');
+    document.querySelectorAll('[data-route]').forEach(a => {
+      a.classList.toggle('active', a.dataset.route === savedRoute);
+    });
+    const gsb = document.getElementById('global-search-bar');
+    if (gsb) gsb.style.display = (savedRoute === 'cart') ? 'none' : '';
+    // Remove the pre-paint override now that JS classes are set
+    const overrideStyle = document.getElementById('route-override');
+    if (overrideStyle) overrideStyle.remove();
   } catch(e) {}
-  // Remove the pre-paint style override now that JS has taken over
-  const overrideStyle = document.getElementById('route-override');
-  if (overrideStyle) overrideStyle.remove();
 
   renderHomeCategories();
   renderFilters();
