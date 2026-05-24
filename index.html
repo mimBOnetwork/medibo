@@ -17,6 +17,18 @@
   document.addEventListener('gesturechange', function(e) {
     e.preventDefault();
   }, { passive: false });
+
+  // Block Ctrl+scroll zoom on desktop
+  document.addEventListener('wheel', function(e) {
+    if (e.ctrlKey) e.preventDefault();
+  }, { passive: false });
+
+  // Block Ctrl+/- and Ctrl+0 keyboard zoom
+  document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0')) {
+      e.preventDefault();
+    }
+  });
 </script>
 <title>Medibo — Bulk Medicine Ordering for Pharmacies & Hospitals</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
