@@ -111,16 +111,27 @@
   }
   html {
     overscroll-behavior: none;
+    box-sizing: border-box;
   }
+  *, *::before, *::after { box-sizing: inherit; }
   body {
     font-family: 'Inter', sans-serif;
     background: #f7f9fc;
     color: #0f1f44;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    width: 100%;
     max-width: 100vw;
     overscroll-behavior: none;
   }
+  /* Prevent ANY element from breaking layout */
+  img, svg, video, canvas, audio, iframe, embed, object { max-width: 100%; display: block; }
+  /* Fix tables on mobile */
+  table { table-layout: fixed; }
+  /* Cards never overflow */
+  .rounded-2xl, .rounded-3xl, .rounded-xl { overflow: hidden; }
+  /* All sections constrained */
+  section { width: 100%; overflow: hidden; }
   .font-display { font-family: 'Manrope', sans-serif; letter-spacing: -0.02em; }
   .hero-bg { background: var(--grad-hero); }
   .grain::before {
@@ -222,6 +233,47 @@
   .track-step.current .dot { background: white; border-color: #10b981; box-shadow: 0 0 0 4px rgba(16,185,129,0.2); }
   .track-line { background: #e2e8f0; }
   .track-line.done { background: #10b981; }
+  /* ── MOBILE RESPONSIVE FIXES ─────────────────────────── */
+  * { min-width: 0; } /* prevent grid blowout */
+  @media (max-width: 639px) {
+    .py-16 { padding-top: 2.5rem !important; padding-bottom: 2.5rem !important; }
+    .py-20, .py-24 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+    .lg\:py-24, .lg\:py-20, .lg\:py-16 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+    .lg\:pt-24 { padding-top: 3rem !important; }
+    .lg\:pb-32 { padding-bottom: 3rem !important; }
+    .text-3xl { font-size: 1.75rem !important; }
+    .text-4xl { font-size: 2rem !important; }
+    .text-5xl { font-size: 2.25rem !important; }
+    .lg\:text-5xl { font-size: 2rem !important; }
+    .lg\:text-4xl { font-size: 1.75rem !important; }
+    /* Grids: any grid that forgot sm: breakpoint → single col */
+    .grid.lg\:grid-cols-3 { grid-template-columns: 1fr !important; }
+    .grid.lg\:grid-cols-4 { grid-template-columns: 1fr 1fr !important; }
+    .grid.lg\:grid-cols-2 { grid-template-columns: 1fr !important; }
+    .grid.lg\:grid-cols-5 { grid-template-columns: 1fr !important; }
+    .grid.lg\:grid-cols-12 { grid-template-columns: 1fr !important; }
+    /* Bulk upload options - stack */
+    #view-bulk .grid.sm\:grid-cols-2 { grid-template-columns: 1fr !important; }
+    /* Profile view */
+    #view-profile .max-w-2xl { padding-left: 1rem; padding-right: 1rem; }
+    /* Deals stats */
+    .grid.grid-cols-3 { gap: 0.5rem !important; }
+    /* Auth modal sheet style on mobile */
+    #auth-modal > div { border-radius: 1.5rem 1.5rem 0 0 !important; max-width: 100% !important; width: 100% !important; position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; margin: 0 !important; top: auto !important; }
+    /* p-8 too much on mobile */
+    .p-8 { padding: 1.25rem !important; }
+    .p-6 { padding: 1rem !important; }
+    /* Gap tweaks */
+    .gap-12 { gap: 1.5rem !important; }
+    .gap-10 { gap: 1.25rem !important; }
+    .gap-8 { gap: 1rem !important; }
+  }
+  @media (max-width: 380px) {
+    .gap-4 { gap: 0.5rem !important; }
+    .gap-3 { gap: 0.5rem !important; }
+    .px-4 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    .text-2xl { font-size: 1.25rem !important; }
+  }
 </style>
 </head>
 <body class="min-h-screen">
@@ -417,7 +469,7 @@
     </div>
 
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 lg:pt-24 lg:pb-32">
-      <div class="grid lg:grid-cols-12 gap-12 items-center">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         <div class="lg:col-span-7 stagger">
           <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-white text-xs font-medium mb-6">
             <span class="w-1.5 h-1.5 rounded-full bg-teal-400 pulse-dot"></span>
@@ -592,7 +644,7 @@
   <!-- VALUE PROPS -->
   <div class="bg-white border-y border-slate-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-      <div class="grid lg:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="rounded-3xl bg-gradient-to-br from-navy-900 to-navy-800 p-8 text-white relative overflow-hidden">
           <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-teal-500/20 blur-3xl"></div>
           <div class="relative">
@@ -683,7 +735,7 @@
         <div class="text-xs font-bold uppercase tracking-[0.18em] text-teal-400 mb-3">How Medibo works</div>
         <h2 class="font-display font-extrabold text-3xl lg:text-5xl tracking-tight leading-tight">Four steps from order to counter.</h2>
       </div>
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <!-- step -->
         <div class="relative">
           <div class="font-mono text-teal-400 text-sm mb-3">01</div>
@@ -719,7 +771,7 @@
         <div class="text-xs font-bold uppercase tracking-[0.18em] text-teal-600 mb-3">From our partners</div>
         <h2 class="font-display font-extrabold text-3xl lg:text-4xl text-navy-900">Trusted by pharmacies that don't have time to wait.</h2>
       </div>
-      <div class="grid md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         <div class="rounded-2xl bg-white p-6 border border-slate-200 shadow-card">
           <div class="flex gap-1 mb-4">
             <svg viewBox="0 0 24 24" fill="#fbbf24" class="w-4 h-4"><path d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/></svg>
@@ -838,7 +890,7 @@
     <p class="text-slate-600 mt-3 max-w-2xl">Choose how you'd like to send your order — WhatsApp for quick photo orders, or upload a file for smart SKU matching.</p>
 
     <!-- ORIGINAL BULK UPLOAD CONTENT -->
-    <div class="grid lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
 
         <!-- TWO OPTIONS replacing the big drop zone -->
@@ -1023,7 +1075,7 @@
       </div>
     </div>
 
-    <div id="cart-content" class="mt-8 grid lg:grid-cols-3 gap-6 lg:gap-8">
+    <div id="cart-content" class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
       <div class="lg:col-span-2 space-y-3" id="cart-items"></div>
 
       <!-- Summary — full width on mobile, sidebar on desktop -->
@@ -1142,7 +1194,7 @@
         <span>›</span>
         <span class="text-white font-semibold">Deals & Offers</span>
       </div>
-      <div class="grid lg:grid-cols-2 gap-8 items-end">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-end">
         <div>
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur text-white text-xs font-semibold mb-4">
             <span>🔥</span> Limited-time wholesale offers
@@ -1171,7 +1223,7 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
     <!-- Featured deals -->
     <h2 class="font-display font-bold text-2xl text-navy-900 mb-5">Featured wholesale offers</h2>
-    <div class="grid lg:grid-cols-3 gap-5" id="featured-deals"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5" id="featured-deals"></div>
 
     <h2 class="font-display font-bold text-2xl text-navy-900 mt-12 mb-5">All deals</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 stagger" id="all-deals"></div>
@@ -1323,7 +1375,7 @@
       </div>
     </div>
 
-    <div class="mt-8 grid lg:grid-cols-3 gap-6">
+    <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Chart -->
       <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200 p-6">
         <div class="flex items-center justify-between mb-5">
@@ -1419,7 +1471,7 @@
     </div>
 
     <!-- Recent activity + account -->
-    <div class="mt-6 grid lg:grid-cols-3 gap-6">
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2 rounded-2xl bg-white border border-slate-200 p-6">
         <div class="flex items-center justify-between mb-5">
           <h3 class="font-display font-bold text-lg text-navy-900">Recent activity</h3>
@@ -2054,7 +2106,7 @@ function showCatalogLoading(show) {
           </div>
         </div>
         <!-- Skeleton cards -->
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 w-full mt-2">
+        <div class="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 w-full mt-2">
           ${Array(6).fill(0).map(() => `
             <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden animate-pulse">
               <div class="bg-slate-100 h-40"></div>
@@ -3040,7 +3092,7 @@ function renderProducts() {
   document.getElementById('result-count').textContent = list.length;
   const wrap = document.getElementById('products-grid');
   if (viewMode === 'grid') {
-    wrap.className = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 stagger';
+    wrap.className = 'grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 stagger';
     wrap.innerHTML = list.map(productCardGrid).join('');
   } else {
     wrap.className = 'space-y-3 stagger';
