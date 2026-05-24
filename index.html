@@ -1645,6 +1645,13 @@
 
         <p id="prof-error" class="text-xs text-rose-500 font-semibold hidden bg-rose-50 px-4 py-2.5 rounded-xl"></p>
 
+        <!-- Toast — shows above submit button after validation -->
+        <div id="submit-confirm-modal" class="hidden">
+          <div class="bg-navy-900 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl text-center shadow-lg">
+            ⚠️ Once submitted, you cannot edit these details.
+          </div>
+        </div>
+
         <button onclick="confirmAndSubmit()" id="submit-btn" class="w-full py-4 rounded-2xl bg-navy-900 text-white font-bold text-base hover:bg-navy-800 active:scale-95 transition">
           Submit →
         </button>
@@ -1661,13 +1668,6 @@
       <p id="auth-success-msg" class="text-sm text-slate-500 mb-5"></p>
       <button onclick="closeAuthModal()" class="px-6 py-2.5 rounded-xl bg-navy-900 text-white font-bold text-sm">Start Ordering</button>
     </div>
-  </div>
-</div>
-
-<!-- SUBMIT CONFIRMATION TOAST -->
-<div id="submit-confirm-modal" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[95] hidden">
-  <div class="bg-navy-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl whitespace-nowrap">
-    ⚠️ Once submitted, you cannot edit these details.
   </div>
 </div>
 
@@ -2322,17 +2322,48 @@ function selectOption(btn, group, value) {
 }
 
 function confirmAndSubmit() {
+  // Validate first — only show toast if all fields filled
+  const name         = document.getElementById('prof-name').value.trim();
+  const customerId   = document.getElementById('prof-customer-id').value.trim();
+  const businessName = document.getElementById('prof-business-name').value.trim();
+  const range        = document.getElementById('prof-range').value;
+  const storeType    = document.getElementById('prof-store-type').value;
+  const paymentTerm  = document.getElementById('prof-payment-term').value;
+  const address      = document.getElementById('prof-address').value.trim();
+  const city         = document.getElementById('prof-city').value.trim();
+  const state        = document.getElementById('prof-state').value.trim();
+  const pincode      = document.getElementById('prof-pincode').value.trim();
+  const whatsapp     = document.getElementById('prof-whatsapp').value.trim();
+  const otherContact = document.getElementById('prof-other-contact').value.trim();
+  const dl1          = document.getElementById('prof-dl1').value.trim();
+  const dl2          = document.getElementById('prof-dl2').value.trim();
+  const errEl        = document.getElementById('prof-error');
+
+  if (!name || !customerId || !businessName || !range || !storeType || !paymentTerm || !address || !city || !state || !pincode || !whatsapp || !otherContact || !dl1 || !dl2) {
+    errEl.textContent = '⚠️ Please fill all required fields and make all selections';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  errEl.classList.add('hidden');
+
+  // All good — show toast above button
   const toast = document.getElementById('submit-confirm-modal');
   toast.classList.remove('hidden');
-  // Auto-dismiss after 4s and submit
-  setTimeout(() => {
+
+  // After 4s auto-submit
+  const timer = setTimeout(() => {
     toast.classList.add('hidden');
     saveProfile();
   }, 4000);
+
+  // If user clicks anywhere else, cancel
+  toast._timer = timer;
 }
 
 function cancelSubmit() {
-  document.getElementById('submit-confirm-modal').classList.add('hidden');
+  const toast = document.getElementById('submit-confirm-modal');
+  clearTimeout(toast._timer);
+  toast.classList.add('hidden');
 }
 
 async function checkCustomerId(val) {
