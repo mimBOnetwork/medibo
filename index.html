@@ -274,7 +274,7 @@
 <aside id="mobile-sidebar" class="lg:hidden fixed top-0 left-0 h-full w-72 bg-white z-[70] shadow-2xl transform -translate-x-full transition-transform duration-300 flex flex-col">
   <!-- Sidebar header -->
   <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-    <a href="#" data-route="home" onclick="closeSidebar()" class="route-link flex items-center">
+    <a href="javascript:void(0)" data-route="home" onclick="closeSidebar()" class="route-link flex items-center">
       <svg viewBox="0 0 520 100" width="150" height="45" role="img" aria-label="mediBO">
         <defs>
           <linearGradient id="sIconG" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -310,31 +310,31 @@
 
   <!-- Nav links -->
   <nav class="flex-1 overflow-y-auto py-3">
-    <a href="#" data-route="catalog" onclick="navigate('catalog');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+    <a href="javascript:void(0)" data-route="catalog" onclick="navigate('catalog');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"/></svg>
       Catalog (Products)
     </a>
-    <a href="#" data-route="categories" onclick="navigate('categories');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+    <a href="javascript:void(0)" data-route="categories" onclick="navigate('categories');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
       Categories
     </a>
-    <a href="#" data-route="bulk" onclick="navigate('bulk');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+    <a href="javascript:void(0)" data-route="bulk" onclick="navigate('bulk');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"/></svg>
       Bulk Upload
     </a>
-    <a href="#" data-route="deals" onclick="navigate('deals');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+    <a href="javascript:void(0)" data-route="deals" onclick="navigate('deals');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"/></svg>
       Deals
     </a>
-    <a href="#" data-route="orders" onclick="navigate('orders');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+    <a href="javascript:void(0)" data-route="orders" onclick="navigate('orders');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25"/></svg>
       My Orders
     </a>
-    <a href="#" data-route="dashboard" onclick="navigate('dashboard');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+    <a href="javascript:void(0)" data-route="dashboard" onclick="navigate('dashboard');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25"/></svg>
       Dashboard
     </a>
-    <a href="#" data-route="cart" onclick="navigate('cart');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
+    <a href="javascript:void(0)" data-route="cart" onclick="navigate('cart');closeSidebar()" class="sidebar-nav-link flex items-center gap-3 px-5 py-3.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218a.75.75 0 0 0 .72-.54l1.892-6.18a.75.75 0 0 0-.72-.96H5.106M7.5 14.25l-1.135-4.255"/></svg>
       Cart
     </a>
@@ -364,7 +364,7 @@
       </button>
 
       <!-- Logo -->
-      <a href="#" data-route="home" class="route-link flex items-center lg:mr-auto">
+      <a href="javascript:void(0)" data-route="home" class="route-link flex items-center lg:mr-auto">
         <svg viewBox="0 0 520 100" width="156" height="48" role="img" aria-label="mediBO">
           <defs>
             <linearGradient id="hIconG" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -392,12 +392,12 @@
 
       <!-- Desktop nav -->
       <nav class="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-700">
-        <a href="#" data-route="catalog" class="route-link nav-link">Products</a>
-        <a href="#" data-route="categories" class="route-link nav-link" style="display:none">Categories</a>
-        <a href="#" data-route="bulk" class="route-link nav-link">Bulk Upload</a>
-        <a href="#" data-route="deals" class="route-link nav-link">Deals</a>
-        <a href="#" data-route="orders" class="route-link nav-link">My Orders</a>
-        <a href="#" data-route="dashboard" class="route-link nav-link">Dashboard</a>
+        <a href="javascript:void(0)" data-route="catalog" class="route-link nav-link">Products</a>
+        <a href="javascript:void(0)" data-route="categories" class="route-link nav-link" style="display:none">Categories</a>
+        <a href="javascript:void(0)" data-route="bulk" class="route-link nav-link">Bulk Upload</a>
+        <a href="javascript:void(0)" data-route="deals" class="route-link nav-link">Deals</a>
+        <a href="javascript:void(0)" data-route="orders" class="route-link nav-link">My Orders</a>
+        <a href="javascript:void(0)" data-route="dashboard" class="route-link nav-link">Dashboard</a>
       </nav>
 
       <!-- Actions -->
@@ -411,7 +411,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
           <span id="auth-btn-label">Login</span>
         </button>
-        <a href="#" data-route="cart" class="route-link relative flex items-center gap-1.5 px-3 py-2 rounded-xl bg-navy-900 text-white hover:bg-navy-800 transition">
+        <a href="javascript:void(0)" data-route="cart" class="route-link relative flex items-center gap-1.5 px-3 py-2 rounded-xl bg-navy-900 text-white hover:bg-navy-800 transition">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218a.75.75 0 0 0 .72-.54l1.892-6.18a.75.75 0 0 0-.72-.96H5.106M7.5 14.25l-1.135-4.255"/>
           </svg>
@@ -852,7 +852,7 @@
 <section id="view-bulk" class="view">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
     <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
-      <a href="#" data-route="home" class="route-link hover:text-navy-900">Home</a>
+      <a href="javascript:void(0)" data-route="home" class="route-link hover:text-navy-900">Home</a>
       <span>›</span>
       <span class="text-navy-900 font-semibold">Bulk Order</span>
     </div>
@@ -1027,7 +1027,7 @@
 <section id="view-cart" class="view">
   <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 lg:py-14" style="max-width:100vw;overflow-x:hidden;">
     <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
-      <a href="#" data-route="home" class="route-link hover:text-navy-900">Home</a>
+      <a href="javascript:void(0)" data-route="home" class="route-link hover:text-navy-900">Home</a>
       <span>›</span>
       <span class="text-navy-900 font-semibold">Cart & Checkout</span>
     </div>
@@ -1125,7 +1125,7 @@
 <section id="view-orders" class="view">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
     <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
-      <a href="#" data-route="home" class="route-link hover:text-navy-900">Home</a>
+      <a href="javascript:void(0)" data-route="home" class="route-link hover:text-navy-900">Home</a>
       <span>›</span>
       <span class="text-navy-900 font-semibold">My Orders</span>
     </div>
@@ -1160,7 +1160,7 @@
     <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/10 blur-3xl"></div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
       <div class="flex items-center gap-2 text-xs text-teal-100 mb-3">
-        <a href="#" data-route="home" class="route-link hover:text-white">Home</a>
+        <a href="javascript:void(0)" data-route="home" class="route-link hover:text-white">Home</a>
         <span>›</span>
         <span class="text-white font-semibold">Deals & Offers</span>
       </div>
@@ -1299,7 +1299,7 @@
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
         <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
-          <a href="#" data-route="home" class="route-link hover:text-navy-900">Home</a>
+          <a href="javascript:void(0)" data-route="home" class="route-link hover:text-navy-900">Home</a>
           <span>›</span>
           <span class="text-navy-900 font-semibold">Business Account</span>
         </div>
@@ -1502,34 +1502,34 @@
       <div>
         <h4 class="text-white font-display font-bold mb-4 text-sm">Platform</h4>
         <ul class="space-y-2 text-sm">
-          <li><a href="#" data-route="catalog" class="route-link hover:text-teal-400">Catalog</a></li>
-          <li><a href="#" data-route="bulk" class="route-link hover:text-teal-400">Bulk upload</a></li>
-          <li><a href="#" data-route="deals" class="route-link hover:text-teal-400">Deals</a></li>
-          <li><a href="#" data-route="categories" class="route-link hover:text-teal-400">Categories</a></li>
+          <li><a href="javascript:void(0)" data-route="catalog" class="route-link hover:text-teal-400">Catalog</a></li>
+          <li><a href="javascript:void(0)" data-route="bulk" class="route-link hover:text-teal-400">Bulk upload</a></li>
+          <li><a href="javascript:void(0)" data-route="deals" class="route-link hover:text-teal-400">Deals</a></li>
+          <li><a href="javascript:void(0)" data-route="categories" class="route-link hover:text-teal-400">Categories</a></li>
         </ul>
       </div>
       <div>
         <h4 class="text-white font-display font-bold mb-4 text-sm">Business</h4>
         <ul class="space-y-2 text-sm">
-          <li><a href="#" class="hover:text-teal-400">For pharmacies</a></li>
-          <li><a href="#" class="hover:text-teal-400">For hospitals</a></li>
-          <li><a href="#" class="hover:text-teal-400">For medical stores</a></li>
-          <li><a href="#" class="hover:text-teal-400">Become a partner</a></li>
+          <li><a href="javascript:void(0)" class="hover:text-teal-400">For pharmacies</a></li>
+          <li><a href="javascript:void(0)" class="hover:text-teal-400">For hospitals</a></li>
+          <li><a href="javascript:void(0)" class="hover:text-teal-400">For medical stores</a></li>
+          <li><a href="javascript:void(0)" class="hover:text-teal-400">Become a partner</a></li>
         </ul>
       </div>
       <div>
         <h4 class="text-white font-display font-bold mb-4 text-sm">Support</h4>
         <ul class="space-y-2 text-sm">
-          <li><a href="#" class="hover:text-teal-400">Help center</a></li>
-          <li><a href="#" class="hover:text-teal-400">Contact</a></li>
-          <li><a href="#" class="hover:text-teal-400">Status</a></li>
-          <li><a href="#" class="hover:text-teal-400">Compliance</a></li>
+          <li><a href="javascript:void(0)" class="hover:text-teal-400">Help center</a></li>
+          <li><a href="javascript:void(0)" class="hover:text-teal-400">Contact</a></li>
+          <li><a href="javascript:void(0)" class="hover:text-teal-400">Status</a></li>
+          <li><a href="javascript:void(0)" class="hover:text-teal-400">Compliance</a></li>
         </ul>
       </div>
     </div>
     <div class="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
       <div>© 2026 Medibo Healthcare Pvt. Ltd. · All rights reserved</div>
-      <div class="flex gap-5"><a href="#" class="hover:text-teal-400">Privacy</a><a href="#" class="hover:text-teal-400">Terms</a><a href="#" class="hover:text-teal-400">Cookies</a></div>
+      <div class="flex gap-5"><a href="javascript:void(0)" class="hover:text-teal-400">Privacy</a><a href="javascript:void(0)" class="hover:text-teal-400">Terms</a><a href="javascript:void(0)" class="hover:text-teal-400">Cookies</a></div>
     </div>
   </div>
 </footer>
@@ -2277,7 +2277,8 @@ function navigate(route) {
 document.querySelectorAll('.route-link').forEach(link => {
   link.addEventListener('click', e => {
     e.preventDefault();
-    navigate(link.dataset.route);
+    const route = link.dataset.route;
+    if (route) navigate(route);
   });
 });
 
