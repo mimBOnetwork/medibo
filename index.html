@@ -660,6 +660,20 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 stagger" id="home-deals"></div>
   </div>
 
+  <!-- CATEGORY SHOWCASE -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20">
+    <div class="flex items-end justify-between mb-8">
+      <div>
+        <div class="text-xs font-bold uppercase tracking-[0.18em] text-teal-600 mb-2">Browse by category</div>
+        <h2 class="font-display font-extrabold text-2xl lg:text-4xl text-navy-900 tracking-tight">Medicines across every specialty</h2>
+      </div>
+      <button onclick="navigate('catalog')" class="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-navy-900 hover:gap-2 transition-all">
+        Browse all <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0-4 4m4-4H3"/></svg>
+      </button>
+    </div>
+    <div id="home-category-showcase" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4"></div>
+  </div>
+
   <!-- HOW IT WORKS -->
   <div class="bg-navy-900 text-white relative overflow-hidden">
     <div class="absolute inset-0 dotgrid opacity-30"></div>
@@ -2258,6 +2272,31 @@ function renderCategoryCard(c) {
   `;
 }
 
+function renderHomeCategoryShowcase() {
+  const el = document.getElementById('home-category-showcase');
+  if (!el) return;
+  el.innerHTML = CATEGORIES.map(c => {
+    const grad =
+      c.color.includes('teal') || c.color.includes('emerald') ? 'linear-gradient(135deg,#059669,#34d399)' :
+      c.color.includes('blue') || c.color.includes('cyan') || c.color.includes('sky') ? 'linear-gradient(135deg,#2563eb,#60a5fa)' :
+      c.color.includes('rose') || c.color.includes('red') ? 'linear-gradient(135deg,#e11d48,#fb7185)' :
+      c.color.includes('violet') || c.color.includes('purple') || c.color.includes('indigo') ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' :
+      c.color.includes('amber') || c.color.includes('orange') || c.color.includes('yellow') ? 'linear-gradient(135deg,#d97706,#fbbf24)' :
+      c.color.includes('pink') || c.color.includes('fuchsia') ? 'linear-gradient(135deg,#db2777,#f472b6)' :
+      c.color.includes('navy') ? 'linear-gradient(135deg,#0f1f44,#1e3a5f)' :
+      'linear-gradient(135deg,#475569,#94a3b8)';
+    return `<div class="bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
+      <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style="background:${grad}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="${c.icon}"/></svg>
+      </div>
+      <div class="min-w-0">
+        <div class="font-display font-bold text-navy-900 text-sm leading-tight truncate">${c.name}</div>
+        <div class="text-xs text-teal-600 font-semibold mt-0.5">${c.count.toLocaleString()} medicines</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 function renderHomeCategories() {
   document.getElementById('home-categories').innerHTML = CATEGORIES.slice(0,6).map(renderCategoryCard).join('');
 }
@@ -3473,6 +3512,7 @@ document.addEventListener('change', e => {
   } catch(e) {}
 
   renderHomeCategories();
+  renderHomeCategoryShowcase();
   renderFilters();
   renderAllCategories();
   renderActivity();
