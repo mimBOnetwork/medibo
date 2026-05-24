@@ -1176,12 +1176,15 @@
       <div class="w-16 h-16 rounded-2xl bg-teal-400 flex items-center justify-center flex-shrink-0">
         <span id="profile-avatar" class="font-display font-extrabold text-navy-900 text-2xl">?</span>
       </div>
-      <div>
-        <div id="profile-name-display" class="font-display font-extrabold text-white text-xl">—</div>
-        <div id="profile-email-display" class="text-teal-400 text-sm font-medium mt-0.5">—</div>
-        <div id="profile-status-badge" class="flex items-center gap-1.5 mt-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-          <span class="text-xs text-amber-500 font-semibold">Verification pending</span>
+      <div class="flex-1 min-w-0">
+        <div id="profile-name-display" class="font-display font-extrabold text-white text-xl truncate">—</div>
+        <div id="profile-email-display" class="text-teal-400 text-sm font-medium mt-0.5 truncate">—</div>
+        <div class="flex items-center gap-2 mt-2">
+          <span id="profile-customer-id" class="text-xs font-mono font-bold bg-white/10 text-white px-2 py-0.5 rounded-full">—</span>
+          <div id="profile-status-badge" class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span class="text-xs text-amber-400 font-semibold">Verification pending</span>
+          </div>
         </div>
       </div>
     </div>
@@ -2432,9 +2435,10 @@ function renderProfile() {
   document.getElementById('profile-avatar').textContent = name.charAt(0).toUpperCase();
   document.getElementById('profile-name-display').textContent = name;
   document.getElementById('profile-email-display').textContent = CURRENT_USER.email || '';
-  document.getElementById('profile-phone').textContent = p?.phone || '—';
-  document.getElementById('profile-business').textContent = p?.business_name || '—';
-  document.getElementById('profile-drug').textContent = p?.drug_license || '—';
+  document.getElementById('profile-customer-id').textContent = p?.customer_id || 'ID pending';
+  document.getElementById('profile-phone').textContent = p?.phone || p?.whatsapp_number || '—';
+  document.getElementById('profile-business').textContent = p?.business_name || p?.store_type || '—';
+  document.getElementById('profile-drug').textContent = p?.dl1 || p?.drug_license || '—';
   document.getElementById('profile-gstin').textContent = p?.gstin || '—';
   document.getElementById('profile-city').textContent = p?.city || '—';
 
