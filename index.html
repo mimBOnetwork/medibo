@@ -25,9 +25,8 @@
     if (e.ctrlKey && e.shiftKey && (e.key === 'r' || e.key === 'R')) e.preventDefault();
   });
 
-  // Block pull-to-refresh on mobile — must set on html+body
+  // Block pull-to-refresh on mobile — overscroll-behavior handles it via CSS
   document.documentElement.style.overscrollBehavior = 'none';
-  document.documentElement.style.overflow = 'hidden';
 
   // Block swipe-down pull-to-refresh on iOS Safari
   var _lastY = 0;
@@ -113,7 +112,6 @@
   }
   html {
     overscroll-behavior: none;
-    overflow: hidden;
   }
   body {
     font-family: 'Inter', sans-serif;
@@ -121,10 +119,8 @@
     color: #0f1f44;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
-    overflow-y: auto;
     max-width: 100vw;
     overscroll-behavior: none;
-    height: 100%;
   }
   .font-display { font-family: 'Manrope', sans-serif; letter-spacing: -0.02em; }
   .hero-bg { background: var(--grad-hero); }
