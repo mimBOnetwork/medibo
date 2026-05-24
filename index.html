@@ -1885,23 +1885,50 @@ const _searchCache = {};
 
 let _fetchRetries = 0;
 
+const _LS_CACHE_TTL = 30 * 60 * 1000; // 30 min localStorage cache
+
+function lsGet(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const { ts, data } = JSON.parse(raw);
+    if (Date.now() - ts > _LS_CACHE_TTL) { localStorage.removeItem(key); return null; }
+    return data;
+  } catch(e) { return null; }
+}
+function lsSet(key, data) {
+  try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(e) {}
+}
+
 async function fetchProducts(page, append) {
   page = page || 0;
   append = append || false;
   if (sbIsLoading) return;
 
   // Build cache key
-  const cacheKey = [filters.search, sbActiveThClass, [...filters.manufacturers].sort().join(','), filters.maxPrice, page].join('|');
+  const cacheKey = 'mdb_' + [filters.search, sbActiveThClass, [...filters.manufacturers].sort().join(','), filters.maxPrice, page].join('|');
+
+  // 1. Check memory cache
   if (!append && _searchCache[cacheKey]) {
     const cached = _searchCache[cacheKey];
-    PRODUCTS.length = 0;
-    PRODUCTS.push(...cached.products);
-    sbTotalCount = cached.total;
-    sbCurrentPage = page;
-    renderProducts();
-    renderLoadMore();
+    PRODUCTS.length = 0; PRODUCTS.push(...cached.products);
+    sbTotalCount = cached.total; sbCurrentPage = page;
+    renderProducts(); renderLoadMore();
     document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
     return;
+  }
+
+  // 2. Check localStorage cache (for browse — not search)
+  if (!append && !filters.search && page === 0) {
+    const lsCached = lsGet(cacheKey);
+    if (lsCached) {
+      PRODUCTS.length = 0; PRODUCTS.push(...lsCached.products);
+      sbTotalCount = lsCached.total; sbCurrentPage = 0;
+      renderProducts(); renderLoadMore();
+      document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
+      _searchCache[cacheKey] = lsCached;
+      return;
+    }
   }
 
   sbIsLoading = true;
@@ -1911,20 +1938,16 @@ async function fetchProducts(page, append) {
     const from = page * PAGE_SIZE;
     const to   = from + PAGE_SIZE - 1;
 
+    // Only fetch columns we actually render — fewer bytes = faster
     const params = {
-      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,url,status,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
-      // Only sort alphabetically when NOT searching — fuzzy ranking handles search order
-      order: (filters.search && filters.search.length >= 2) ? 'product_name.asc' : 'product_name.asc'
+      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,status,image_url_1,image_url_2',
+      order: 'product_name.asc'
     };
-    if (sbActiveThClass) {
-      params['therapeutic_class'] = 'eq.' + sbActiveThClass;
-    }
+    if (sbActiveThClass) params['therapeutic_class'] = 'eq.' + sbActiveThClass;
 
     let rawParams = '';
     if (filters.search && filters.search.length >= 2) {
       const q = filters.search.replace(/[%*'"()]/g, '').trim();
-      // Use only product_name ilike — this hits the trigram index and is fast
-      // Salt/marketer search handled by client-side ranking after fetch
       rawParams = 'product_name=ilike.%25' + q + '%25';
     }
     if (filters.manufacturers.size > 0) {
@@ -1935,17 +1958,16 @@ async function fetchProducts(page, append) {
     const { data: rows, total } = await sbRest('MEDICINE', params, {
       count: true,
       range: from + '-' + to,
-      rawParams: rawParams
+      rawParams
     });
 
     sbTotalCount = (total != null) ? total : (rows ? rows.length : 0);
     sbCurrentPage = page;
-    _fetchRetries = 0;  // reset on success
+    _fetchRetries = 0;
 
     let mapped = (rows || []).map((r, i) => rowToProduct(r, page * PAGE_SIZE + i));
 
     if (filters.search && filters.search.length >= 2 && mapped.length > 0) {
-      // Search: relevance first, then within same relevance bucket — images first
       const q = filters.search.toLowerCase().trim();
       mapped.sort((a, b) => {
         const an = (a.name || '').toLowerCase();
@@ -1953,11 +1975,11 @@ async function fetchProducts(page, append) {
         const ar = an.startsWith(q) ? 0 : an.includes(q) ? 1 : 2;
         const br = bn.startsWith(q) ? 0 : bn.includes(q) ? 1 : 2;
         if (ar !== br) return ar - br;
-        // Same relevance → images first
         const ai = (a.images && a.images.length > 0) ? 0 : 1;
         const bi = (b.images && b.images.length > 0) ? 0 : 1;
         return ai - bi;
       });
+
     } else {
       // No search → images first, then alphabetical
       mapped.sort((a, b) => {
@@ -1975,17 +1997,15 @@ async function fetchProducts(page, append) {
     } else {
       PRODUCTS.length = 0;
       PRODUCTS.push(...filtered);
-      // Cache in memory
+      // Memory cache
       _searchCache[cacheKey] = { products: filtered.slice(), total: sbTotalCount };
       const keys = Object.keys(_searchCache);
       if (keys.length > 20) delete _searchCache[keys[0]];
-    }
-    // Persist to localStorage for instant load next visit
-    try {
-      if (!filters.search && !sbActiveThClass && filters.manufacturers.size === 0) {
-        localStorage.setItem('medibo_products_cache', JSON.stringify(PRODUCTS.slice(0, 48)));
+      // localStorage cache for browse (not search)
+      if (!filters.search && page === 0) {
+        lsSet(cacheKey, { products: filtered.slice(), total: sbTotalCount });
       }
-    } catch(e) {}
+    }
 
     renderProducts();
     renderLoadMore();
