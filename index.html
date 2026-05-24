@@ -2331,7 +2331,7 @@ function formatCustomerId(input) {
   input.value = val;
 }
 
-let _submitting = false;
+let _confirmShown = false;
 
 function showFormError(msg) {
   const toast = document.getElementById('prof-error-toast');
@@ -2343,7 +2343,6 @@ function showFormError(msg) {
 }
 
 function confirmAndSubmit() {
-  if (_submitting) return;
   const name         = document.getElementById('prof-name').value.trim();
   const customerId   = document.getElementById('prof-customer-id').value.replace(/\s/g,'').trim();
   const businessName = document.getElementById('prof-business-name').value.trim();
@@ -2360,17 +2359,24 @@ function confirmAndSubmit() {
   const dl2          = document.getElementById('prof-dl2').value.trim();
 
   if (!name || !customerId || customerId.length !== 4 || !businessName || !range || !storeType || !paymentTerm || !address || !city || !state || !pincode || !whatsapp || !otherContact || !dl1 || !dl2) {
+    _confirmShown = false;
     return showFormError('⚠️ Please fill all the mandatory info');
   }
 
-  _submitting = true;
-  document.getElementById('prof-error-toast').classList.add('hidden');
-  const toast = document.getElementById('submit-confirm-modal');
-  toast.classList.remove('hidden');
-  setTimeout(() => {
-    toast.classList.add('hidden');
-    saveProfile();
-  }, 4000);
+  // First click — show warning toast
+  if (!_confirmShown) {
+    _confirmShown = true;
+    const toast = document.getElementById('submit-confirm-modal');
+    toast.classList.remove('hidden');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { toast.classList.add('hidden'); }, 4000);
+    return; // wait for second click
+  }
+
+  // Second click — actually submit
+  _confirmShown = false;
+  document.getElementById('submit-confirm-modal').classList.add('hidden');
+  saveProfile();
 }
 
 async function checkCustomerId(val) {
@@ -2480,7 +2486,7 @@ async function saveProfile() {
     const err = await res.json().catch(() => ({}));
     errEl.textContent = err.message?.includes('duplicate') ? '❌ Customer ID already taken. Choose another.' : '⚠️ Could not save. Try again.';
     errEl.classList.remove('hidden');
-    _submitting = false;
+    _confirmShown = false;
   }
 }
 
