@@ -2190,9 +2190,15 @@ async function saveProfile() {
   });
 
   if (res.ok || res.status === 201) {
-    CURRENT_PROFILE = { full_name: name, phone, business_name: business, drug_license: drug, gstin, city };
+    CURRENT_PROFILE = { full_name: name, phone, business_name: business, drug_license: drug, gstin, city, approved: false };
     updateAuthUI();
-    document.getElementById('auth-success-msg').textContent = 'Welcome to Medibo, ' + name.split(' ')[0] + '! You can now place orders.';
+    // Trigger admin approval email
+    fetch(SUPABASE_URL + '/functions/v1/send-approval-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({ user_id: CURRENT_USER.id })
+    }).catch(() => {});
+    document.getElementById('auth-success-msg').textContent = 'Profile submitted! Our team will verify your account within 24–48 hours.';
     showStep('success');
   } else {
     errEl.textContent = 'Could not save profile. Try again.';
