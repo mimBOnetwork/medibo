@@ -3257,6 +3257,22 @@ document.addEventListener('change', e => {
    INIT  (async bootstrap)
 ------------------------------------------------------------- */
 (async function init() {
+  // Restore route FIRST before anything renders — prevents homepage flash
+  try {
+    const savedRoute = localStorage.getItem('medibo_route');
+    if (savedRoute && savedRoute !== 'home') {
+      currentView = savedRoute;
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      const el = document.getElementById('view-' + savedRoute);
+      if (el) el.classList.add('active');
+      document.querySelectorAll('[data-route]').forEach(a => {
+        a.classList.toggle('active', a.dataset.route === savedRoute);
+      });
+      const gsb = document.getElementById('global-search-bar');
+      if (gsb) gsb.style.display = (savedRoute === 'cart') ? 'none' : '';
+    }
+  } catch(e) {}
+
   renderHomeCategories();
   renderFilters();
   renderAllCategories();
@@ -3264,15 +3280,13 @@ document.addEventListener('change', e => {
   updateCartBadge(); saveCart();
   initAuth();
 
-  // Restore last visited route
-  try {
-    const savedRoute = localStorage.getItem('medibo_route');
-    if (savedRoute && savedRoute !== 'home') {
-      navigate(savedRoute);
-    }
-  } catch(e) {}
+  // Render the current view's dynamic content
+  if (currentView === 'cart') renderCart();
+  if (currentView === 'orders') renderOrders();
+  if (currentView === 'deals') renderDeals();
+  if (currentView === 'categories') renderAllCategories();
+  if (currentView === 'profile') renderProfile();
 
-  // Fire both in parallel
   await fetchProducts(0);
   setTimeout(() => fetchHomeDeals(), 1000);
   setTimeout(() => fetchManufacturers(), 2000);
