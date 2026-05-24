@@ -2446,61 +2446,50 @@ async function saveProfile() {
   const dl2          = document.getElementById('prof-dl2').value.trim();
   const gstin        = document.getElementById('prof-gstin').value.trim();
   const mapLink      = document.getElementById('prof-map-link').value.trim();
-  const errEl        = document.getElementById('prof-error');
-  errEl.classList.add('hidden');
 
-  if (!name || !customerId || !businessName || !range || !storeType || !paymentTerm || !address || !city || !state || !pincode || !whatsapp || !otherContact || !dl1 || !dl2) {
-    errEl.textContent = '⚠️ Please fill all required fields and make all selections';
-    errEl.classList.remove('hidden');
-    return;
-  }
+  // Show loading state on button
+  const btn = document.getElementById('submit-btn');
+  if (btn) { btn.textContent = 'Submitting...'; btn.disabled = true; }
 
-  // Final customer ID availability check
-  const checkRes = await fetch(SUPABASE_URL + '/rest/v1/user_profiles?customer_id=eq.' + encodeURIComponent(customerId) + '&select=customer_id', {
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + CURRENT_USER.access_token }
-  });
-  const existing = await checkRes.json();
-  if (existing && existing.length > 0) {
-    errEl.textContent = '❌ Customer ID "' + customerId + '" is already taken. Please choose another.';
-    errEl.classList.remove('hidden');
-    return;
-  }
-
-  const res = await fetch(SUPABASE_URL + '/rest/v1/user_profiles', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY,
-      'Authorization': 'Bearer ' + CURRENT_USER.access_token, 'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify({
-      id: CURRENT_USER.id,
-      customer_id: customerId,
-      full_name: name,
-      phone: whatsapp,
-      business_name: businessName,
-      drug_license: dl1,
-      range, store_type: storeType, payment_term: paymentTerm,
-      address_line: address, city, state, pincode,
-      whatsapp_number: whatsapp, other_contact: otherContact,
-      dl1, dl2, gstin, google_map_link: mapLink
-    })
-  });
-
-  if (res.ok || res.status === 201) {
-    CURRENT_PROFILE = { customer_id: customerId, full_name: name, phone: whatsapp, business_name: businessName, drug_license: dl1, city, approved: false };
-    updateAuthUI();
-    fetch(SUPABASE_URL + '/functions/v1/send-approval-email', {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/user_profiles', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-      body: JSON.stringify({ user_id: CURRENT_USER.id })
-    }).catch(() => {});
-    document.getElementById('auth-success-msg').textContent = 'Profile submitted! Our team will verify your account within 24–48 hours.';
-    showStep('success');
-  } else {
-    const err = await res.json().catch(() => ({}));
-    errEl.textContent = err.message?.includes('duplicate') ? '❌ Customer ID already taken. Choose another.' : '⚠️ Could not save. Try again.';
-    errEl.classList.remove('hidden');
+      headers: {
+        'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + CURRENT_USER.access_token, 'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        id: CURRENT_USER.id,
+        customer_id: customerId,
+        full_name: name, phone: whatsapp, business_name: businessName, drug_license: dl1,
+        range, store_type: storeType, payment_term: paymentTerm,
+        address_line: address, city, state, pincode,
+        whatsapp_number: whatsapp, other_contact: otherContact,
+        dl1, dl2, gstin, google_map_link: mapLink
+      })
+    });
+
+    if (res.ok || res.status === 201) {
+      CURRENT_PROFILE = { customer_id: customerId, full_name: name, phone: whatsapp, business_name: businessName, drug_license: dl1, city, approved: false };
+      updateAuthUI();
+      fetch(SUPABASE_URL + '/functions/v1/send-approval-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({ user_id: CURRENT_USER.id })
+      }).catch(() => {});
+      document.getElementById('auth-success-msg').textContent = 'Profile submitted! Our team will verify your account within 24–48 hours.';
+      showStep('success');
+    } else {
+      const err = await res.json().catch(() => ({}));
+      const msg = err.message?.includes('duplicate') ? '❌ Customer ID already taken.' : '⚠️ Could not save. Try again.';
+      showFormError(msg);
+      _confirmShown = false;
+      if (btn) { btn.textContent = 'Submit →'; btn.disabled = false; }
+    }
+  } catch(e) {
+    showFormError('⚠️ Network error. Please try again.');
     _confirmShown = false;
+    if (btn) { btn.textContent = 'Submit →'; btn.disabled = false; }
   }
 }
 
