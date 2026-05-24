@@ -1944,6 +1944,8 @@ async function fetchProducts(page, append) {
   // Cancel any pending auto-load
   const lmBtn = document.getElementById('load-more-btn');
   if (lmBtn) clearTimeout(lmBtn._autoLoad);
+  // Reset rendered count on fresh (non-append) fetch
+  if (!append) _renderedCount = 0;
 
   try {
     const from = page * PAGE_SIZE;
@@ -2030,7 +2032,7 @@ async function fetchProducts(page, append) {
       }
     }
 
-    renderProducts();
+    renderProducts(append);
     renderLoadMore();
     document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
   } catch (err) {
@@ -3091,10 +3093,37 @@ function productCardList(p) {
   `;
 }
 
-function renderProducts() {
+let _renderedCount = 0;
+
+function renderProducts(appendOnly) {
   const list = getFilteredProducts();
   document.getElementById('result-count').textContent = list.length;
   const wrap = document.getElementById('products-grid');
+
+  if (appendOnly && _renderedCount > 0) {
+    // Only add new cards — don't touch existing DOM, no animation flash
+    const newItems = list.slice(_renderedCount);
+    if (newItems.length === 0) return;
+    const frag = document.createDocumentFragment();
+    newItems.forEach(p => {
+      const div = document.createElement('div');
+      div.innerHTML = (viewMode === 'grid' ? productCardGrid(p) : productCardList(p));
+      const el = div.firstElementChild;
+      if (el) { el.style.opacity = '0'; el.style.transform = 'translateY(8px)'; el.style.transition = 'opacity .3s ease, transform .3s ease'; frag.appendChild(el); }
+    });
+    wrap.appendChild(frag);
+    // Fade in new cards smoothly
+    requestAnimationFrame(() => {
+      wrap.querySelectorAll('[style*="opacity: 0"]').forEach((el, i) => {
+        setTimeout(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }, i * 20);
+      });
+    });
+    _renderedCount = list.length;
+    return;
+  }
+
+  // Full re-render (new search, category change, etc.)
+  _renderedCount = list.length;
   if (viewMode === 'grid') {
     wrap.className = 'grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 stagger';
     wrap.innerHTML = list.map(productCardGrid).join('');
