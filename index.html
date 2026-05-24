@@ -3355,9 +3355,9 @@ function renderDeals() {
       select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,url,status,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
       order: 'product_name.asc',
       'mrp': 'not.is.null',
-    }, { range: '0-47', rawParams: 'image_url_1=not.is.null' }).then(({ data: rows }) => {
+    }, { range: '0-47' }).then(({ data: rows }) => {
       if (rows && rows.length > 0) {
-        const mapped = rows.map((r, i) => rowToProduct(r, i)).filter(p => p.mrp > 0 && p.images && p.images.length > 0);
+        const mapped = rows.map((r, i) => rowToProduct(r, i)).filter(p => p.mrp > 0);
         if (PRODUCTS.length === 0) PRODUCTS.push(...mapped);
         renderDeals();
       }
@@ -3366,10 +3366,7 @@ function renderDeals() {
     });
     return;
   }
-  // Only products with images
-  const withImages = PRODUCTS.filter(p => p.images && p.images.length > 0);
-  // Featured = 3 big cards
-  const featured = withImages.slice(0, 3);
+  const featured = PRODUCTS.slice(0, 3);
   document.getElementById('featured-deals').innerHTML = featured.map((p, idx) => `
     <div class="rounded-3xl bg-gradient-to-br ${idx===0?'from-navy-900 to-navy-800':idx===1?'from-teal-600 to-teal-700':'from-navy-700 to-teal-700'} text-white p-6 relative overflow-hidden">
       <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-3xl"></div>
@@ -3387,9 +3384,7 @@ function renderDeals() {
       </div>
     </div>
   `).join('');
-
-  // All deals — only with images
-  document.getElementById('all-deals').innerHTML = withImages.slice(0, 24).map(productCardGrid).join('');
+  document.getElementById('all-deals').innerHTML = PRODUCTS.slice(0, 24).map(productCardGrid).join('');
 }
 
 /* -------------------------------------------------------------
