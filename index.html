@@ -816,8 +816,24 @@
      ========================================================= -->
 <section id="view-catalog" class="view">
 
-  <!-- Products -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+  <!-- Category grid -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div id="category-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+  </div>
+
+  <!-- Products area — hidden until category selected -->
+  <div id="catalog-products-area" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+    <!-- Active category header -->
+    <div class="flex items-center gap-3 mb-4">
+      <button onclick="clearCategory()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4 text-navy-900"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
+      </button>
+      <div>
+        <div id="active-cat-name" class="font-display font-bold text-navy-900 text-lg"></div>
+        <div id="active-cat-count" class="text-xs text-slate-500"></div>
+      </div>
+    </div>
+    <!-- Sort + view controls -->
     <div class="flex items-center justify-end mb-3">
       <div class="flex items-center gap-2">
         <select id="sort-select" class="px-3 py-1.5 bg-white rounded-lg text-xs font-medium text-navy-900 focus:outline-none ring-1 ring-slate-200">
@@ -836,12 +852,12 @@
         </div>
       </div>
     </div>
-    <!-- Placeholder shown while fetching -->
-    <div id="catalog-placeholder" class="flex flex-col items-center justify-center py-24 gap-3 text-center">
-      <p class="text-navy-900 font-semibold text-base">Please wait, we are loading some products</p>
-      <p class="text-slate-400 text-sm">This usually takes just a moment</p>
+    <!-- Loading placeholder for category products -->
+    <div id="catalog-placeholder" class="hidden flex flex-col items-center justify-center py-20 gap-3 text-center">
+      <svg class="w-8 h-8 text-teal-400 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+      <p class="text-navy-900 font-semibold">Loading products…</p>
     </div>
-    <div id="products-grid" class="mt-1 hidden"></div>
+    <div id="products-grid" class="mt-1"></div>
   </div>
 </section>
 
@@ -1880,28 +1896,28 @@ function rowToProduct(r, idx) {
    STATIC CATEGORY METADATA
 ------------------------------------------------------------- */
 const CATEGORIES = [
-  { name: 'Anti-Infectives',        dbClass: 'ANTI INFECTIVES',              count: 25211, icon: 'M19.428 15.428a2 2 0 0 0-1.022-.547l-2.387-.477a6 6 0 0 0-3.86.517l-.318.158a6 6 0 0 1-3.86.517L6.05 15.21a2 2 0 0 0-1.806.547M8 4h8l-1 1v5.172a2 2 0 0 0 .586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 0 0 9 10.172V5L8 4z', color: 'from-teal-500 to-teal-600' },
-  { name: 'Gastro Intestinal',       dbClass: 'GASTRO INTESTINAL',            count: 16211, icon: 'M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814', color: 'from-emerald-500 to-teal-500' },
-  { name: 'Pain & Analgesics',       dbClass: 'PAIN ANALGESICS',              count: 13791, icon: 'M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6Z', color: 'from-orange-500 to-red-500' },
-  { name: 'Respiratory',             dbClass: 'RESPIRATORY',                  count: 10704, icon: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z', color: 'from-cyan-500 to-teal-500' },
-  { name: 'Neuro / CNS',             dbClass: 'NEURO CNS',                    count: 9615,  icon: 'M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25', color: 'from-navy-600 to-teal-600' },
-  { name: 'Cardiac',                 dbClass: 'CARDIAC',                      count: 9133,  icon: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z', color: 'from-red-500 to-rose-600' },
-  { name: 'Diabetic Care',           dbClass: 'ANTI DIABETIC',                count: 6335,  icon: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z', color: 'from-rose-500 to-pink-600' },
-  { name: 'Dermatology',             dbClass: 'DERMA',                        count: 4264,  icon: 'M2.25 15.75 7.409 8.844a2.25 2.25 0 0 1 3.182-.094l5.319 5.319m-4.5-4.5 1.401-1.401a2.25 2.25 0 0 1 3.182-.094l4.5 4.5', color: 'from-pink-500 to-rose-500' },
-  { name: 'Hormones',                dbClass: 'HORMONES',                     count: 2661,  icon: 'M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21a48.25 48.25 0 0 1-8.135-.687c-1.718-.293-2.3-2.379-1.067-3.61L5 14.5', color: 'from-purple-500 to-indigo-500' },
-  { name: 'Vitamins & Nutrients',    dbClass: 'VITAMINS MINERALS NUTRIENTS',  count: 2627,  icon: 'M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z', color: 'from-yellow-500 to-amber-500' },
-  { name: 'Ophthal',                 dbClass: 'OPHTHAL',                      count: 2538,  icon: 'M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z', color: 'from-blue-500 to-cyan-500' },
-  { name: "Women's Health",          dbClass: 'GYNAECOLOGICAL',               count: 2439,  icon: 'M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Z', color: 'from-fuchsia-500 to-pink-500' },
-  { name: 'Oncology',                dbClass: 'ANTI NEOPLASTICS',             count: 1496,  icon: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z', color: 'from-navy-700 to-navy-900' },
-  { name: 'Blood Related',           dbClass: 'BLOOD RELATED',                count: 1457,  icon: 'M12 3v18M3 12h18', color: 'from-red-600 to-rose-700' },
-  { name: 'Urology',                 dbClass: 'UROLOGY',                      count: 1039,  icon: 'M12 3v18M3 12h18', color: 'from-blue-600 to-indigo-600' },
-  { name: 'Anti-Malarials',          dbClass: 'ANTI MALARIALS',               count: 743,   icon: 'M12 3v18M3 12h18', color: 'from-green-600 to-teal-700' },
-  { name: 'Ophthal & ENT',           dbClass: 'OPHTHAL OTOLOGICALS',          count: 387,   icon: 'M12 3v18M3 12h18', color: 'from-sky-500 to-blue-500' },
-  { name: 'Sex & Rejuvenators',      dbClass: 'SEX STIMULANTS REJUVENATORS',  count: 352,   icon: 'M12 3v18M3 12h18', color: 'from-rose-400 to-pink-500' },
-  { name: 'ENT',                     dbClass: 'OTOLOGICALS',                  count: 138,   icon: 'M12 3v18M3 12h18', color: 'from-violet-500 to-purple-500' },
-  { name: 'Vaccines',                dbClass: 'VACCINES',                     count: 126,   icon: 'M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z', color: 'from-amber-500 to-orange-500' },
-  { name: 'Dental',                  dbClass: 'STOMATOLOGICALS',              count: 75,    icon: 'M12 3v18M3 12h18', color: 'from-slate-500 to-slate-600' },
-  { name: 'Others',                  dbClass: 'OTHERS',                       count: 81,    icon: 'M12 3v18M3 12h18', color: 'from-slate-400 to-slate-500' },
+  { name: 'Cardiac',              dbClass: 'CARDIAC',                      count: 2570,  icon: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z', color: 'from-red-500 to-rose-600' },
+  { name: 'Gastro Intestinal',    dbClass: 'GASTRO INTESTINAL',            count: 2499,  icon: 'M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814', color: 'from-emerald-500 to-teal-500' },
+  { name: 'Anti-Infectives',      dbClass: 'ANTI INFECTIVES',              count: 2187,  icon: 'M19.428 15.428a2 2 0 0 0-1.022-.547l-2.387-.477a6 6 0 0 0-3.86.517l-.318.158a6 6 0 0 1-3.86.517L6.05 15.21a2 2 0 0 0-1.806.547M8 4h8l-1 1v5.172a2 2 0 0 0 .586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 0 0 9 10.172V5L8 4z', color: 'from-teal-500 to-teal-600' },
+  { name: 'Neuro / CNS',          dbClass: 'NEURO CNS',                    count: 2095,  icon: 'M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25', color: 'from-navy-600 to-teal-600' },
+  { name: 'Pain & Analgesics',    dbClass: 'PAIN ANALGESICS',              count: 1977,  icon: 'M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6Z', color: 'from-orange-500 to-red-500' },
+  { name: 'Respiratory',          dbClass: 'RESPIRATORY',                  count: 1768,  icon: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z', color: 'from-cyan-500 to-teal-500' },
+  { name: 'Diabetic Care',        dbClass: 'ANTI DIABETIC',                count: 1712,  icon: 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z', color: 'from-rose-500 to-pink-600' },
+  { name: 'Dermatology',          dbClass: 'DERMA',                        count: 1119,  icon: 'M2.25 15.75 7.409 8.844a2.25 2.25 0 0 1 3.182-.094l5.319 5.319m-4.5-4.5 1.401-1.401a2.25 2.25 0 0 1 3.182-.094l4.5 4.5', color: 'from-pink-500 to-rose-500' },
+  { name: 'Vitamins & Nutrients', dbClass: 'VITAMINS MINERALS NUTRIENTS',  count: 1087,  icon: 'M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z', color: 'from-yellow-500 to-amber-500' },
+  { name: 'Ophthal',              dbClass: 'OPHTHAL',                      count: 639,   icon: 'M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z', color: 'from-blue-500 to-cyan-500' },
+  { name: "Women's Health",       dbClass: 'GYNAECOLOGICAL',               count: 535,   icon: 'M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Z', color: 'from-fuchsia-500 to-pink-500' },
+  { name: 'Urology',              dbClass: 'UROLOGY',                      count: 345,   icon: 'M12 3v18M3 12h18', color: 'from-blue-600 to-indigo-600' },
+  { name: 'Oncology',             dbClass: 'ANTI NEOPLASTICS',             count: 335,   icon: 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z', color: 'from-navy-700 to-navy-900' },
+  { name: 'Hormones',             dbClass: 'HORMONES',                     count: 318,   icon: 'M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082', color: 'from-purple-500 to-indigo-500' },
+  { name: 'Blood Related',        dbClass: 'BLOOD RELATED',                count: 288,   icon: 'M12 3v18M3 12h18', color: 'from-red-600 to-rose-700' },
+  { name: 'Sex & Rejuvenators',   dbClass: 'SEX STIMULANTS REJUVENATORS',  count: 96,    icon: 'M12 3v18M3 12h18', color: 'from-rose-400 to-pink-500' },
+  { name: 'Ophthal & ENT',        dbClass: 'OPHTHAL OTOLOGICALS',          count: 81,    icon: 'M12 3v18M3 12h18', color: 'from-sky-500 to-blue-500' },
+  { name: 'Vaccines',             dbClass: 'VACCINES',                     count: 78,    icon: 'M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z', color: 'from-amber-500 to-orange-500' },
+  { name: 'ENT',                  dbClass: 'OTOLOGICALS',                  count: 35,    icon: 'M12 3v18M3 12h18', color: 'from-violet-500 to-purple-500' },
+  { name: 'Others',               dbClass: 'OTHERS',                       count: 34,    icon: 'M12 3v18M3 12h18', color: 'from-slate-400 to-slate-500' },
+  { name: 'Dental',               dbClass: 'STOMATOLOGICALS',              count: 32,    icon: 'M12 3v18M3 12h18', color: 'from-slate-500 to-slate-600' },
+  { name: 'Anti-Malarials',       dbClass: 'ANTI MALARIALS',               count: 29,    icon: 'M12 3v18M3 12h18', color: 'from-green-600 to-teal-700' },
 ];
 
 // Clear stale v1 cache entries
@@ -2048,14 +2064,11 @@ async function fetchProducts(page, append) {
 
     renderProducts(append);
     renderLoadMore();
-    // Show grid, hide placeholder, show count — only after first successful load
+    // Hide spinner, show grid
     const placeholder = document.getElementById('catalog-placeholder');
-    const grid = document.getElementById('products-grid');
-    const countWrap = document.getElementById('result-count-wrap');
-    if (placeholder) placeholder.classList.add('hidden');
-    if (grid) grid.classList.remove('hidden');
-    if (countWrap) countWrap.classList.remove('invisible');
-    document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
+    const pgrid = document.getElementById('products-grid');
+    if (placeholder) { placeholder.classList.add('hidden'); placeholder.style.display = ''; }
+    if (pgrid) pgrid.classList.remove('hidden');
   } catch (err) {
     console.error('Fetch error:', err);
     sbIsLoading = false;
@@ -2270,7 +2283,7 @@ function navigate(route) {
   try { localStorage.setItem('medibo_route', route); } catch(e) {}
   const gsb = document.getElementById('global-search-bar');
   if (gsb) gsb.style.display = (route === 'cart') ? 'none' : '';
-  if (route === 'catalog') { _fetchRetries = 0; const _ph=document.getElementById('catalog-placeholder'); const _pg=document.getElementById('products-grid'); const _cw=document.getElementById('result-count-wrap'); if(_ph)_ph.classList.remove('hidden'); if(_pg)_pg.classList.add('hidden'); if(_cw)_cw.classList.add('invisible'); fetchProducts(0); renderCategoryScrollBar(); }
+  if (route === 'catalog') { _fetchRetries = 0; sbActiveThClass = null; const catGrid = document.getElementById('category-grid'); if(catGrid){catGrid.parentElement.classList.remove('hidden');renderCategoryGrid();} const pa=document.getElementById('catalog-products-area'); if(pa)pa.classList.add('hidden'); }
   if (route === 'cart') { renderCart(); syncCartWithSupabase(); }
   if (route === 'orders') renderOrders();
   if (route === 'deals') { const _dp=document.getElementById('deals-placeholder'); if(_dp)_dp.classList.remove('hidden'); renderDeals(); }
@@ -2328,6 +2341,73 @@ function renderCategoryCard(c) {
       <div class="text-xs text-teal-600 font-semibold mt-1">${c.count.toLocaleString()} medicines</div>
     </button>
   `;
+}
+
+function renderCategoryGrid() {
+  const grid = document.getElementById('category-grid');
+  if (!grid) return;
+  const colorMap = {
+    'red':'#e11d48','rose':'#f43f5e','pink':'#ec4899','fuchsia':'#d946ef',
+    'purple':'#9333ea','indigo':'#6366f1','blue':'#3b82f6','cyan':'#06b6d4',
+    'teal':'#14b8a6','emerald':'#10b981','green':'#22c55e','yellow':'#eab308',
+    'amber':'#f59e0b','orange':'#f97316','navy':'#0f1f44','slate':'#64748b'
+  };
+  function gradColor(colorClass) {
+    const m = colorClass.match(/from-(\w+)-/);
+    return m ? (colorMap[m[1]] || '#0f1f44') : '#0f1f44';
+  }
+  grid.innerHTML = CATEGORIES.map(c => `
+    <button onclick="selectCategory('${c.dbClass.replace(/'/g,"\\'")}','${c.name.replace(/'/g,"\\'")}',${c.count})"
+      class="bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-3 hover:shadow-md hover:border-teal-300 transition-all text-left active:scale-95">
+      <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style="background:linear-gradient(135deg,${gradColor(c.color)},${gradColor(c.color.replace('from','to'))}99)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="${c.icon}"/></svg>
+      </div>
+      <div class="min-w-0">
+        <div class="font-display font-bold text-navy-900 text-sm leading-tight">${c.name}</div>
+        <div class="text-xs text-teal-600 font-semibold mt-0.5">${c.count.toLocaleString()} products</div>
+      </div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" class="w-4 h-4 flex-shrink-0 ml-auto"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    </button>`).join('');
+}
+
+function selectCategory(dbClass, name, count) {
+  sbActiveThClass = dbClass;
+  _fetchRetries = 0;
+  PRODUCTS.length = 0;
+  _renderedCount = 0;
+
+  // Show products area, hide category grid
+  const catGrid = document.getElementById('category-grid').parentElement;
+  const productsArea = document.getElementById('catalog-products-area');
+  catGrid.classList.add('hidden');
+  productsArea.classList.remove('hidden');
+
+  // Update header
+  document.getElementById('active-cat-name').textContent = name;
+  document.getElementById('active-cat-count').textContent = count.toLocaleString() + ' products with images';
+
+  // Show spinner, hide grid
+  const placeholder = document.getElementById('catalog-placeholder');
+  const grid = document.getElementById('products-grid');
+  if (placeholder) { placeholder.classList.remove('hidden'); placeholder.style.display = 'flex'; }
+  if (grid) { grid.innerHTML = ''; }
+
+  fetchProducts(0);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function clearCategory() {
+  sbActiveThClass = null;
+  PRODUCTS.length = 0;
+  _renderedCount = 0;
+
+  // Show category grid, hide products
+  const catGrid = document.getElementById('category-grid');
+  if (catGrid) catGrid.parentElement.classList.remove('hidden');
+  const productsArea = document.getElementById('catalog-products-area');
+  if (productsArea) productsArea.classList.add('hidden');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function renderHomeCategoryShowcase() {
@@ -3611,6 +3691,7 @@ document.addEventListener('change', e => {
 
   renderHomeCategories();
   renderHomeCategoryShowcase();
+  renderCategoryGrid();
   renderFilters();
   renderAllCategories();
   renderActivity();
