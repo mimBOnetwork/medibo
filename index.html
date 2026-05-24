@@ -1433,7 +1433,7 @@ function rowToProduct(r, idx) {
   const rawMrp = parseFloat((r.mrp || '0').replace(/[^\d.]/g, '')) || 0;
   const b2b    = Math.round(rawMrp * 0.72);
   const deal   = rawMrp > 0 ? Math.round(((rawMrp - b2b) / rawMrp) * 100) : 0;
-  const packType = (r.pack_type || 'Tablet').trim();
+  const packType = (r.pack_type || '').trim() || 'Piece';
   const tag    = packType + (r.pack_size ? ' · ' + r.pack_size : '');
   const catMap = {
     'ANTI INFECTIVES': 'Anti-Infectives', 'ANTI DIABETIC': 'Diabetic Care',
@@ -1993,31 +1993,28 @@ function stockBadge(status) {
 
 function productImageArea(p, size) {
   const imgs = p.images || [];
-  const pid = 'img_' + Math.random().toString(36).slice(2,10);
 
-  if (imgs.length === 0) {
-    return `<div class="w-full h-full flex items-center justify-center">${productSvg(p, size === 'large' ? '' : 'small')}</div>`;
-  }
+  const svgFallback = `<div class="w-full h-full flex items-center justify-center p-6 bg-gradient-to-br from-slate-50 to-white">${productSvg(p, size === 'large' ? 'large' : 'small')}</div>`;
+
+  if (imgs.length === 0) return svgFallback;
 
   if (imgs.length === 1) {
-    return `<img src="${imgs[0]}" alt="${p.name}" class="w-full h-full object-cover" onerror="this.parentNode.innerHTML='<div class=\'w-full h-full flex items-center justify-center\'>${productSvg(p,'').replace(/'/g,"\\'")}</div>'">`;
+    return `<img src="${imgs[0]}" alt="${p.name}" class="w-full h-full object-cover" onerror="this.parentNode.innerHTML=this.parentNode.getAttribute('data-fb')">`;
   }
 
-  // Multiple images: full cover, swipe left/right arrows only
   const urlsAttr = imgs.join('|||');
   return `
-    <div class="relative w-full h-full select-none" 
+    <div class="relative w-full h-full select-none"
          data-imgs="${urlsAttr.replace(/"/g,'&quot;')}" data-cur="0"
-         id="${pid}"
          onmousedown="this._sx=event.clientX"
          onmouseup="(function(el,e){var dx=e.clientX-el._sx;if(Math.abs(dx)>30){var imgs=el.dataset.imgs.split('|||');var cur=parseInt(el.dataset.cur);var next=dx<0?(cur+1)%imgs.length:(cur-1+imgs.length)%imgs.length;el.dataset.cur=next;el.querySelector('img').src=imgs[next];};})(this,event)"
          ontouchstart="this._tx=event.touches[0].clientX"
          ontouchend="(function(el,e){var dx=e.changedTouches[0].clientX-el._tx;if(Math.abs(dx)>30){var imgs=el.dataset.imgs.split('|||');var cur=parseInt(el.dataset.cur);var next=dx<0?(cur+1)%imgs.length:(cur-1+imgs.length)%imgs.length;el.dataset.cur=next;el.querySelector('img').src=imgs[next];};})(this,event)">
       <img src="${imgs[0]}" alt="${p.name}" class="w-full h-full object-cover" onerror="this.style.display='none'">
-      <button onclick="event.stopPropagation();(function(el){var imgs=el.dataset.imgs.split('|||');var cur=parseInt(el.dataset.cur);var next=(cur-1+imgs.length)%imgs.length;el.dataset.cur=next;el.querySelector('img').src=imgs[next];})(this.closest('[data-imgs]'))" 
-        class="absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/40 text-white text-xs flex items-center justify-center hover:bg-black/60">‹</button>
+      <button onclick="event.stopPropagation();(function(el){var imgs=el.dataset.imgs.split('|||');var cur=parseInt(el.dataset.cur);var next=(cur-1+imgs.length)%imgs.length;el.dataset.cur=next;el.querySelector('img').src=imgs[next];})(this.closest('[data-imgs]'))"
+        class="absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/40 text-white text-xs flex items-center justify-center">‹</button>
       <button onclick="event.stopPropagation();(function(el){var imgs=el.dataset.imgs.split('|||');var cur=parseInt(el.dataset.cur);var next=(cur+1)%imgs.length;el.dataset.cur=next;el.querySelector('img').src=imgs[next];})(this.closest('[data-imgs]'))"
-        class="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/40 text-white text-xs flex items-center justify-center hover:bg-black/60">›</button>
+        class="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/40 text-white text-xs flex items-center justify-center">›</button>
     </div>`;
 }
 
