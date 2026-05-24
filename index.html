@@ -824,76 +824,90 @@
     <h1 class="font-display font-extrabold text-3xl lg:text-5xl text-navy-900 tracking-tight">Place Bulk Order</h1>
     <p class="text-slate-600 mt-3 max-w-2xl">Choose how you'd like to send your order — WhatsApp for quick photo orders, or upload a file for smart SKU matching.</p>
 
-    <!-- TWO OPTIONS ROW -->
-    <div class="mt-8 grid sm:grid-cols-2 gap-4 mb-10">
-
-      <!-- Option 1: WhatsApp -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col gap-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-[#25d366] flex items-center justify-center flex-shrink-0">
-            <svg viewBox="0 0 24 24" fill="white" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.862L.054 23.25a.75.75 0 0 0 .917.97l5.443-1.489A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.715 9.715 0 0 1-4.95-1.35l-.355-.212-3.67 1.004 1.004-3.592-.231-.368A9.715 9.715 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
-          </div>
-          <div>
-            <div class="font-display font-bold text-navy-900">Send Order on WhatsApp</div>
-            <div class="text-xs text-slate-500">Take a photo & send directly — fastest option</div>
-          </div>
-        </div>
-        <div class="relative">
-          <div id="wa-toast" class="hidden absolute bottom-full left-0 right-0 mb-2">
-            <div class="bg-rose-500 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl text-center shadow-lg"></div>
-          </div>
-          <button onclick="sendWhatsAppOrder()" class="w-full py-3 rounded-xl bg-[#25d366] hover:bg-[#1fb859] text-white font-bold text-sm flex items-center justify-center gap-2 transition active:scale-95">
-            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.862L.054 23.25a.75.75 0 0 0 .917.97l5.443-1.489A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.715 9.715 0 0 1-4.95-1.35l-.355-.212-3.67 1.004 1.004-3.592-.231-.368A9.715 9.715 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
-            Open WhatsApp
-          </button>
-        </div>
-      </div>
-
-      <!-- Option 2: File Upload -->
-      <div class="bg-white rounded-2xl border border-slate-200 p-5 flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-navy-900 flex items-center justify-center flex-shrink-0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/></svg>
-        </div>
-        <div class="flex-1">
-          <div class="font-display font-bold text-navy-900">Upload Order File</div>
-          <div class="text-xs text-slate-500">Excel, CSV or PDF — smart SKU matching below</div>
-        </div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" class="w-5 h-5 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3"/></svg>
-      </div>
-    </div>
-
     <!-- ORIGINAL BULK UPLOAD CONTENT -->
     <div class="grid lg:grid-cols-3 gap-8">
       <div class="lg:col-span-2">
-        <!-- Drop zone -->
-        <div id="drop-zone" class="drop-zone relative rounded-3xl border-2 border-dashed border-slate-300 bg-white p-10 lg:p-16 text-center transition">
-          <div class="absolute inset-0 dotgrid opacity-30 rounded-3xl pointer-events-none"></div>
-          <div class="relative">
-            <div class="mx-auto w-20 h-20 rounded-2xl bg-teal-50 flex items-center justify-center mb-5">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" class="w-10 h-10">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/>
-              </svg>
+
+        <!-- TWO OPTIONS replacing the big drop zone -->
+        <div class="grid sm:grid-cols-2 gap-4">
+          <!-- Option 1: WhatsApp -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#25d366] flex items-center justify-center flex-shrink-0">
+                <svg viewBox="0 0 24 24" fill="white" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.862L.054 23.25a.75.75 0 0 0 .917.97l5.443-1.489A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.715 9.715 0 0 1-4.95-1.35l-.355-.212-3.67 1.004 1.004-3.592-.231-.368A9.715 9.715 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+              </div>
+              <div>
+                <div class="font-display font-bold text-navy-900">Send via WhatsApp</div>
+                <div class="text-xs text-slate-500">Photo of list · Fastest option</div>
+              </div>
             </div>
-            <h2 class="font-display font-bold text-2xl text-navy-900">Drag & drop your order file</h2>
-            <p class="text-slate-500 mt-2 text-sm">or click to browse · Excel, CSV, or PDF · up to 25 MB</p>
-            <button onclick="simulateUpload()" class="mt-6 btn-primary px-6 py-3 rounded-xl font-semibold inline-flex items-center gap-2">
+            <ul class="space-y-1.5 text-xs text-slate-500 flex-1">
+              <li>✅ Send photo of handwritten list</li>
+              <li>✅ Your details auto-included</li>
+              <li>✅ No upload needed</li>
+            </ul>
+            <div class="relative">
+              <div id="wa-toast" class="hidden absolute bottom-full left-0 right-0 mb-2">
+                <div class="bg-rose-500 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl text-center shadow-lg"></div>
+              </div>
+              <button onclick="sendWhatsAppOrder()" class="w-full py-3 rounded-xl bg-[#25d366] hover:bg-[#1fb859] text-white font-bold text-sm flex items-center justify-center gap-2 transition active:scale-95">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.862L.054 23.25a.75.75 0 0 0 .917.97l5.443-1.489A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.715 9.715 0 0 1-4.95-1.35l-.355-.212-3.67 1.004 1.004-3.592-.231-.368A9.715 9.715 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+                Open WhatsApp
+              </button>
+            </div>
+          </div>
+
+          <!-- Option 2: File Upload -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-navy-900 flex items-center justify-center flex-shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/></svg>
+              </div>
+              <div>
+                <div class="font-display font-bold text-navy-900">Upload Order File</div>
+                <div class="text-xs text-slate-500">Excel, CSV or PDF · Smart matching</div>
+              </div>
+            </div>
+            <ul class="space-y-1.5 text-xs text-slate-500 flex-1">
+              <li>✅ .xlsx, .csv, .pdf supported</li>
+              <li>✅ 99.4% SKU match accuracy</li>
+              <li>✅ Add to cart in one click</li>
+            </ul>
+            <button onclick="simulateUpload()" class="w-full py-3 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-bold text-sm flex items-center justify-center gap-2 transition active:scale-95">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              Choose file
+              Choose File
             </button>
-            <div class="mt-6 flex items-center justify-center gap-2 flex-wrap text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-              <span>Supported:</span>
-              <span class="px-2 py-1 rounded-md bg-slate-100">.xlsx</span>
-              <span class="px-2 py-1 rounded-md bg-slate-100">.csv</span>
-              <span class="px-2 py-1 rounded-md bg-slate-100">.pdf</span>
-            </div>
           </div>
         </div>
 
-        <!-- Preview table -->
+        <!-- Preview table (shown after real upload) -->
         <div id="upload-preview" class="mt-8 hidden">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h3 class="font-display font-bold text-xl text-navy-900">Smart match preview</h3>
+              <p class="text-xs text-slate-500 mt-0.5" id="preview-summary">—</p>
+            </div>
+            <button onclick="addBulkToCart()" class="btn-teal px-5 py-2.5 rounded-xl text-sm font-semibold">Add matched to cart</button>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto"><table class="w-full text-sm">
+              <thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500"><tr>
+                <th class="px-4 py-3 text-left">Your line item</th>
+                <th class="px-4 py-3 text-left">Matched SKU</th>
+                <th class="px-4 py-3 text-right">Qty</th>
+                <th class="px-4 py-3 text-right">Price</th>
+                <th class="px-4 py-3 text-center">Status</th>
+              </tr></thead>
+              <tbody id="preview-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <!-- Demo match table — always visible as sample -->
+        <div class="mt-8">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-display font-bold text-xl text-navy-900">Smart match preview <span class="text-xs font-normal text-slate-400 ml-1">(sample)</span></h3>
               <p class="text-xs text-slate-500 mt-0.5">8 items matched · 1 partial · 0 unrecognized</p>
             </div>
             <button onclick="addBulkToCart()" class="btn-teal px-5 py-2.5 rounded-xl text-sm font-semibold">Add matched to cart</button>
@@ -901,16 +915,23 @@
           <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
             <div class="overflow-x-auto">
               <table class="w-full text-sm">
-                <thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  <tr>
-                    <th class="px-4 py-3 text-left">Your line item</th>
-                    <th class="px-4 py-3 text-left">Matched SKU</th>
-                    <th class="px-4 py-3 text-right">Qty</th>
-                    <th class="px-4 py-3 text-right">Price</th>
-                    <th class="px-4 py-3 text-center">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="preview-tbody"></tbody>
+                <thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500"><tr>
+                  <th class="px-4 py-3 text-left">Your line item</th>
+                  <th class="px-4 py-3 text-left">Matched SKU</th>
+                  <th class="px-4 py-3 text-right">Qty</th>
+                  <th class="px-4 py-3 text-right">Price</th>
+                  <th class="px-4 py-3 text-center">Status</th>
+                </tr></thead>
+                <tbody>
+                  <tr class="border-t border-slate-100"><td class="px-4 py-3 text-slate-600">Augmentin 625</td><td class="px-4 py-3 font-medium text-navy-900">Augmentin 625 Duo Tab (10s)</td><td class="px-4 py-3 text-right">5</td><td class="px-4 py-3 text-right font-mono text-sm">₹210.00</td><td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-100 text-teal-700">Matched</span></td></tr>
+                  <tr class="border-t border-slate-100"><td class="px-4 py-3 text-slate-600">Pan 40</td><td class="px-4 py-3 font-medium text-navy-900">Pan 40mg Tab (15s)</td><td class="px-4 py-3 text-right">10</td><td class="px-4 py-3 text-right font-mono text-sm">₹96.50</td><td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-100 text-teal-700">Matched</span></td></tr>
+                  <tr class="border-t border-slate-100"><td class="px-4 py-3 text-slate-600">Dolo 650</td><td class="px-4 py-3 font-medium text-navy-900">Dolo 650mg Tab (15s)</td><td class="px-4 py-3 text-right">20</td><td class="px-4 py-3 text-right font-mono text-sm">₹30.36</td><td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-100 text-teal-700">Matched</span></td></tr>
+                  <tr class="border-t border-slate-100"><td class="px-4 py-3 text-slate-600">Metformin 500 SR</td><td class="px-4 py-3 font-medium text-navy-900">Glycomet 500 SR Tab (20s)</td><td class="px-4 py-3 text-right">8</td><td class="px-4 py-3 text-right font-mono text-sm">₹52.00</td><td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-100 text-teal-700">Matched</span></td></tr>
+                  <tr class="border-t border-slate-100"><td class="px-4 py-3 text-slate-600">Atorva 10</td><td class="px-4 py-3 font-medium text-navy-900">Atorvastatin 10mg Tab (10s)</td><td class="px-4 py-3 text-right">6</td><td class="px-4 py-3 text-right font-mono text-sm">₹89.00</td><td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-100 text-teal-700">Matched</span></td></tr>
+                  <tr class="border-t border-slate-100"><td class="px-4 py-3 text-slate-600">Azithro 500</td><td class="px-4 py-3 font-medium text-navy-900">Azithromycin 500mg Tab (5s)</td><td class="px-4 py-3 text-right">4</td><td class="px-4 py-3 text-right font-mono text-sm">₹75.40</td><td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-100 text-teal-700">Matched</span></td></tr>
+                  <tr class="border-t border-slate-100"><td class="px-4 py-3 text-slate-600">Montair LC</td><td class="px-4 py-3 font-medium text-navy-900">Montelukast+Levo 5+2.5mg (10s)</td><td class="px-4 py-3 text-right">5</td><td class="px-4 py-3 text-right font-mono text-sm">₹148.00</td><td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">Partial</span></td></tr>
+                  <tr class="border-t border-slate-100"><td class="px-4 py-3 text-slate-600">Vitamin D sachet</td><td class="px-4 py-3 font-medium text-navy-900">D-Rise 60K IU Sachet</td><td class="px-4 py-3 text-right">12</td><td class="px-4 py-3 text-right font-mono text-sm">₹43.00</td><td class="px-4 py-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-100 text-teal-700">Matched</span></td></tr>
+                </tbody>
               </table>
             </div>
           </div>
