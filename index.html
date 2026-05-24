@@ -1703,7 +1703,9 @@ async function fetchHomeDeals() {
       select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,url,status,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
       'mrp':  'not.is.null'
     }, { range: '500-507' });
-    const mapped = (rows || []).map((r, i) => rowToProduct(r, i));
+    const mapped = (rows || []).map((r, i) => rowToProduct(r, i)).filter(p => p.mrp > 0);
+    // Add to PRODUCTS if not already there so cart works
+    mapped.forEach(p => { if (!PRODUCTS.find(x => x.id === p.id)) PRODUCTS.push(p); });
     const el = document.getElementById('home-deals');
     if (el) el.innerHTML = mapped.slice(0,4).map(productCardGrid).join('');
   } catch(e) {
