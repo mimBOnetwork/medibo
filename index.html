@@ -286,26 +286,21 @@
   <!-- Sidebar header -->
   <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
     <a href="#" data-route="home" onclick="closeSidebar()" class="route-link flex items-center">
-      <svg viewBox="0 0 420 90" width="130" height="40" role="img" aria-label="Medibo">
+      <svg viewBox="0 0 520 100" width="150" height="45" role="img" aria-label="mediBO">
         <defs>
           <linearGradient id="sIconG" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#0f1f44"/>
             <stop offset="60%" stop-color="#1e3a5f"/>
             <stop offset="100%" stop-color="#34d399" stop-opacity="0.85"/>
           </linearGradient>
-          <linearGradient id="sTextG" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="#0f1f44"/>
-            <stop offset="72%" stop-color="#0f1f44"/>
-            <stop offset="100%" stop-color="#34d399"/>
-          </linearGradient>
         </defs>
-        <rect x="2" y="2" width="86" height="86" rx="22" fill="url(#sIconG)"/>
-        <rect x="14" y="38" width="62" height="14" rx="7" fill="#34d399"/>
-        <rect x="38" y="14" width="14" height="62" rx="7" fill="#34d399"/>
-        <circle cx="79" cy="15" r="5" fill="#34d399" opacity="0.45"/>
-        <text x="100" y="68"
+        <rect x="2" y="2" width="96" height="96" rx="26" fill="url(#sIconG)"/>
+        <rect x="16" y="43" width="68" height="15" rx="7.5" fill="#34d399"/>
+        <rect x="43" y="16" width="15" height="68" rx="7.5" fill="#34d399"/>
+        <circle cx="88" cy="16" r="6" fill="#34d399" opacity="0.5"/>
+        <text x="112" y="88"
           font-family="'Manrope','Segoe UI',sans-serif"
-          font-weight="800" font-size="62" letter-spacing="-2"><tspan fill="url(#sTextG)">medi</tspan><tspan fill="#34d399">BO</tspan></text>
+          font-weight="800" font-size="78" letter-spacing="-2"><tspan fill="#0f1f44">medi</tspan><tspan fill="#34d399">BO</tspan></text>
       </svg>
     </a>
     <button onclick="closeSidebar()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-lg font-light">✕</button>
@@ -381,33 +376,28 @@
 
       <!-- Logo -->
       <a href="#" data-route="home" class="route-link flex items-center lg:mr-auto">
-        <svg viewBox="0 0 420 90" width="140" height="45" role="img" aria-label="Medibo">
+        <svg viewBox="0 0 520 100" width="156" height="48" role="img" aria-label="mediBO">
           <defs>
             <linearGradient id="hIconG" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#0f1f44"/>
               <stop offset="60%" stop-color="#1e3a5f"/>
               <stop offset="100%" stop-color="#34d399" stop-opacity="0.85"/>
             </linearGradient>
-            <linearGradient id="hTextG" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#0f1f44"/>
-              <stop offset="72%" stop-color="#0f1f44"/>
-              <stop offset="100%" stop-color="#34d399"/>
-            </linearGradient>
           </defs>
-          <!-- Icon rounded square -->
-          <rect x="2" y="2" width="86" height="86" rx="22" fill="url(#hIconG)"/>
+          <!-- Icon: 0 to 100 vertically, same as text cap -->
+          <rect x="2" y="2" width="96" height="96" rx="26" fill="url(#hIconG)"/>
           <!-- Cross horizontal -->
-          <rect x="14" y="38" width="62" height="14" rx="7" fill="#34d399"/>
+          <rect x="16" y="43" width="68" height="15" rx="7.5" fill="#34d399"/>
           <!-- Cross vertical -->
-          <rect x="38" y="14" width="14" height="62" rx="7" fill="#34d399"/>
-          <!-- Dot accent -->
-          <circle cx="79" cy="15" r="5" fill="#34d399" opacity="0.45"/>
-          <!-- Wordmark -->
-          <text x="100" y="68"
+          <rect x="43" y="16" width="15" height="68" rx="7.5" fill="#34d399"/>
+          <!-- Dot -->
+          <circle cx="88" cy="16" r="6" fill="#34d399" opacity="0.5"/>
+          <!-- Wordmark: baseline=88, cap-height ~72px so top≈16 — matches icon top=2, bottom=98 -->
+          <text x="112" y="88"
             font-family="'Manrope','Segoe UI',sans-serif"
             font-weight="800"
-            font-size="62"
-            letter-spacing="-2"><tspan fill="url(#hTextG)">medi</tspan><tspan fill="#34d399">BO</tspan></text>
+            font-size="78"
+            letter-spacing="-2"><tspan fill="#0f1f44">medi</tspan><tspan fill="#34d399">BO</tspan></text>
         </svg>
       </a>
 
@@ -518,30 +508,8 @@
           </p>
           <p class="mt-2 text-sm text-slate-400 font-medium">Powered by Medibo · GST compliant · Drug license verified</p>
 
-          <!-- Hero search -->
-          <div class="mt-8 bg-white rounded-2xl p-2 shadow-2xl shadow-navy-950/40 ring-1 ring-white/10 flex flex-col sm:flex-row gap-2">
-            <div class="flex-1 flex items-center gap-3 px-4 py-3">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 text-slate-400">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.34-4.34M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/>
-              </svg>
-              <input id="hero-search" type="text" placeholder="Search medicine, salt or manufacturer — e.g. Paracetamol 500mg" class="w-full text-navy-900 placeholder-slate-400 focus:outline-none text-base"/>
-            </div>
-            <button onclick="navigate('catalog')" class="btn-teal px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
-              Search
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0-4 4m4-4H3"/>
-              </svg>
-            </button>
-          </div>
-          <!-- Suggestions -->
-          <div class="mt-3 flex flex-wrap gap-2 text-xs">
-            <span class="text-slate-400 mr-1">Popular:</span>
-            <button onclick="navigate('catalog')" class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">Paracetamol</button>
-            <button onclick="navigate('catalog')" class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">Amoxicillin</button>
-            <button onclick="navigate('catalog')" class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">Insulin</button>
-            <button onclick="navigate('catalog')" class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">Cipla</button>
-            <button onclick="navigate('catalog')" class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10">Surgical gloves</button>
-          </div>
+
+
 
           <!-- CTAs -->
           <div class="mt-8 flex flex-col sm:flex-row gap-3">
@@ -3514,16 +3482,6 @@ function toast(msg) {
 /* -------------------------------------------------------------
    EVENT LISTENERS  (Supabase-aware)
 ------------------------------------------------------------- */
-document.getElementById('hero-search').addEventListener('keypress', e => {
-  if (e.key === 'Enter') {
-    filters.search = e.target.value;
-    navigate('catalog');
-    setTimeout(() => {
-      document.getElementById('global-search-input').value = filters.search;
-      fetchProducts(0);
-    }, 50);
-  }
-});
 document.getElementById('sort-select').addEventListener('change', e => {
   filters.sort = e.target.value;
   renderProducts();  // sort is client-side
