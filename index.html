@@ -30,7 +30,20 @@
     }
   });
 </script>
-<title>Medibo — Bulk Medicine Ordering for Pharmacies & Hospitals</title>
+<script>
+  // Run BEFORE paint — hide home view if another route is saved
+  (function() {
+    try {
+      var route = localStorage.getItem('medibo_route');
+      if (route && route !== 'home') {
+        var style = document.createElement('style');
+        style.id = 'route-override';
+        style.textContent = '#view-home { display: none !important; } #view-' + route + ' { display: block !important; }';
+        document.head.appendChild(style);
+      }
+    } catch(e) {}
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -3272,6 +3285,9 @@ document.addEventListener('change', e => {
       if (gsb) gsb.style.display = (savedRoute === 'cart') ? 'none' : '';
     }
   } catch(e) {}
+  // Remove the pre-paint style override now that JS has taken over
+  const overrideStyle = document.getElementById('route-override');
+  if (overrideStyle) overrideStyle.remove();
 
   renderHomeCategories();
   renderFilters();
