@@ -2266,6 +2266,7 @@ async function initAuth() {
     const params = new URLSearchParams(hash.replace('#', ''));
     const token = params.get('access_token');
     if (token) {
+      window._justLoggedIn = true;
       localStorage.setItem('medibo_session', JSON.stringify({ access_token: token }));
       window.location.hash = ''; // clean URL
     }
@@ -2284,7 +2285,15 @@ async function initAuth() {
         await loadProfile();
         // New user — no profile yet, show profile form
         if (!CURRENT_PROFILE) {
-          // Don't auto-open — user will click the header button to complete profile
+          // Only show profile form if Google just redirected back (fresh OAuth)
+          if (window._justLoggedIn) {
+            window._justLoggedIn = false;
+            openAuthModal();
+            showStep('profile');
+            const gName = user.user_metadata?.full_name || user.user_metadata?.name || '';
+            if (gName) document.getElementById('prof-name').value = gName;
+            if (user.email) document.getElementById('prof-email').value = user.email;
+          }
           updateAuthUI();
           return;
         }
