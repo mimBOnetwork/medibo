@@ -1381,18 +1381,6 @@
   </div>
 </footer>
 
-<!-- PRODUCT DETAIL MODAL -->
-<div id="product-modal" class="fixed inset-0 z-[80] hidden" onclick="if(event.target===this)closeProduct()">
-  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-  <div class="absolute inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="relative bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] overflow-y-auto shadow-2xl" id="product-modal-inner">
-      <!-- Close -->
-      <button onclick="closeProduct()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200">✕</button>
-      <div id="product-modal-content"></div>
-    </div>
-  </div>
-</div>
-
 <!-- Toast -->
 <div id="toast" class="toast"></div>
 
@@ -1941,76 +1929,6 @@ function closeSidebar() {
   document.body.style.overflow = '';
 }
 
-function openProduct(id) {
-  const p = PRODUCTS.find(x => x.id === id);
-  if (!p) return;
-  const safeId = id.replace(/'/g,"\\'");
-  const cartItem = CART.find(c => c.id === id);
-  const imgs = p.images && p.images.length > 0 ? p.images : [];
-
-  document.getElementById('product-modal-content').innerHTML = `
-    <!-- Image gallery -->
-    <div class="relative bg-gradient-to-br from-slate-50 to-white rounded-t-3xl overflow-hidden" style="height:280px;">
-      <div class="absolute top-4 left-4 z-10">${stockBadge(p.stock)}</div>
-      ${imgs.length > 0 ? `
-        <div class="relative w-full h-full" id="modal-img-wrap" data-imgs="${imgs.join('|||').replace(/"/g,'&quot;')}" data-cur="0"
-          ontouchstart="this._tx=event.touches[0].clientX"
-          ontouchend="(function(el,e){var dx=e.changedTouches[0].clientX-el._tx;if(Math.abs(dx)>30){var imgs=el.dataset.imgs.split('|||');var cur=parseInt(el.dataset.cur);var next=dx<0?(cur+1)%imgs.length:(cur-1+imgs.length)%imgs.length;el.dataset.cur=next;el.querySelector('img').src=imgs[next];el.querySelector('.modal-img-counter').textContent=(next+1)+'/'+imgs.length;};})(this,event)">
-          <img src="${imgs[0]}" class="w-full h-full object-contain p-4" onerror="this.style.display='none'">
-          ${imgs.length > 1 ? `
-            <button onclick="(function(){var el=document.getElementById('modal-img-wrap');var imgs=el.dataset.imgs.split('|||');var cur=parseInt(el.dataset.cur);var next=(cur-1+imgs.length)%imgs.length;el.dataset.cur=next;el.querySelector('img').src=imgs[next];el.querySelector('.modal-img-counter').textContent=(next+1)+'/'+imgs.length;})()" class="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 text-white flex items-center justify-center text-lg">‹</button>
-            <button onclick="(function(){var el=document.getElementById('modal-img-wrap');var imgs=el.dataset.imgs.split('|||');var cur=parseInt(el.dataset.cur);var next=(cur+1)%imgs.length;el.dataset.cur=next;el.querySelector('img').src=imgs[next];el.querySelector('.modal-img-counter').textContent=(next+1)+'/'+imgs.length;})()" class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 text-white flex items-center justify-center text-lg">›</button>
-            <span class="modal-img-counter absolute bottom-3 right-4 text-xs text-white bg-black/40 rounded-full px-2 py-0.5">1/${imgs.length}</span>
-          ` : ''}
-        </div>
-      ` : `<div class="w-full h-full flex items-center justify-center p-8">${productSvg(p,'large')}</div>`}
-    </div>
-
-    <!-- Details -->
-    <div class="p-5">
-      <div class="text-[10px] font-bold uppercase tracking-wider text-teal-600 mb-1">${p.mfr}</div>
-      <h2 class="font-display font-extrabold text-navy-900 text-xl leading-snug mb-1">${p.name}</h2>
-      <p class="text-sm text-slate-500 mb-4">${p.salt}</p>
-
-      <!-- Info grid -->
-      <div class="grid grid-cols-2 gap-3 mb-5">
-        <div class="bg-slate-50 rounded-2xl p-3">
-          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">MRP</div>
-          <div class="font-display font-extrabold text-navy-900 text-lg font-mono">₹${p.mrp}</div>
-        </div>
-        <div class="bg-slate-50 rounded-2xl p-3">
-          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Pack</div>
-          <div class="font-semibold text-navy-900 text-sm">${p.packQty || p.packType || '—'}</div>
-        </div>
-        <div class="bg-slate-50 rounded-2xl p-3">
-          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Category</div>
-          <div class="font-semibold text-navy-900 text-sm">${p.cat || '—'}</div>
-        </div>
-        <div class="bg-slate-50 rounded-2xl p-3">
-          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Status</div>
-          <div class="text-sm">${stockBadge(p.stock)}</div>
-        </div>
-        ${p.rx ? `<div class="col-span-2 bg-amber-50 border border-amber-200 rounded-2xl p-3 flex items-center gap-2">
-          <span class="text-amber-700 font-bold text-xs px-2 py-0.5 rounded-full bg-amber-100">Rx</span>
-          <span class="text-xs text-amber-700 font-medium">Prescription required</span>
-        </div>` : ''}
-      </div>
-
-      <!-- Add to cart -->
-      <div id="modal-cart-btn" data-cart-id="${p.id}" class="mb-2">${cartBtnHTML(p)}</div>
-      <p class="text-center text-xs text-slate-400">GST compliant · Drug license verified · Bulk pricing available</p>
-    </div>
-  `;
-
-  document.getElementById('product-modal').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeProduct() {
-  document.getElementById('product-modal').classList.add('hidden');
-  document.body.style.overflow = '';
-}
-
 function openMobileFilter() {
   document.getElementById('filter-sheet').style.transform = 'translateY(0)';
   document.getElementById('filter-overlay').classList.remove('hidden');
@@ -2146,14 +2064,14 @@ function productCardGrid(p) {
   const safeId = p.id.replace(/'/g,"\\'");
   return `
     <div class="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col" data-id="${p.id}">
-      <div class="relative bg-gradient-to-br from-slate-50 to-white overflow-hidden cursor-pointer" style="height:200px;" onclick="openProduct('${safeId}')">
+      <div class="relative bg-gradient-to-br from-slate-50 to-white overflow-hidden" style="height:200px;">
         ${p.deal >= 35 ? `<div class="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-full bg-teal-500 text-white text-[10px] font-bold uppercase tracking-wider">${p.deal}% off</div>` : ''}
         <div class="absolute top-3 right-3 z-10">${stockBadge(p.stock)}</div>
         <div class="w-full h-full">${productImageArea(p, 'large')}</div>
       </div>
       <div class="p-4 flex-1 flex flex-col">
         <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">${p.mfr}</div>
-        <h3 class="font-display font-bold text-navy-900 leading-snug mb-1 cursor-pointer hover:text-teal-600 transition-colors" onclick="openProduct('${safeId}')">${p.name}</h3>
+        <h3 class="font-display font-bold text-navy-900 leading-snug mb-1">${p.name}</h3>
         <div class="text-xs text-slate-500 mb-3">${p.salt}</div>
         <div class="mt-auto">
           <div class="flex items-baseline gap-2 mb-1">
