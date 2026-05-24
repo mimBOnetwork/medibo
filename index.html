@@ -3264,10 +3264,10 @@ document.addEventListener('change', e => {
   updateCartBadge(); saveCart();
   initAuth();
 
-  // Restore last visited route (skip cart on refresh — go to catalog instead)
+  // Restore last visited route
   try {
     const savedRoute = localStorage.getItem('medibo_route');
-    if (savedRoute && savedRoute !== 'home' && savedRoute !== 'cart') {
+    if (savedRoute && savedRoute !== 'home') {
       navigate(savedRoute);
     }
   } catch(e) {}
