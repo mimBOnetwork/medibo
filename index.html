@@ -2079,9 +2079,9 @@ function productCardGrid(p) {
   return `
     <div class="product-card bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col" data-id="${p.id}">
       <div class="relative bg-gradient-to-br from-slate-50 to-white overflow-hidden" style="height:200px;">
-        <div class="absolute top-3 left-3 right-3 z-10 flex items-start justify-between gap-2">
+        <div class="absolute top-3 left-3 right-3 z-10 flex items-center justify-between">
           <span class="px-2 py-0.5 rounded-full bg-orange-500 text-white text-[10px] font-bold tracking-wide whitespace-nowrap">7% Discount on PTR</span>
-          <span>${stockBadge(p.stock)}</span>
+          ${stockBadge(p.stock)}
         </div>
         <div class="w-full h-full">${productImageArea(p, 'large')}</div>
       </div>
