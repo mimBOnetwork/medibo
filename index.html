@@ -2284,11 +2284,9 @@ async function initAuth() {
         await loadProfile();
         // New user — no profile yet, show profile form
         if (!CURRENT_PROFILE) {
-          openAuthModal();
-          showStep('profile');
-          const gName = user.user_metadata?.full_name || user.user_metadata?.name || '';
-          if (gName) document.getElementById('prof-name').value = gName;
-          if (user.email) document.getElementById('prof-email').value = user.email;
+          // Don't auto-open — user will click the header button to complete profile
+          updateAuthUI();
+          return;
         }
         updateAuthUI();
         return;
@@ -2507,9 +2505,15 @@ function updateAuthUI() {
     btn.className = `hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition ${approved ? 'bg-teal-50 text-teal-800' : 'bg-amber-50 text-amber-800'}`;
     btn.onclick = showUserMenu;
   } else if (CURRENT_USER) {
-    label.textContent = 'Setup';
-    btn.className = 'hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-navy-900 text-sm font-semibold hover:bg-slate-200 transition';
-    btn.onclick = () => { openAuthModal(); showStep('profile'); };
+    label.textContent = 'Complete Profile';
+    btn.className = 'hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 text-amber-800 text-sm font-semibold hover:opacity-90 transition';
+    btn.onclick = () => {
+      openAuthModal();
+      showStep('profile');
+      const gName = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.user_metadata?.name || '';
+      if (gName) document.getElementById('prof-name').value = gName;
+      if (CURRENT_USER.email) document.getElementById('prof-email').value = CURRENT_USER.email;
+    };
   } else {
     label.textContent = 'Login';
     btn.className = 'hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-navy-900 text-sm font-semibold hover:bg-slate-200 transition';
