@@ -1926,52 +1926,18 @@ const _searchCache = {};
 
 let _fetchRetries = 0;
 
-const _LS_CACHE_TTL = 30 * 60 * 1000; // 30 min localStorage cache
-const _LS_CACHE_VER = 'v2'; // bump this to invalidate all caches
+const _LS_CACHE_TTL = 0; // always fetch fresh from Supabase — no stale cache
 
-function lsGet(key) {
-  try {
-    const raw = localStorage.getItem(_LS_CACHE_VER + key);
-    if (!raw) return null;
-    const { ts, data } = JSON.parse(raw);
-    if (Date.now() - ts > _LS_CACHE_TTL) { localStorage.removeItem(_LS_CACHE_VER + key); return null; }
-    return data;
-  } catch(e) { return null; }
-}
-function lsSet(key, data) {
-  try { localStorage.setItem(_LS_CACHE_VER + key, JSON.stringify({ ts: Date.now(), data })); } catch(e) {}
-}
+function lsGet(key) { return null; } // disabled — always fetch fresh
+function lsSet(key, data) {} // disabled
 
 async function fetchProducts(page, append) {
   page = page || 0;
   append = append || false;
   if (sbIsLoading) return;
 
-  // Build cache key
+  // Always fetch fresh from Supabase — no cache
   const cacheKey = 'mdb_' + [filters.search, sbActiveThClass, [...filters.manufacturers].sort().join(','), filters.maxPrice, page].join('|');
-
-  // 1. Check memory cache
-  if (!append && _searchCache[cacheKey]) {
-    const cached = _searchCache[cacheKey];
-    PRODUCTS.length = 0; PRODUCTS.push(...cached.products);
-    sbTotalCount = cached.total; sbCurrentPage = page;
-    renderProducts(); renderLoadMore();
-    document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
-    return;
-  }
-
-  // 2. Check localStorage cache (for browse — not search)
-  if (!append && !filters.search && page === 0) {
-    const lsCached = lsGet(cacheKey);
-    if (lsCached) {
-      PRODUCTS.length = 0; PRODUCTS.push(...lsCached.products);
-      sbTotalCount = lsCached.total; sbCurrentPage = 0;
-      renderProducts(); renderLoadMore();
-      document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
-      _searchCache[cacheKey] = lsCached;
-      return;
-    }
-  }
 
   sbIsLoading = true;
   showCatalogLoading(true);
@@ -2292,7 +2258,7 @@ function navigate(route) {
   const gsb = document.getElementById('global-search-bar');
   if (gsb) gsb.style.display = (route === 'cart') ? 'none' : '';
   if (route === 'catalog') { _fetchRetries = 0; renderProducts(); renderCategoryScrollBar(); }
-  if (route === 'cart') renderCart();
+  if (route === 'cart') { renderCart(); syncCartWithSupabase(); }
   if (route === 'orders') renderOrders();
   if (route === 'deals') renderDeals();
   if (route === 'categories') { navigate('catalog'); return; }
@@ -3202,6 +3168,29 @@ function updateQty(id, delta) {
 function updateCartBadge() {
   const total = CART.length; // number of unique products, not total qty
   document.getElementById('cart-badge').textContent = total;
+}
+
+async function syncCartWithSupabase() {
+  if (!CART || CART.length === 0) return;
+  try {
+    const names = CART.map(i => '"' + i.name.replace(/"/g, '\\"') + '"').join(',');
+    const res = await fetch(
+      SUPABASE_URL + '/rest/v1/MEDICINE?select=product_name,status,mrp,image_url_1&product_name=in.(' + encodeURIComponent('(' + names + ')') + ')',
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Accept': 'application/json' } }
+    );
+    if (!res.ok) return;
+    const rows = await res.json();
+    if (!Array.isArray(rows)) return;
+    let changed = false;
+    CART.forEach(item => {
+      const fresh = rows.find(r => r.product_name === item.name);
+      if (fresh) {
+        if (item.status !== fresh.status) { item.status = fresh.status; changed = true; }
+        if (fresh.mrp && item.mrp !== fresh.mrp) { item.mrp = fresh.mrp; changed = true; }
+      }
+    });
+    if (changed) { saveCart(); renderCart(); }
+  } catch(e) {}
 }
 
 function renderCart() {
