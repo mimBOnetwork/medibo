@@ -1161,68 +1161,84 @@
 <section id="view-profile" class="view">
   <div class="max-w-2xl mx-auto px-4 sm:px-6 py-10">
     <!-- Header -->
-    <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center gap-3 mb-6">
       <button onclick="navigate('home')" class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
       </button>
       <div>
         <h1 class="font-display font-extrabold text-2xl text-navy-900">My Profile</h1>
-        <p class="text-xs text-slate-500">View your account details</p>
+        <p class="text-xs text-slate-500">Your account details</p>
       </div>
     </div>
 
-    <!-- Avatar + name -->
-    <div class="bg-gradient-to-br from-navy-900 to-navy-800 rounded-3xl p-6 mb-5 flex items-center gap-4">
-      <div class="w-16 h-16 rounded-2xl bg-teal-400 flex items-center justify-center flex-shrink-0">
+    <!-- Avatar card -->
+    <div class="bg-gradient-to-br from-navy-900 to-navy-800 rounded-3xl p-5 mb-4 flex items-center gap-4">
+      <div class="w-14 h-14 rounded-2xl bg-teal-400 flex items-center justify-center flex-shrink-0">
         <span id="profile-avatar" class="font-display font-extrabold text-navy-900 text-2xl">?</span>
       </div>
       <div class="flex-1 min-w-0">
-        <div id="profile-name-display" class="font-display font-extrabold text-white text-xl truncate">—</div>
-        <div id="profile-email-display" class="text-teal-400 text-sm font-medium mt-0.5 truncate">—</div>
-        <div class="flex items-center gap-2 mt-2">
+        <div id="profile-name-display" class="font-display font-extrabold text-white text-lg truncate">—</div>
+        <div id="profile-email-display" class="text-teal-400 text-xs font-medium mt-0.5 truncate">—</div>
+        <div class="flex items-center gap-2 mt-1.5 flex-wrap">
           <span id="profile-customer-id" class="text-xs font-mono font-bold bg-white/10 text-white px-2 py-0.5 rounded-full">—</span>
-          <div id="profile-status-badge" class="flex items-center gap-1.5">
+          <div id="profile-status-badge" class="flex items-center gap-1">
             <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-            <span class="text-xs text-amber-400 font-semibold">Verification pending</span>
+            <span class="text-xs text-amber-400 font-semibold">Pending verification</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Profile details — read only -->
-    <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden mb-5">
-      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-        <span class="font-semibold text-navy-900 text-sm">Business Details</span>
-        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Read only</span>
+    <!-- Personal Info -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-4">
+      <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Personal Info</span>
+        <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Read only</span>
       </div>
       <div class="divide-y divide-slate-100">
-        <div class="px-5 py-4 flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Phone</span>
-          <span id="profile-phone" class="text-sm font-semibold text-navy-900">—</span>
-        </div>
-        <div class="px-5 py-4 flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Business Name</span>
-          <span id="profile-business" class="text-sm font-semibold text-navy-900 text-right max-w-[60%]">—</span>
-        </div>
-        <div class="px-5 py-4 flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Drug License</span>
-          <span id="profile-drug" class="text-sm font-semibold text-navy-900 font-mono">—</span>
-        </div>
-        <div class="px-5 py-4 flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">GSTIN</span>
-          <span id="profile-gstin" class="text-sm font-semibold text-navy-900 font-mono">—</span>
-        </div>
-        <div class="px-5 py-4 flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">City</span>
-          <span id="profile-city" class="text-sm font-semibold text-navy-900">—</span>
-        </div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">WhatsApp</span><span id="profile-whatsapp" class="text-sm font-semibold text-navy-900">—</span></div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">Other Contact</span><span id="profile-other-contact" class="text-sm font-semibold text-navy-900">—</span></div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">Email</span><span id="profile-email" class="text-sm font-semibold text-navy-900 truncate max-w-[60%]">—</span></div>
       </div>
     </div>
 
-    <!-- Info note -->
-    <div class="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-6 flex items-start gap-3">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
-      <p class="text-xs text-amber-700 font-medium">Profile details are locked after signup. Contact support to update your drug license or business details.</p>
+    <!-- Business Info -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-4">
+      <div class="px-4 py-3 bg-slate-50 border-b border-slate-100">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Business Info</span>
+      </div>
+      <div class="divide-y divide-slate-100">
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">Business Name</span><span id="profile-business" class="text-sm font-semibold text-navy-900 text-right max-w-[60%]">—</span></div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">Store Type</span><span id="profile-store-type" class="text-sm font-semibold text-navy-900">—</span></div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">Range</span><span id="profile-range" class="text-sm font-semibold text-navy-900">—</span></div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">Payment Term</span><span id="profile-payment-term" class="text-sm font-semibold text-navy-900">—</span></div>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-4">
+      <div class="px-4 py-3 bg-slate-50 border-b border-slate-100">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Address</span>
+      </div>
+      <div class="divide-y divide-slate-100">
+        <div class="px-4 py-3 flex items-start justify-between gap-4"><span class="text-xs text-slate-400 font-semibold flex-shrink-0">Address</span><span id="profile-address" class="text-sm font-semibold text-navy-900 text-right">—</span></div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">City</span><span id="profile-city" class="text-sm font-semibold text-navy-900">—</span></div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">State</span><span id="profile-state" class="text-sm font-semibold text-navy-900">—</span></div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">Pincode</span><span id="profile-pincode" class="text-sm font-semibold text-navy-900 font-mono">—</span></div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">Google Map</span><span id="profile-map" class="text-sm font-semibold text-teal-600">—</span></div>
+      </div>
+    </div>
+
+    <!-- Licenses -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden mb-4">
+      <div class="px-4 py-3 bg-slate-50 border-b border-slate-100">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Licenses</span>
+      </div>
+      <div class="divide-y divide-slate-100">
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">Drug License 1</span><span id="profile-dl1" class="text-sm font-semibold text-navy-900 font-mono">—</span></div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">Drug License 2</span><span id="profile-dl2" class="text-sm font-semibold text-navy-900 font-mono">—</span></div>
+        <div class="px-4 py-3 flex items-center justify-between"><span class="text-xs text-slate-400 font-semibold">GSTIN</span><span id="profile-gstin" class="text-sm font-semibold text-navy-900 font-mono">—</span></div>
+      </div>
     </div>
 
     <!-- Logout -->
@@ -2556,21 +2572,32 @@ function renderProfile() {
   document.getElementById('profile-avatar').textContent = name.charAt(0).toUpperCase();
   document.getElementById('profile-name-display').textContent = name;
   document.getElementById('profile-email-display').textContent = CURRENT_USER.email || '';
-  document.getElementById('profile-customer-id').textContent = p?.customer_id || 'ID pending';
-  document.getElementById('profile-phone').textContent = p?.phone || p?.whatsapp_number || '—';
-  document.getElementById('profile-business').textContent = p?.business_name || p?.store_type || '—';
-  document.getElementById('profile-drug').textContent = p?.dl1 || p?.drug_license || '—';
-  document.getElementById('profile-gstin').textContent = p?.gstin || '—';
+  document.getElementById('profile-customer-id').textContent = p?.customer_id || '—';
+  document.getElementById('profile-email').textContent = CURRENT_USER.email || '—';
+  document.getElementById('profile-whatsapp').textContent = p?.whatsapp_number || p?.phone || '—';
+  document.getElementById('profile-other-contact').textContent = p?.other_contact || '—';
+  document.getElementById('profile-business').textContent = p?.business_name || '—';
+  document.getElementById('profile-store-type').textContent = p?.store_type || '—';
+  document.getElementById('profile-range').textContent = p?.range || '—';
+  document.getElementById('profile-payment-term').textContent = p?.payment_term || '—';
+  document.getElementById('profile-address').textContent = p?.address_line || '—';
   document.getElementById('profile-city').textContent = p?.city || '—';
+  document.getElementById('profile-state').textContent = p?.state || '—';
+  document.getElementById('profile-pincode').textContent = p?.pincode || '—';
+  document.getElementById('profile-dl1').textContent = p?.dl1 || p?.drug_license || '—';
+  document.getElementById('profile-dl2').textContent = p?.dl2 || '—';
+  document.getElementById('profile-gstin').textContent = p?.gstin || '—';
 
-  // Update verification badge
+  const mapEl = document.getElementById('profile-map');
+  if (p?.google_map_link) {
+    mapEl.innerHTML = `<a href="${p.google_map_link}" target="_blank" class="text-teal-600 font-semibold text-sm">View on Maps →</a>`;
+  } else { mapEl.textContent = '—'; }
+
   const badge = document.getElementById('profile-status-badge');
   if (badge) {
-    if (approved) {
-      badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span><span class="text-xs text-slate-400 font-medium">Verified · Can place orders</span>`;
-    } else {
-      badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span class="text-xs text-amber-500 font-semibold">Verification pending · Cannot order yet</span>`;
-    }
+    badge.innerHTML = approved
+      ? `<span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span><span class="text-xs text-teal-400 font-semibold">Verified · Can place orders</span>`
+      : `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span class="text-xs text-amber-400 font-semibold">Pending verification</span>`;
   }
 }
 
