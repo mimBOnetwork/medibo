@@ -1645,7 +1645,7 @@
 
         <p id="prof-error" class="text-xs text-rose-500 font-semibold hidden bg-rose-50 px-4 py-2.5 rounded-xl"></p>
 
-        <button onclick="confirmAndSubmit()" class="w-full py-4 rounded-2xl bg-navy-900 text-white font-bold text-base hover:bg-navy-800 active:scale-95 transition">
+        <button onclick="confirmAndSubmit()" id="submit-btn" class="w-full py-4 rounded-2xl bg-navy-900 text-white font-bold text-base hover:bg-navy-800 active:scale-95 transition">
           Submit →
         </button>
         <div class="h-2"></div>
@@ -1664,12 +1664,10 @@
   </div>
 </div>
 
-<!-- SUBMIT CONFIRMATION MODAL -->
-<div id="submit-confirm-modal" class="fixed inset-0 z-[95] hidden items-end justify-center p-4 pb-8" style="background:rgba(0,0,0,0.4);">
-  <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl px-5 py-4 flex items-center gap-3">
-    <p class="text-sm text-navy-900 font-medium flex-1">Once submitted, you cannot edit these details.</p>
-    <button onclick="cancelSubmit()" class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs flex-shrink-0">Back</button>
-    <button onclick="cancelSubmit();saveProfile()" class="px-3 py-1.5 rounded-xl bg-navy-900 text-white font-bold text-xs flex-shrink-0">Submit</button>
+<!-- SUBMIT CONFIRMATION TOAST -->
+<div id="submit-confirm-modal" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[95] hidden">
+  <div class="bg-navy-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl whitespace-nowrap">
+    ⚠️ Once submitted, you cannot edit these details.
   </div>
 </div>
 
@@ -2324,12 +2322,17 @@ function selectOption(btn, group, value) {
 }
 
 function confirmAndSubmit() {
-  // Show confirmation modal
-  document.getElementById('submit-confirm-modal').style.display = 'flex';
+  const toast = document.getElementById('submit-confirm-modal');
+  toast.classList.remove('hidden');
+  // Auto-dismiss after 4s and submit
+  setTimeout(() => {
+    toast.classList.add('hidden');
+    saveProfile();
+  }, 4000);
 }
 
 function cancelSubmit() {
-  document.getElementById('submit-confirm-modal').style.display = 'none';
+  document.getElementById('submit-confirm-modal').classList.add('hidden');
 }
 
 async function checkCustomerId(val) {
