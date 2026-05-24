@@ -765,18 +765,18 @@
      ========================================================= -->
 <section id="view-catalog" class="view">
 
-  <!-- Category horizontal scroll bar -->
-  <div class="bg-white border-b border-slate-100 sticky top-14 lg:top-16 z-30">
+  <!-- Category horizontal scroll — hidden during search -->
+  <div id="cat-scroll-section" class="bg-white border-b border-slate-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div id="category-scroll-bar" class="flex items-center gap-2 overflow-x-auto py-3 scrollbar-hide" style="-webkit-overflow-scrolling:touch;scroll-behavior:smooth;">
-        <button onclick="selectCategoryTab('')" data-cat="" class="cat-tab flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border-2 border-navy-900 bg-navy-900 text-white transition whitespace-nowrap">All</button>
+      <div id="category-scroll-bar" class="flex items-center gap-3 overflow-x-auto py-3 scrollbar-hide" style="-webkit-overflow-scrolling:touch;">
+        <!-- filled by renderCategoryScrollBar() -->
       </div>
     </div>
   </div>
 
   <!-- Products -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="flex items-center justify-between mb-4">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center justify-between mb-3">
       <div class="text-sm text-slate-600">
         <span id="result-count" class="font-bold text-navy-900">0</span> products
       </div>
@@ -797,17 +797,12 @@
         </div>
       </div>
     </div>
-    <div id="products-grid" class="mt-2"></div>
+    <div id="products-grid" class="mt-1"></div>
   </div>
 </section>
 
-<!-- =========================================================
-     VIEW: CATEGORIES (kept as alias — redirects to catalog)
-     ========================================================= -->
-<section id="view-categories" class="view">
-  <!-- immediately redirect to catalog -->
-  <script>if(document.getElementById('view-categories').classList.contains('active')){navigate('catalog');}</script>
-</section>
+<!-- categories alias -->
+<section id="view-categories" class="view"></section>
 
 <!-- =========================================================
      VIEW: BULK UPLOAD
@@ -2111,12 +2106,7 @@ document.querySelectorAll('.route-link').forEach(link => {
 
 // Global search bar — always visible, drives catalog
 document.getElementById('global-search-input').addEventListener('input', function(e) {
-  filters.search = e.target.value;
-  // Sync with catalog search input
-  const cs = document.getElementById('global-search-input');
-  if (cs) cs.value = e.target.value;
-  if (currentView !== 'catalog') navigate('catalog');
-  debounce(() => fetchProducts(0), 150);
+  onSearchInput(e.target.value);
 });
 document.getElementById('global-search-input').addEventListener('keypress', function(e) {
   if (e.key === 'Enter' && currentView !== 'catalog') navigate('catalog');
@@ -2141,42 +2131,52 @@ function renderHomeCategories() {
   document.getElementById('home-categories').innerHTML = CATEGORIES.slice(0,6).map(renderCategoryCard).join('');
 }
 function selectCategoryTab(cat) {
+  // Clear search box
+  const searchInput = document.getElementById('global-search-input');
+  if (searchInput) { searchInput.value = ''; filters.search = ''; }
+  // Show category bar
+  const catSection = document.getElementById('cat-scroll-section');
+  if (catSection) catSection.style.display = '';
+
   sbActiveThClass = cat;
-  // Update tab styles
+  // Update active state on cards
   document.querySelectorAll('.cat-tab').forEach(b => {
     const active = b.dataset.cat === cat;
-    b.className = 'cat-tab flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border-2 transition whitespace-nowrap ' +
-      (active ? 'border-navy-900 bg-navy-900 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-navy-900');
+    const inner = b.querySelector('.cat-inner');
+    if (inner) {
+      inner.style.boxShadow = active ? '0 0 0 3px #0f1f44' : '';
+      inner.style.borderColor = active ? '#0f1f44' : '';
+    }
   });
   _fetchRetries = 0;
   fetchProducts(0);
   window.scrollTo({ top: 0 });
 }
 
-const THERAPEUTIC_CLASSES = [
-  'Anti-Infectives','Cardiovascular','Gastro-Intestinal','Neuro / CNS','Respiratory',
-  'Diabetic Care','Dermatology','Vitamins & Nutrients','Hormones','Oncology',
-  'Blood Related','Urology','Ophthal','Musculoskeletal','Women\'s Health',
-  'ENT','Dental','Ayurvedic / Herbal','Immunosuppressants','Nephrology',
-  'Psychiatric','Hepatology'
-];
-
 function renderCategoryScrollBar() {
   const bar = document.getElementById('category-scroll-bar');
-  if (!bar) return;
-  const existing = bar.querySelector('[data-cat=""]');
-  // Keep "All" button, add category pills
-  const pills = THERAPEUTIC_CLASSES.map(cat =>
-    `<button onclick="selectCategoryTab('${cat.replace(/'/g,"\\'")}')" data-cat="${cat}"
-      class="cat-tab flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border-2 border-slate-200 bg-white text-slate-600 hover:border-navy-900 transition whitespace-nowrap">
-      ${cat}
-    </button>`
-  ).join('');
-  if (existing) {
-    existing.insertAdjacentHTML('afterend', pills);
-  } else {
-    bar.innerHTML = `<button onclick="selectCategoryTab('')" data-cat="" class="cat-tab flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold border-2 border-navy-900 bg-navy-900 text-white transition whitespace-nowrap">All</button>` + pills;
-  }
+  if (!bar || bar.dataset.built) return;
+  bar.dataset.built = '1';
+
+  // "All" card first
+  const allCard = `<button onclick="selectCategoryTab('')" data-cat="" class="cat-tab flex-shrink-0">
+    <div class="cat-inner w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-navy-900 bg-navy-900 flex flex-col items-center justify-center gap-1 transition active:scale-95" style="box-shadow:0 0 0 3px #0f1f44">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+      <span class="text-[10px] font-bold text-white leading-tight text-center px-1">All</span>
+    </div>
+  </button>`;
+
+  const pills = CATEGORIES.map(c => `
+    <button onclick="selectCategoryTab('${c.name.replace(/'/g,"\\'")}')" data-cat="${c.name}" class="cat-tab flex-shrink-0">
+      <div class="cat-inner w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-slate-200 bg-white flex flex-col items-center justify-center gap-1.5 hover:border-navy-900 transition active:scale-95">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br ${c.color} flex items-center justify-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="${c.icon}"/></svg>
+        </div>
+        <span class="text-[9px] font-bold text-navy-900 leading-tight text-center px-1 line-clamp-2">${c.name}</span>
+      </div>
+    </button>`).join('');
+
+  bar.innerHTML = allCard + pills;
 }
 
 function renderAllCategories() {
@@ -2186,6 +2186,19 @@ function renderAllCategories() {
 function navigateToCategory(name) {
   navigate('catalog');
   setTimeout(() => selectCategoryTab(name), 100);
+}
+
+function onSearchInput(val) {
+  filters.search = val.trim();
+  const catSection = document.getElementById('cat-scroll-section');
+  if (catSection) catSection.style.display = filters.search ? 'none' : '';
+  if (filters.search) {
+    // Reset category when searching
+    sbActiveThClass = '';
+  }
+  if (currentView !== 'catalog') navigate('catalog');
+  clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(() => { _fetchRetries = 0; fetchProducts(0); }, 150);
 }
 
 /* -------------------------------------------------------------
@@ -3206,10 +3219,6 @@ function toast(msg) {
 /* -------------------------------------------------------------
    EVENT LISTENERS  (Supabase-aware)
 ------------------------------------------------------------- */
-document.getElementById('global-search-input').addEventListener('input', e => {
-  filters.search = e.target.value;
-  debounce(() => fetchProducts(0), 400);
-});
 document.getElementById('hero-search').addEventListener('keypress', e => {
   if (e.key === 'Enter') {
     filters.search = e.target.value;
