@@ -1495,117 +1495,138 @@
     </div>
 
     <!-- STEP 2: Pharmacy Details (new users) -->
-    <div id="auth-step-profile" class="hidden overflow-y-auto" style="max-height:85vh;">
-      <div class="px-6 pt-6 pb-2 sticky top-0 bg-white z-10 border-b border-slate-100">
-        <h2 class="font-display font-extrabold text-xl text-navy-900 mb-0.5">Complete your profile</h2>
-        <p class="text-xs text-slate-400">All fields required except marked optional</p>
+    <div id="auth-step-profile" class="hidden" style="max-height:88vh;overflow-y:auto;">
+
+      <!-- Sticky header -->
+      <div class="sticky top-0 bg-white z-10 px-6 pt-5 pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-navy-900 flex items-center justify-center flex-shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 text-teal-400"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/></svg>
+          </div>
+          <div>
+            <h2 class="font-display font-extrabold text-lg text-navy-900 leading-tight">Business Registration</h2>
+            <p class="text-xs text-slate-400">Required once · Cannot be edited later</p>
+          </div>
+        </div>
       </div>
-      <div class="px-6 py-4 space-y-4">
 
-        <!-- Customer Name -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Customer Name *</label>
-          <input id="prof-name" type="text" placeholder="Full name" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        </div>
+      <div class="px-6 py-5 space-y-5">
 
-        <!-- Range -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Range *</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" onclick="selectOption(this,'prof-range','INSIDE RAIPUR CITY')" data-group="prof-range" class="option-btn px-3 py-3 rounded-xl border-2 border-slate-200 text-sm font-semibold text-slate-600 hover:border-teal-400 transition text-center">Inside Raipur City</button>
-            <button type="button" onclick="selectOption(this,'prof-range','OUTSIDE RAIPUR CITY')" data-group="prof-range" class="option-btn px-3 py-3 rounded-xl border-2 border-slate-200 text-sm font-semibold text-slate-600 hover:border-teal-400 transition text-center">Outside Raipur City</button>
-          </div>
-          <input type="hidden" id="prof-range"/>
-        </div>
+        <!-- Section: Personal -->
+        <div class="bg-slate-50 rounded-2xl p-4 space-y-3">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Personal Info</div>
 
-        <!-- Store Type -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Store Type *</label>
-          <div class="grid grid-cols-3 gap-2">
-            <button type="button" onclick="selectOption(this,'prof-store-type','PHARMACY')" data-group="prof-store-type" class="option-btn px-2 py-3 rounded-xl border-2 border-slate-200 text-xs font-semibold text-slate-600 hover:border-teal-400 transition text-center">Pharmacy</button>
-            <button type="button" onclick="selectOption(this,'prof-store-type','HOSPITAL PHARMACY')" data-group="prof-store-type" class="option-btn px-2 py-3 rounded-xl border-2 border-slate-200 text-xs font-semibold text-slate-600 hover:border-teal-400 transition text-center">Hospital Pharmacy</button>
-            <button type="button" onclick="selectOption(this,'prof-store-type','CLINIC')" data-group="prof-store-type" class="option-btn px-2 py-3 rounded-xl border-2 border-slate-200 text-xs font-semibold text-slate-600 hover:border-teal-400 transition text-center">Clinic</button>
-          </div>
-          <input type="hidden" id="prof-store-type"/>
-        </div>
-
-        <!-- Payment Term -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Payment Term *</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" onclick="selectOption(this,'prof-payment-term','ADVANCE PAYMENT')" data-group="prof-payment-term" class="option-btn px-3 py-3 rounded-xl border-2 border-slate-200 text-sm font-semibold text-slate-600 hover:border-teal-400 transition text-center">Advance Payment</button>
-            <button type="button" onclick="selectOption(this,'prof-payment-term','COD')" data-group="prof-payment-term" class="option-btn px-3 py-3 rounded-xl border-2 border-slate-200 text-sm font-semibold text-slate-600 hover:border-teal-400 transition text-center">COD</button>
-          </div>
-          <input type="hidden" id="prof-payment-term"/>
-        </div>
-
-        <!-- Address -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Address Line *</label>
-          <textarea id="prof-address" placeholder="Shop no, building, street, area" rows="2" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 resize-none" style="font-size:16px"></textarea>
-        </div>
-
-        <!-- Pincode → auto-fill city & state -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Pincode * <span class="text-teal-500 font-normal normal-case">(auto-fills city & state)</span></label>
-          <input id="prof-pincode" type="tel" maxlength="6" placeholder="6-digit pincode" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px" oninput="lookupPincode(this.value)"/>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">City *</label>
-            <input id="prof-city" type="text" placeholder="Auto-filled" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 bg-slate-50" style="font-size:16px" readonly/>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">Customer Name *</label>
+            <input id="prof-name" type="text" placeholder="Full name" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
           </div>
+
           <div>
-            <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">State *</label>
-            <input id="prof-state" type="text" placeholder="Auto-filled" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 bg-slate-50" style="font-size:16px" readonly/>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">WhatsApp Number *</label>
+            <input id="prof-whatsapp" type="tel" placeholder="10-digit number" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">Other Contact Number *</label>
+            <input id="prof-other-contact" type="tel" placeholder="Alternate number" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">Email *</label>
+            <input id="prof-email" type="email" readonly class="w-full px-3.5 py-2.5 rounded-xl border border-slate-100 bg-slate-100 text-sm text-slate-400" style="font-size:16px"/>
           </div>
         </div>
 
-        <!-- WhatsApp -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">WhatsApp Number *</label>
-          <input id="prof-whatsapp" type="tel" placeholder="+91 XXXXX XXXXX" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
+        <!-- Section: Business -->
+        <div class="bg-slate-50 rounded-2xl p-4 space-y-3">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Business Info</div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-600 mb-1.5 block">Range *</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="selectOption(this,'prof-range','INSIDE RAIPUR CITY')" data-group="prof-range" class="option-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition">🏙️ Inside Raipur</button>
+              <button type="button" onclick="selectOption(this,'prof-range','OUTSIDE RAIPUR CITY')" data-group="prof-range" class="option-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition">🗺️ Outside Raipur</button>
+            </div>
+            <input type="hidden" id="prof-range"/>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-600 mb-1.5 block">Store Type *</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="selectOption(this,'prof-store-type','PHARMACY')" data-group="prof-store-type" class="option-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition">💊 Pharmacy</button>
+              <button type="button" onclick="selectOption(this,'prof-store-type','HOSPITAL PHARMACY')" data-group="prof-store-type" class="option-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition">🏥 Hospital</button>
+              <button type="button" onclick="selectOption(this,'prof-store-type','CLINIC')" data-group="prof-store-type" class="option-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition">🩺 Clinic</button>
+            </div>
+            <input type="hidden" id="prof-store-type"/>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-600 mb-1.5 block">Payment Term *</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="selectOption(this,'prof-payment-term','ADVANCE PAYMENT')" data-group="prof-payment-term" class="option-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition">💳 Advance</button>
+              <button type="button" onclick="selectOption(this,'prof-payment-term','COD')" data-group="prof-payment-term" class="option-btn py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition">💵 COD</button>
+            </div>
+            <input type="hidden" id="prof-payment-term"/>
+          </div>
         </div>
 
-        <!-- Other Contact -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Other Contact Number *</label>
-          <input id="prof-other-contact" type="tel" placeholder="Alternate number" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
+        <!-- Section: Address -->
+        <div class="bg-slate-50 rounded-2xl p-4 space-y-3">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Address</div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">Address Line *</label>
+            <textarea id="prof-address" placeholder="Shop no, building, street, area" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 resize-none" style="font-size:16px"></textarea>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">Pincode * <span class="text-teal-500 font-normal">(auto-fills city & state)</span></label>
+            <input id="prof-pincode" type="tel" maxlength="6" placeholder="6-digit pincode" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px" oninput="lookupPincode(this.value)"/>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-semibold text-slate-600 mb-1 block">City *</label>
+              <input id="prof-city" type="text" placeholder="e.g. Raipur" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-600 mb-1 block">State *</label>
+              <input id="prof-state" type="text" placeholder="e.g. Chhattisgarh" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">Google Map Link <span class="text-slate-400 font-normal">(optional)</span></label>
+            <input id="prof-map-link" type="url" placeholder="https://maps.google.com/..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
+          </div>
         </div>
 
-        <!-- Email (auto-filled) -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Email *</label>
-          <input id="prof-email" type="email" placeholder="Auto-filled from Google" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-slate-50 text-slate-500" style="font-size:16px" readonly/>
+        <!-- Section: Licenses -->
+        <div class="bg-slate-50 rounded-2xl p-4 space-y-3">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Licenses & Compliance</div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">Drug License 1 (DL 1) *</label>
+            <input id="prof-dl1" type="text" placeholder="DL number 1" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono" style="font-size:16px"/>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">Drug License 2 (DL 2) *</label>
+            <input id="prof-dl2" type="text" placeholder="DL number 2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono" style="font-size:16px"/>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">GST Number <span class="text-slate-400 font-normal">(optional)</span></label>
+            <input id="prof-gstin" type="text" placeholder="15-digit GSTIN" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono" style="font-size:16px"/>
+          </div>
         </div>
 
-        <!-- DL 1 -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Drug License 1 (DL 1) *</label>
-          <input id="prof-dl1" type="text" placeholder="DL number 1" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 font-mono" style="font-size:16px"/>
-        </div>
+        <p id="prof-error" class="text-xs text-rose-500 font-semibold hidden bg-rose-50 px-4 py-2.5 rounded-xl"></p>
 
-        <!-- DL 2 -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Drug License 2 (DL 2) *</label>
-          <input id="prof-dl2" type="text" placeholder="DL number 2" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 font-mono" style="font-size:16px"/>
-        </div>
-
-        <!-- GST (optional) -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">GST Number <span class="text-slate-400 font-normal normal-case">(optional)</span></label>
-          <input id="prof-gstin" type="text" placeholder="15-digit GSTIN" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 font-mono" style="font-size:16px"/>
-        </div>
-
-        <!-- Google Map Link (optional) -->
-        <div>
-          <label class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Google Map Link <span class="text-slate-400 font-normal normal-case">(optional)</span></label>
-          <input id="prof-map-link" type="url" placeholder="https://maps.google.com/..." class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        </div>
-
-        <p id="prof-error" class="text-xs text-rose-500 hidden font-semibold"></p>
-        <button onclick="saveProfile()" class="w-full py-3.5 rounded-xl bg-navy-900 text-white font-bold text-sm hover:bg-navy-800 transition">Complete Signup →</button>
-        <div class="h-4"></div>
+        <button onclick="saveProfile()" class="w-full py-4 rounded-2xl bg-navy-900 text-white font-bold text-base hover:bg-navy-800 active:scale-95 transition">
+          Complete Registration →
+        </button>
+        <div class="h-2"></div>
       </div>
     </div>
 
@@ -2263,9 +2284,11 @@ function signInWithGoogle() {
 
 function selectOption(btn, group, value) {
   document.querySelectorAll(`[data-group="${group}"]`).forEach(b => {
-    b.className = b.className.replace('border-teal-500 bg-teal-50 text-teal-700', 'border-slate-200 text-slate-600');
+    b.classList.remove('border-teal-500', 'bg-teal-50', 'text-teal-700');
+    b.classList.add('border-slate-200', 'text-slate-600', 'bg-white');
   });
-  btn.className = btn.className.replace('border-slate-200 text-slate-600', 'border-teal-500 bg-teal-50 text-teal-700');
+  btn.classList.remove('border-slate-200', 'text-slate-600', 'bg-white');
+  btn.classList.add('border-teal-500', 'bg-teal-50', 'text-teal-700');
   document.getElementById(group).value = value;
 }
 
