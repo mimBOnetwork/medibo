@@ -2260,17 +2260,19 @@ let CURRENT_USER = null;
 let CURRENT_PROFILE = null;
 
 async function initAuth() {
-  // Check for OAuth callback (hash contains access_token)
+  // Check for fresh Google OAuth callback
   const hash = window.location.hash;
   if (hash && hash.includes('access_token')) {
     const params = new URLSearchParams(hash.replace('#', ''));
     const token = params.get('access_token');
     if (token) {
-      window._justLoggedIn = true;
       localStorage.setItem('medibo_session', JSON.stringify({ access_token: token }));
-      window.location.hash = ''; // clean URL
+      localStorage.setItem('medibo_fresh_login', '1');
+      window.location.hash = '';
     }
   }
+
+  const freshLogin = localStorage.getItem('medibo_fresh_login') === '1';
 
   // Restore session
   try {
@@ -2283,20 +2285,25 @@ async function initAuth() {
         const user = await res.json();
         CURRENT_USER = { ...user, access_token: session.access_token };
         await loadProfile();
-        // New user — no profile yet, show profile form
+
         if (!CURRENT_PROFILE) {
-          // Only show profile form if Google just redirected back (fresh OAuth)
-          if (window._justLoggedIn) {
-            window._justLoggedIn = false;
-            openAuthModal();
-            showStep('profile');
-            const gName = user.user_metadata?.full_name || user.user_metadata?.name || '';
-            if (gName) document.getElementById('prof-name').value = gName;
-            if (user.email) document.getElementById('prof-email').value = user.email;
+          // Only show registration form if this is a fresh Google login
+          if (freshLogin) {
+            localStorage.removeItem('medibo_fresh_login');
+            setTimeout(() => {
+              openAuthModal();
+              showStep('profile');
+              const gName = user.user_metadata?.full_name || user.user_metadata?.name || '';
+              if (gName) document.getElementById('prof-name').value = gName;
+              if (user.email) document.getElementById('prof-email').value = user.email;
+            }, 300);
           }
+          // No profile but not fresh login — just show Login button, do nothing
           updateAuthUI();
           return;
         }
+
+        localStorage.removeItem('medibo_fresh_login');
         updateAuthUI();
         return;
       }
@@ -2513,17 +2520,8 @@ function updateAuthUI() {
     btn.title = approved ? 'Account verified' : 'Verification pending';
     btn.className = `hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition ${approved ? 'bg-teal-50 text-teal-800' : 'bg-amber-50 text-amber-800'}`;
     btn.onclick = showUserMenu;
-  } else if (CURRENT_USER) {
-    label.textContent = 'Complete Profile';
-    btn.className = 'hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 text-amber-800 text-sm font-semibold hover:opacity-90 transition';
-    btn.onclick = () => {
-      openAuthModal();
-      showStep('profile');
-      const gName = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.user_metadata?.name || '';
-      if (gName) document.getElementById('prof-name').value = gName;
-      if (CURRENT_USER.email) document.getElementById('prof-email').value = CURRENT_USER.email;
-    };
   } else {
+    // Not logged in OR logged in but no profile — always show Login
     label.textContent = 'Login';
     btn.className = 'hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-navy-900 text-sm font-semibold hover:bg-slate-200 transition';
     btn.onclick = openAuthModal;
