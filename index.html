@@ -37,24 +37,13 @@
     _lastY = y;
   }, { passive: false });
 
-  // Intercept browser refresh — redirect back to same page with state preserved
-  window.addEventListener('beforeunload', function(e) {
-    // Save state before any unload
-    try { localStorage.setItem('medibo_unloading', '1'); } catch(ex) {}
+  // Always open homepage on next visit
+  window.addEventListener('beforeunload', function() {
+    try { localStorage.removeItem('medibo_route'); } catch(e) {}
   });
 </script>
 <script>
-  // Run BEFORE paint — show only the saved route, hide everything else
-  (function() {
-    try {
-      var route = localStorage.getItem('medibo_route') || 'home';
-      var style = document.createElement('style');
-      style.id = 'route-override';
-      // Hide ALL views, then show only the target one
-      style.textContent = '.view { display: none !important; } #view-' + route + ' { display: block !important; animation: none !important; }';
-      document.head.appendChild(style);
-    } catch(e) {}
-  })();
+  // Always show homepage on load — no route restoration
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3601,19 +3590,13 @@ document.addEventListener('change', e => {
    INIT  (async bootstrap)
 ------------------------------------------------------------- */
 (async function init() {
-  // Restore route FIRST before anything renders
+  // Always open homepage — route is cleared on page unload
   try {
-    const savedRoute = localStorage.getItem('medibo_route') || 'home';
+    const savedRoute = 'home';
     currentView = savedRoute;
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    const el = document.getElementById('view-' + savedRoute);
+    const el = document.getElementById('view-home');
     if (el) el.classList.add('active');
-    document.querySelectorAll('[data-route]').forEach(a => {
-      a.classList.toggle('active', a.dataset.route === savedRoute);
-    });
-    const gsb = document.getElementById('global-search-bar');
-    if (gsb) gsb.style.display = (savedRoute === 'cart') ? 'none' : '';
-    // Remove the pre-paint override now that JS classes are set
     const overrideStyle = document.getElementById('route-override');
     if (overrideStyle) overrideStyle.remove();
   } catch(e) {}
