@@ -1960,13 +1960,30 @@ const _LS_CACHE_TTL = 0; // always fetch fresh from Supabase — no stale cache
 function lsGet(key) { return null; } // disabled — always fetch fresh
 function lsSet(key, data) {} // disabled
 
+const _catCache = {}; // fast in-memory cache per category
+
 async function fetchProducts(page, append) {
   page = page || 0;
   append = append || false;
   if (sbIsLoading) return;
 
-  // Always fetch fresh from Supabase — no cache
-  const cacheKey = 'mdb_' + [filters.search, sbActiveThClass, [...filters.manufacturers].sort().join(','), filters.maxPrice, page].join('|');
+  // Fast cache for category page 0 — instant on repeat visits
+  const cacheKey = (sbActiveThClass || 'all') + '|' + page;
+  if (!append && page === 0 && _catCache[cacheKey]) {
+    const cached = _catCache[cacheKey];
+    PRODUCTS.length = 0; PRODUCTS.push(...cached);
+    sbCurrentPage = 0;
+    _renderedCount = 0;
+    renderProducts(false);
+    renderLoadMore();
+    const placeholder = document.getElementById('catalog-placeholder');
+    const pgrid = document.getElementById('products-grid');
+    if (placeholder) { placeholder.classList.add('hidden'); placeholder.style.display = ''; }
+    if (pgrid) pgrid.classList.remove('hidden');
+    return;
+  }
+
+  // Always fetch fresh — no stale cache
 
   sbIsLoading = true;
   // Show loading bar only during search, not on regular browse
@@ -2003,13 +2020,14 @@ async function fetchProducts(page, append) {
       params['marketer'] = 'in.(' + list + ')';
     }
 
-    const { data: rows, total } = await sbRest('MEDICINE', params, {
-      count: true,
+    const { data: rows } = await sbRest('MEDICINE', params, {
       range: from + '-' + to,
       rawParams
     });
 
-    sbTotalCount = (total != null) ? total : (rows ? rows.length : 0);
+    // Use known category count instead of expensive COUNT(*) query
+    const cat = sbActiveThClass ? CATEGORIES.find(c => c.dbClass === sbActiveThClass) : null;
+    sbTotalCount = cat ? cat.count : (rows ? rows.length + from : 0);
     sbCurrentPage = page;
     _fetchRetries = 0;
 
@@ -2052,14 +2070,8 @@ async function fetchProducts(page, append) {
     } else {
       PRODUCTS.length = 0;
       PRODUCTS.push(...filtered);
-      // Memory cache
-      _searchCache[cacheKey] = { products: filtered.slice(), total: sbTotalCount };
-      const keys = Object.keys(_searchCache);
-      if (keys.length > 20) delete _searchCache[keys[0]];
-      // localStorage cache for browse (not search)
-      if (!filters.search && page === 0) {
-        lsSet(cacheKey, { products: filtered.slice(), total: sbTotalCount });
-      }
+      // Cache first page per category for instant repeat visits
+      if (page === 0) _catCache[(sbActiveThClass || 'all') + '|0'] = filtered.slice();
     }
 
     renderProducts(append);
