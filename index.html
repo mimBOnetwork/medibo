@@ -837,8 +837,7 @@
       </div>
     </div>
     <!-- Placeholder shown while fetching -->
-    <div id="catalog-placeholder" class="flex flex-col items-center justify-center py-24 gap-4 text-center">
-      <svg class="w-10 h-10 text-teal-400 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+    <div id="catalog-placeholder" class="flex flex-col items-center justify-center py-24 gap-3 text-center">
       <p class="text-navy-900 font-semibold text-base">Please wait, we are loading some products</p>
       <p class="text-slate-400 text-sm">This usually takes just a moment</p>
     </div>
@@ -1954,7 +1953,8 @@ async function fetchProducts(page, append) {
   const cacheKey = 'mdb_' + [filters.search, sbActiveThClass, [...filters.manufacturers].sort().join(','), filters.maxPrice, page].join('|');
 
   sbIsLoading = true;
-  showCatalogLoading(true);
+  // Show loading bar only during search, not on regular browse
+  if (filters.search && filters.search.length >= 2) showCatalogLoading(true);
   // Cancel any pending auto-load
   const lmBtn = document.getElementById('load-more-btn');
   if (lmBtn) clearTimeout(lmBtn._autoLoad);
