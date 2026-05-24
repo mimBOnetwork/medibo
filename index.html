@@ -149,6 +149,14 @@
   /* Tab transitions */
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  /* Category cards */
+  .cat-card { flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; transition:transform .18s ease; }
+  .cat-card:active { transform:scale(.92); }
+  .cat-icon-wrap { width:58px; height:58px; border-radius:16px; display:flex; align-items:center; justify-content:center; transition:box-shadow .2s, transform .2s; border:2.5px solid transparent; }
+  .cat-card.active .cat-icon-wrap { box-shadow:0 0 0 2.5px #0f1f44, 0 6px 20px rgba(15,31,68,.18); transform:translateY(-3px); border-color:#0f1f44; }
+  .cat-card:not(.active):hover .cat-icon-wrap { box-shadow:0 4px 16px rgba(0,0,0,.13); transform:translateY(-2px); }
+  .cat-label { font-size:9.5px; font-weight:700; color:#64748b; text-align:center; line-height:1.2; max-width:66px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.01em; }
+  .cat-card.active .cat-label { color:#0f1f44; }
   .view { display: none; }
   .view.active { display: block; animation: fadeUp .35s ease both; }
   @keyframes fadeUp { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)} }
@@ -767,8 +775,8 @@
 
   <!-- Category horizontal scroll — hidden during search -->
   <div id="cat-scroll-section" class="bg-white border-b border-slate-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div id="category-scroll-bar" class="flex items-center gap-3 overflow-x-auto py-3 scrollbar-hide" style="-webkit-overflow-scrolling:touch;">
+    <div class="max-w-7xl mx-auto">
+      <div id="category-scroll-bar" class="flex items-end overflow-x-auto scrollbar-hide px-4 sm:px-6 lg:px-8" style="-webkit-overflow-scrolling:touch;padding-top:14px;padding-bottom:14px;gap:10px;">
         <!-- filled by renderCategoryScrollBar() -->
       </div>
     </div>
@@ -2139,15 +2147,7 @@ function selectCategoryTab(cat) {
   if (catSection) catSection.style.display = '';
 
   sbActiveThClass = cat;
-  // Update active state on cards
-  document.querySelectorAll('.cat-tab').forEach(b => {
-    const active = b.dataset.cat === cat;
-    const inner = b.querySelector('.cat-inner');
-    if (inner) {
-      inner.style.boxShadow = active ? '0 0 0 3px #0f1f44' : '';
-      inner.style.borderColor = active ? '#0f1f44' : '';
-    }
-  });
+  updateCatActiveState(cat);
   _fetchRetries = 0;
   fetchProducts(0);
   window.scrollTo({ top: 0 });
@@ -2158,25 +2158,38 @@ function renderCategoryScrollBar() {
   if (!bar || bar.dataset.built) return;
   bar.dataset.built = '1';
 
-  // "All" card first
-  const allCard = `<button onclick="selectCategoryTab('')" data-cat="" class="cat-tab flex-shrink-0">
-    <div class="cat-inner w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-navy-900 bg-navy-900 flex flex-col items-center justify-center gap-1 transition active:scale-95" style="box-shadow:0 0 0 3px #0f1f44">
-      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
-      <span class="text-[10px] font-bold text-white leading-tight text-center px-1">All</span>
-    </div>
-  </button>`;
-
-  const pills = CATEGORIES.map(c => `
-    <button onclick="selectCategoryTab('${c.name.replace(/'/g,"\\'")}')" data-cat="${c.name}" class="cat-tab flex-shrink-0">
-      <div class="cat-inner w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-slate-200 bg-white flex flex-col items-center justify-center gap-1.5 hover:border-navy-900 transition active:scale-95">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br ${c.color} flex items-center justify-center">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="${c.icon}"/></svg>
-        </div>
-        <span class="text-[9px] font-bold text-navy-900 leading-tight text-center px-1 line-clamp-2">${c.name}</span>
+  function makeCard(cat, icon, color, label) {
+    return `<button onclick="selectCategoryTab('${cat.replace(/'/g,"\\'")}');this.closest('#category-scroll-bar').querySelectorAll('.cat-card').forEach(b=>b.classList.remove('active'));this.classList.add('active')" data-cat="${cat}" class="cat-card${cat===''?' active':''}">
+      <div class="cat-icon-wrap" style="background:${color}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="${icon}"/></svg>
       </div>
-    </button>`).join('');
+      <span class="cat-label">${label}</span>
+    </button>`;
+  }
 
-  bar.innerHTML = allCard + pills;
+  const cards = [
+    ['', 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5', 'linear-gradient(135deg,#0f1f44,#1e3a5f)', 'All'],
+    ...CATEGORIES.map(c => [c.name, c.icon,
+      c.color.includes('emerald') ? 'linear-gradient(135deg,#059669,#34d399)' :
+      c.color.includes('blue') ? 'linear-gradient(135deg,#2563eb,#60a5fa)' :
+      c.color.includes('rose') || c.color.includes('red') ? 'linear-gradient(135deg,#e11d48,#fb7185)' :
+      c.color.includes('violet') || c.color.includes('purple') ? 'linear-gradient(135deg,#7c3aed,#a78bfa)' :
+      c.color.includes('amber') || c.color.includes('orange') ? 'linear-gradient(135deg,#d97706,#fbbf24)' :
+      c.color.includes('teal') || c.color.includes('cyan') ? 'linear-gradient(135deg,#0891b2,#22d3ee)' :
+      c.color.includes('pink') ? 'linear-gradient(135deg,#db2777,#f472b6)' :
+      c.color.includes('indigo') ? 'linear-gradient(135deg,#4338ca,#818cf8)' :
+      c.color.includes('lime') || c.color.includes('green') ? 'linear-gradient(135deg,#16a34a,#4ade80)' :
+      'linear-gradient(135deg,#475569,#94a3b8)',
+      c.name])
+  ];
+
+  bar.innerHTML = cards.map(([cat, icon, color, label]) => makeCard(cat, icon, color, label)).join('');
+}
+
+function updateCatActiveState(cat) {
+  document.querySelectorAll('#category-scroll-bar .cat-card').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === cat);
+  });
 }
 
 function renderAllCategories() {
