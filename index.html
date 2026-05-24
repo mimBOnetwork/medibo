@@ -23,12 +23,19 @@
     if (e.ctrlKey) e.preventDefault();
   }, { passive: false });
 
-  // Block Ctrl+/- and Ctrl+0 keyboard zoom
+  // Block Ctrl+/- and Ctrl+0 keyboard zoom + F5/Ctrl+R refresh
   document.addEventListener('keydown', function(e) {
     if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0')) {
       e.preventDefault();
     }
+    // Block F5 and Ctrl+R refresh
+    if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.ctrlKey && e.key === 'R')) {
+      e.preventDefault();
+    }
   });
+
+  // Block pull-to-refresh on mobile (overscroll)
+  document.body.style.overscrollBehavior = 'none';
 </script>
 <script>
   // Run BEFORE paint — hide home view if another route is saved
@@ -38,7 +45,7 @@
       if (route && route !== 'home') {
         var style = document.createElement('style');
         style.id = 'route-override';
-        style.textContent = '#view-home { display: none !important; } #view-' + route + ' { display: block !important; }';
+        style.textContent = '#view-home { display: none !important; } #view-' + route + ' { display: block !important; animation: none !important; }';
         document.head.appendChild(style);
       }
     } catch(e) {}
