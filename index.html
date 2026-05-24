@@ -2100,6 +2100,8 @@ function navigate(route) {
     a.classList.toggle('active', a.dataset.route === route);
   });
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Save current route for refresh restore
+  try { localStorage.setItem('medibo_route', route); } catch(e) {}
   // Hide search bar on cart page only
   const gsb = document.getElementById('global-search-bar');
   if (gsb) gsb.style.display = (route === 'cart') ? 'none' : '';
@@ -3261,6 +3263,14 @@ document.addEventListener('change', e => {
   renderActivity();
   updateCartBadge(); saveCart();
   initAuth();
+
+  // Restore last visited route (skip cart on refresh — go to catalog instead)
+  try {
+    const savedRoute = localStorage.getItem('medibo_route');
+    if (savedRoute && savedRoute !== 'home' && savedRoute !== 'cart') {
+      navigate(savedRoute);
+    }
+  } catch(e) {}
 
   // Fire both in parallel
   await fetchProducts(0);
