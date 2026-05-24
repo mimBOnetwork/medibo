@@ -285,18 +285,28 @@
 <aside id="mobile-sidebar" class="lg:hidden fixed top-0 left-0 h-full w-72 bg-white z-[70] shadow-2xl transform -translate-x-full transition-transform duration-300 flex flex-col">
   <!-- Sidebar header -->
   <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-    <a href="#" data-route="home" onclick="closeSidebar()" class="route-link flex items-center gap-2.5">
-      <div class="relative w-9 h-9 rounded-xl bg-navy-900 flex items-center justify-center shadow-lg">
-        <svg viewBox="0 0 24 24" class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M12 3v18M3 12h18" stroke-linecap="round"/>
-          <circle cx="12" cy="12" r="9.5" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
-        </svg>
-        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-teal-400 ring-2 ring-white"></span>
-      </div>
-      <div class="leading-none">
-        <div class="font-display font-extrabold text-xl text-navy-900 tracking-tight">Medibo</div>
-        <div class="text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mt-0.5">B2B Pharma</div>
-      </div>
+    <a href="#" data-route="home" onclick="closeSidebar()" class="route-link flex items-center">
+      <svg viewBox="0 0 420 90" width="130" height="40" role="img" aria-label="Medibo">
+        <defs>
+          <linearGradient id="sIconG" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0f1f44"/>
+            <stop offset="60%" stop-color="#1e3a5f"/>
+            <stop offset="100%" stop-color="#34d399" stop-opacity="0.85"/>
+          </linearGradient>
+          <linearGradient id="sTextG" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#0f1f44"/>
+            <stop offset="72%" stop-color="#0f1f44"/>
+            <stop offset="100%" stop-color="#34d399"/>
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="86" height="86" rx="22" fill="url(#sIconG)"/>
+        <rect x="14" y="38" width="62" height="14" rx="7" fill="#34d399"/>
+        <rect x="38" y="14" width="14" height="62" rx="7" fill="#34d399"/>
+        <circle cx="79" cy="15" r="5" fill="#34d399" opacity="0.45"/>
+        <text x="100" y="68"
+          font-family="'Manrope','Segoe UI',sans-serif"
+          font-weight="800" font-size="62" letter-spacing="-2"><tspan fill="url(#sTextG)">medi</tspan><tspan fill="#34d399">BO</tspan></text>
+      </svg>
     </a>
     <button onclick="closeSidebar()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-lg font-light">✕</button>
   </div>
@@ -369,19 +379,36 @@
         <span class="w-4 h-0.5 bg-navy-900 rounded-full"></span>
       </button>
 
-      <!-- Logo (center on mobile, left on desktop) -->
-      <a href="#" data-route="home" class="route-link flex items-center gap-2.5 lg:mr-auto">
-        <div class="relative w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-navy-900 flex items-center justify-center shadow-lg">
-          <svg viewBox="0 0 24 24" class="w-4 h-4 lg:w-5 lg:h-5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2.2">
-            <path d="M12 3v18M3 12h18" stroke-linecap="round"/>
-            <circle cx="12" cy="12" r="9.5" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
-          </svg>
-          <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-teal-400 ring-2 ring-white"></span>
-        </div>
-        <div class="leading-none">
-          <div class="font-display font-extrabold text-lg lg:text-xl text-navy-900 tracking-tight">Medibo</div>
-          <div class="text-[9px] lg:text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mt-0.5">B2B Pharma</div>
-        </div>
+      <!-- Logo -->
+      <a href="#" data-route="home" class="route-link flex items-center lg:mr-auto">
+        <svg viewBox="0 0 420 90" width="140" height="45" role="img" aria-label="Medibo">
+          <defs>
+            <linearGradient id="hIconG" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0f1f44"/>
+              <stop offset="60%" stop-color="#1e3a5f"/>
+              <stop offset="100%" stop-color="#34d399" stop-opacity="0.85"/>
+            </linearGradient>
+            <linearGradient id="hTextG" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0f1f44"/>
+              <stop offset="72%" stop-color="#0f1f44"/>
+              <stop offset="100%" stop-color="#34d399"/>
+            </linearGradient>
+          </defs>
+          <!-- Icon rounded square -->
+          <rect x="2" y="2" width="86" height="86" rx="22" fill="url(#hIconG)"/>
+          <!-- Cross horizontal -->
+          <rect x="14" y="38" width="62" height="14" rx="7" fill="#34d399"/>
+          <!-- Cross vertical -->
+          <rect x="38" y="14" width="14" height="62" rx="7" fill="#34d399"/>
+          <!-- Dot accent -->
+          <circle cx="79" cy="15" r="5" fill="#34d399" opacity="0.45"/>
+          <!-- Wordmark -->
+          <text x="100" y="68"
+            font-family="'Manrope','Segoe UI',sans-serif"
+            font-weight="800"
+            font-size="62"
+            letter-spacing="-2"><tspan fill="url(#hTextG)">medi</tspan><tspan fill="#34d399">BO</tspan></text>
+        </svg>
       </a>
 
       <!-- Desktop nav -->
@@ -533,8 +560,8 @@
           </div>
         </div>
 
-        <!-- Hero side card -->
-        <div class="lg:col-span-5 relative">
+        <!-- Hero side card — desktop only -->
+        <div class="hidden lg:block lg:col-span-5 relative">
           <div class="relative rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 p-6 shadow-2xl">
             <div class="flex items-center justify-between mb-5">
               <div>
