@@ -3366,7 +3366,12 @@ function renderDeals() {
     });
     return;
   }
-  const featured = PRODUCTS.slice(0, 3);
+  const sorted = PRODUCTS.slice().sort((a, b) => {
+    const ai = a.images && a.images.length > 0 ? 0 : 1;
+    const bi = b.images && b.images.length > 0 ? 0 : 1;
+    return ai - bi;
+  });
+  const featured = sorted.slice(0, 3);
   document.getElementById('featured-deals').innerHTML = featured.map((p, idx) => `
     <div class="rounded-3xl bg-gradient-to-br ${idx===0?'from-navy-900 to-navy-800':idx===1?'from-teal-600 to-teal-700':'from-navy-700 to-teal-700'} text-white p-6 relative overflow-hidden">
       <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-3xl"></div>
@@ -3384,7 +3389,7 @@ function renderDeals() {
       </div>
     </div>
   `).join('');
-  document.getElementById('all-deals').innerHTML = PRODUCTS.slice(0, 24).map(productCardGrid).join('');
+  document.getElementById('all-deals').innerHTML = sorted.slice(0, 24).map(productCardGrid).join('');
 }
 
 /* -------------------------------------------------------------
