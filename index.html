@@ -1507,8 +1507,8 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 text-teal-400"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/></svg>
           </div>
           <div>
-            <h2 class="font-display font-extrabold text-lg text-navy-900 leading-tight">Business Registration</h2>
-            <p class="text-xs text-slate-400">Required once · Cannot be edited later</p>
+            <h2 class="font-display font-extrabold text-lg text-navy-900 leading-tight">Pharmacy Registration</h2>
+            <p class="text-xs text-slate-400">Fill all required details to create your account</p>
           </div>
         </div>
       </div>
@@ -1527,12 +1527,9 @@
           <!-- Customer ID picker -->
           <div>
             <label class="text-xs font-semibold text-slate-600 mb-1 block">Customer ID * <span class="text-slate-400 font-normal">(choose your unique ID)</span></label>
-            <div class="flex gap-2">
-              <input id="prof-customer-id" type="text" placeholder="e.g. RAIPUR01" maxlength="20"
-                class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono uppercase"
-                style="font-size:16px" oninput="this.value=this.value.toUpperCase()" onblur="checkCustomerId(this.value)"/>
-              <button type="button" onclick="checkCustomerId(document.getElementById('prof-customer-id').value)" class="px-3.5 py-2.5 rounded-xl bg-navy-900 text-white text-xs font-bold flex-shrink-0">Check</button>
-            </div>
+            <input id="prof-customer-id" type="text" placeholder="e.g. RAIPUR01" maxlength="20"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono uppercase"
+              style="font-size:16px" oninput="this.value=this.value.toUpperCase();checkCustomerId(this.value)"/>
             <p id="customer-id-status" class="text-xs mt-1 hidden"></p>
           </div>
 
@@ -1588,9 +1585,9 @@
             </div>
             <input type="hidden" id="prof-payment-term"/>
             <!-- Note -->
-            <div class="mt-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 flex gap-2">
+            <div class="mt-2 flex gap-2">
               <span class="text-amber-500 flex-shrink-0 text-xs mt-0.5">ℹ️</span>
-              <p class="text-xs text-amber-700 leading-relaxed"><strong>Note —</strong> Advance payment allows you to enjoy a higher discount. We do not offer credit facilities; however, Cash on Delivery (COD) is available as a convenient option.</p>
+              <p class="text-xs text-slate-500 leading-relaxed"><strong>Note —</strong> Advance payment allows you to enjoy a higher discount. We do not offer credit facilities; however, Cash on Delivery (COD) is available as a convenient option.</p>
             </div>
           </div>
         </div>
@@ -1631,12 +1628,12 @@
           <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Licenses & Compliance</div>
 
           <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Drug License 1 (DL 1) *</label>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">Drug License 1 *</label>
             <input id="prof-dl1" type="text" placeholder="DL number 1" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono" style="font-size:16px"/>
           </div>
 
           <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Drug License 2 (DL 2) *</label>
+            <label class="text-xs font-semibold text-slate-600 mb-1 block">Drug License 2 *</label>
             <input id="prof-dl2" type="text" placeholder="DL number 2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono" style="font-size:16px"/>
           </div>
 
@@ -1648,8 +1645,8 @@
 
         <p id="prof-error" class="text-xs text-rose-500 font-semibold hidden bg-rose-50 px-4 py-2.5 rounded-xl"></p>
 
-        <button onclick="saveProfile()" class="w-full py-4 rounded-2xl bg-navy-900 text-white font-bold text-base hover:bg-navy-800 active:scale-95 transition">
-          Complete Registration →
+        <button onclick="confirmAndSubmit()" class="w-full py-4 rounded-2xl bg-navy-900 text-white font-bold text-base hover:bg-navy-800 active:scale-95 transition">
+          Submit →
         </button>
         <div class="h-2"></div>
       </div>
@@ -1663,6 +1660,21 @@
       <h3 class="font-display font-bold text-xl text-navy-900 mb-1">You're in!</h3>
       <p id="auth-success-msg" class="text-sm text-slate-500 mb-5"></p>
       <button onclick="closeAuthModal()" class="px-6 py-2.5 rounded-xl bg-navy-900 text-white font-bold text-sm">Start Ordering</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUBMIT CONFIRMATION MODAL -->
+<div id="submit-confirm-modal" class="fixed inset-0 z-[95] hidden items-center justify-center p-6" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
+  <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl p-7 text-center">
+    <div class="w-14 h-14 rounded-full bg-navy-50 flex items-center justify-center mx-auto mb-4">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-7 h-7 text-navy-900"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
+    </div>
+    <h3 class="font-display font-extrabold text-lg text-navy-900 mb-2">Review Before Submitting</h3>
+    <p class="text-sm text-slate-500 mb-6 leading-relaxed">Please review all the details carefully before submitting. Once submitted, you can edit them later.</p>
+    <div class="flex gap-3">
+      <button onclick="cancelSubmit()" class="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition">Go Back</button>
+      <button onclick="cancelSubmit();saveProfile()" class="flex-1 py-3 rounded-2xl bg-navy-900 text-white font-bold text-sm hover:bg-navy-800 transition">Submit</button>
     </div>
   </div>
 </div>
@@ -2315,6 +2327,15 @@ function selectOption(btn, group, value) {
   btn.classList.remove('border-slate-200', 'text-slate-600', 'bg-white');
   btn.classList.add('border-teal-500', 'bg-teal-50', 'text-teal-700');
   document.getElementById(group).value = value;
+}
+
+function confirmAndSubmit() {
+  // Show confirmation modal
+  document.getElementById('submit-confirm-modal').style.display = 'flex';
+}
+
+function cancelSubmit() {
+  document.getElementById('submit-confirm-modal').style.display = 'none';
 }
 
 async function checkCustomerId(val) {
