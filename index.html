@@ -1179,9 +1179,9 @@
       <div>
         <div id="profile-name-display" class="font-display font-extrabold text-white text-xl">—</div>
         <div id="profile-email-display" class="text-teal-400 text-sm font-medium mt-0.5">—</div>
-        <div class="flex items-center gap-1.5 mt-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
-          <span class="text-xs text-slate-400 font-medium">Verified account</span>
+        <div id="profile-status-badge" class="flex items-center gap-1.5 mt-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="text-xs text-amber-500 font-semibold">Verification pending</span>
         </div>
       </div>
     </div>
@@ -1521,6 +1521,33 @@
       <p id="auth-success-msg" class="text-sm text-slate-500 mb-5"></p>
       <button onclick="closeAuthModal()" class="px-6 py-2.5 rounded-xl bg-navy-900 text-white font-bold text-sm">Start Ordering</button>
     </div>
+  </div>
+</div>
+
+<!-- APPROVAL PENDING MODAL -->
+<div id="approval-modal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);">
+  <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl p-8 text-center">
+    <div class="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-8 h-8 text-amber-500"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+    </div>
+    <h3 class="font-display font-extrabold text-xl text-navy-900 mb-2">Verification Pending</h3>
+    <p class="text-sm text-slate-500 mb-2">Your account is under review. Our team will verify your drug license and business details.</p>
+    <p class="text-sm text-slate-500 mb-6">You'll be able to place orders once approved. This usually takes <span class="font-semibold text-navy-900">24–48 hours</span>.</p>
+    <div class="bg-slate-50 rounded-2xl px-4 py-3 mb-6 text-left space-y-1.5">
+      <div class="flex items-center gap-2 text-xs text-slate-600">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3.5 h-3.5 text-teal-500 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75"/></svg>
+        Account created successfully
+      </div>
+      <div class="flex items-center gap-2 text-xs text-slate-600">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3.5 h-3.5 text-teal-500 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75"/></svg>
+        Profile details submitted
+      </div>
+      <div class="flex items-center gap-2 text-xs text-amber-600 font-medium">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3.5 h-3.5 text-amber-500 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5"/><circle cx="12" cy="12" r="9"/></svg>
+        Admin verification in progress
+      </div>
+    </div>
+    <button onclick="document.getElementById('approval-modal').style.display='none';document.body.style.overflow='';" class="w-full py-3 rounded-2xl bg-navy-900 text-white font-bold text-sm">Got it</button>
   </div>
 </div>
 
@@ -2184,13 +2211,18 @@ function updateAuthUI() {
   const label = document.getElementById('auth-btn-label');
   if (!btn) return;
   if (CURRENT_USER && CURRENT_PROFILE) {
+    const approved = CURRENT_PROFILE.approved === true;
     label.textContent = CURRENT_PROFILE.full_name.split(' ')[0];
+    btn.title = approved ? 'Account verified' : 'Verification pending';
+    btn.className = `hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition ${approved ? 'bg-teal-50 text-teal-800' : 'bg-amber-50 text-amber-800'}`;
     btn.onclick = showUserMenu;
   } else if (CURRENT_USER) {
     label.textContent = 'Setup';
+    btn.className = 'hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-navy-900 text-sm font-semibold hover:bg-slate-200 transition';
     btn.onclick = () => { openAuthModal(); showStep('profile'); };
   } else {
     label.textContent = 'Login';
+    btn.className = 'hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-navy-900 text-sm font-semibold hover:bg-slate-200 transition';
     btn.onclick = openAuthModal;
   }
 }
@@ -2220,10 +2252,17 @@ function doLogout() {
   navigate('home');
 }
 
+function showApprovalPending() {
+  document.getElementById('approval-modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
 function renderProfile() {
   if (!CURRENT_USER) return;
   const p = CURRENT_PROFILE;
   const name = p?.full_name || CURRENT_USER.email || '?';
+  const approved = p?.approved === true;
+
   document.getElementById('profile-avatar').textContent = name.charAt(0).toUpperCase();
   document.getElementById('profile-name-display').textContent = name;
   document.getElementById('profile-email-display').textContent = CURRENT_USER.email || '';
@@ -2232,6 +2271,16 @@ function renderProfile() {
   document.getElementById('profile-drug').textContent = p?.drug_license || '—';
   document.getElementById('profile-gstin').textContent = p?.gstin || '—';
   document.getElementById('profile-city').textContent = p?.city || '—';
+
+  // Update verification badge
+  const badge = document.getElementById('profile-status-badge');
+  if (badge) {
+    if (approved) {
+      badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span><span class="text-xs text-slate-400 font-medium">Verified · Can place orders</span>`;
+    } else {
+      badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span class="text-xs text-amber-500 font-semibold">Verification pending · Cannot order yet</span>`;
+    }
+  }
 }
 
 function openMobileFilter() {
@@ -2586,6 +2635,10 @@ function removeFromCart(id) {
 function placeOrder() {
   if (CART.length === 0) return;
   if (!CURRENT_USER) { openAuthModal(); return; }
+  if (!CURRENT_PROFILE?.approved) {
+    showApprovalPending();
+    return;
+  }
   toast('Order placed! Tracking ID: MB-' + Math.floor(90000 + Math.random()*9999));
   CART = [];
   updateCartBadge();
