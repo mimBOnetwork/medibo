@@ -1527,7 +1527,7 @@
           <!-- Customer ID picker -->
           <div>
             <label class="text-xs font-semibold text-slate-600 mb-1 block">Customer ID * <span class="text-slate-400 font-normal">(choose your unique ID)</span></label>
-            <input id="prof-customer-id" type="text" placeholder="e.g. RAIPUR01" maxlength="20"
+            <input id="prof-customer-id" type="text" placeholder="e.g. laxmimedical1" maxlength="20"
               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono uppercase"
               style="font-size:16px" oninput="this.value=this.value.toUpperCase();checkCustomerId(this.value)"/>
             <p id="customer-id-status" class="text-xs mt-1 hidden"></p>
@@ -1587,7 +1587,7 @@
             <!-- Note -->
             <div class="mt-2 flex gap-2">
               <span class="text-amber-500 flex-shrink-0 text-xs mt-0.5">ℹ️</span>
-              <p class="text-xs text-slate-500 leading-relaxed"><strong>Note —</strong> Advance payment allows you to enjoy a higher discount. We do not offer credit facilities; however, Cash on Delivery (COD) is available as a convenient option.</p>
+              <p class="text-xs text-slate-500 leading-relaxed"><strong>Note —</strong> Advance payment offers higher discounts. We do not provide credit, but Cash on Delivery (COD) is available.</p>
             </div>
           </div>
         </div>
@@ -1665,17 +1665,11 @@
 </div>
 
 <!-- SUBMIT CONFIRMATION MODAL -->
-<div id="submit-confirm-modal" class="fixed inset-0 z-[95] hidden items-center justify-center p-6" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);">
-  <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl p-7 text-center">
-    <div class="w-14 h-14 rounded-full bg-navy-50 flex items-center justify-center mx-auto mb-4">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-7 h-7 text-navy-900"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z"/></svg>
-    </div>
-    <h3 class="font-display font-extrabold text-lg text-navy-900 mb-2">Review Before Submitting</h3>
-    <p class="text-sm text-slate-500 mb-6 leading-relaxed">Please review all the details carefully before submitting. Once submitted, you can edit them later.</p>
-    <div class="flex gap-3">
-      <button onclick="cancelSubmit()" class="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition">Go Back</button>
-      <button onclick="cancelSubmit();saveProfile()" class="flex-1 py-3 rounded-2xl bg-navy-900 text-white font-bold text-sm hover:bg-navy-800 transition">Submit</button>
-    </div>
+<div id="submit-confirm-modal" class="fixed inset-0 z-[95] hidden items-end justify-center p-4 pb-8" style="background:rgba(0,0,0,0.4);">
+  <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl px-5 py-4 flex items-center gap-3">
+    <p class="text-sm text-navy-900 font-medium flex-1">Once submitted, you cannot edit these details.</p>
+    <button onclick="cancelSubmit()" class="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs flex-shrink-0">Back</button>
+    <button onclick="cancelSubmit();saveProfile()" class="px-3 py-1.5 rounded-xl bg-navy-900 text-white font-bold text-xs flex-shrink-0">Submit</button>
   </div>
 </div>
 
