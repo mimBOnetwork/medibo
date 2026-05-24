@@ -370,13 +370,21 @@
      ========================================================= -->
 <div id="global-search-bar" class="sticky top-14 lg:top-16 z-40 glass border-b border-slate-200/70 px-3 sm:px-6 lg:px-8 py-2.5">
   <div class="max-w-7xl mx-auto">
-    <div class="relative flex items-center">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="absolute left-4 w-5 h-5 text-slate-400 pointer-events-none">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-      </svg>
-      <input id="global-search-input" type="text" placeholder="Search medicines by name…"
-        class="w-full pl-12 pr-4 py-3 rounded-2xl bg-white border border-slate-200 text-sm text-navy-900 placeholder-slate-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 shadow-sm font-medium transition"
-        style="font-size:16px"/>
+    <div class="bg-white rounded-2xl p-1.5 shadow-sm ring-1 ring-slate-200 flex gap-2">
+      <div class="flex-1 flex items-center gap-3 px-4 py-2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 text-slate-400 flex-shrink-0">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.34-4.34M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z"/>
+        </svg>
+        <input id="global-search-input" type="text" placeholder="Search medicine, salt or manufacturer…"
+          class="w-full text-navy-900 placeholder-slate-400 focus:outline-none text-sm font-medium bg-transparent"
+          style="font-size:16px"/>
+      </div>
+      <button onclick="if(currentView!=='catalog')navigate('catalog')" class="btn-teal px-5 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 flex-shrink-0">
+        Search
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0-4 4m4-4H3"/>
+        </svg>
+      </button>
     </div>
   </div>
 </div>
