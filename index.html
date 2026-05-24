@@ -1399,57 +1399,56 @@
 </footer>
 
 <!-- AUTH MODAL -->
-<div id="auth-modal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);">
-  <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
-    <!-- Tabs -->
-    <div class="flex border-b border-slate-100">
-      <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-4 text-sm font-bold text-navy-900 border-b-2 border-navy-900">Login</button>
-      <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-4 text-sm font-bold text-slate-400 border-b-2 border-transparent">Sign Up</button>
-    </div>
+<div id="auth-modal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);" onclick="if(event.target===this)closeAuthModal()">
+  <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative">
+    <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-lg z-10">✕</button>
 
-    <!-- LOGIN FORM -->
-    <div id="auth-login-form" class="p-6">
-      <h2 class="font-display font-extrabold text-xl text-navy-900 mb-1">Welcome back</h2>
-      <p class="text-sm text-slate-500 mb-5">Login to place orders on Medibo</p>
-      <div class="space-y-3">
-        <input id="login-email" type="email" placeholder="Email address" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        <input id="login-password" type="password" placeholder="Password" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        <p id="login-error" class="text-xs text-rose-500 hidden"></p>
-        <button onclick="doLogin()" class="w-full py-3 rounded-xl bg-navy-900 text-white font-bold text-sm hover:bg-navy-800 transition">Login</button>
+    <!-- STEP 1: Google Sign In -->
+    <div id="auth-step-google" class="p-8 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-navy-900 flex items-center justify-center mx-auto mb-4">
+        <svg viewBox="0 0 24 24" class="w-7 h-7 text-teal-400" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v18M3 12h18" stroke-linecap="round"/><circle cx="12" cy="12" r="9.5" stroke-width="1.2" opacity="0.4"/></svg>
       </div>
-      <p class="text-center text-xs text-slate-400 mt-4">Don't have an account? <button onclick="switchAuthTab('signup')" class="text-teal-600 font-semibold">Sign up</button></p>
+      <h2 class="font-display font-extrabold text-2xl text-navy-900 mb-1">Welcome to Medibo</h2>
+      <p class="text-sm text-slate-500 mb-8">B2B pharma ordering for pharmacies & hospitals</p>
+      <button onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 px-5 py-3.5 rounded-2xl border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition font-semibold text-slate-700 text-sm">
+        <svg viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+      <p class="text-xs text-slate-400 mt-4">No password needed · Instant access</p>
     </div>
 
-    <!-- SIGNUP FORM -->
-    <div id="auth-signup-form" class="p-6 hidden">
-      <h2 class="font-display font-extrabold text-xl text-navy-900 mb-1">Create account</h2>
-      <p class="text-sm text-slate-500 mb-5">Join Medibo — bulk pharma ordering</p>
-      <div class="space-y-3">
-        <input id="signup-name" type="text" placeholder="Full name *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        <input id="signup-phone" type="tel" placeholder="Phone number *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        <input id="signup-business" type="text" placeholder="Business / Pharmacy name *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        <input id="signup-drug" type="text" placeholder="Drug license number *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        <input id="signup-gstin" type="text" placeholder="GSTIN (optional)" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        <input id="signup-city" type="text" placeholder="City *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        <input id="signup-email" type="email" placeholder="Email address *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        <input id="signup-password" type="password" placeholder="Password (min 6 chars) *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
-        <p id="signup-error" class="text-xs text-rose-500 hidden"></p>
-        <button onclick="doSignup()" class="w-full py-3 rounded-xl bg-navy-900 text-white font-bold text-sm hover:bg-navy-800 transition">Create Account</button>
+    <!-- STEP 2: Pharmacy Details (new users) -->
+    <div id="auth-step-profile" class="p-6 hidden">
+      <div class="mb-5">
+        <h2 class="font-display font-extrabold text-xl text-navy-900 mb-1">Complete your profile</h2>
+        <p class="text-sm text-slate-500">Required once — can't be changed later</p>
       </div>
-      <p class="text-center text-xs text-slate-400 mt-4">Already have an account? <button onclick="switchAuthTab('login')" class="text-teal-600 font-semibold">Login</button></p>
+      <div class="space-y-3">
+        <input id="prof-name" type="text" placeholder="Full name *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
+        <input id="prof-phone" type="tel" placeholder="Phone number *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
+        <input id="prof-business" type="text" placeholder="Pharmacy / Business name *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
+        <input id="prof-drug" type="text" placeholder="Drug license number *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
+        <input id="prof-gstin" type="text" placeholder="GSTIN (optional)" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
+        <input id="prof-city" type="text" placeholder="City *" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100" style="font-size:16px"/>
+        <p id="prof-error" class="text-xs text-rose-500 hidden"></p>
+        <button onclick="saveProfile()" class="w-full py-3 rounded-xl bg-navy-900 text-white font-bold text-sm hover:bg-navy-800 transition">Complete Signup →</button>
+      </div>
     </div>
 
-    <!-- SUCCESS -->
-    <div id="auth-success" class="p-8 hidden text-center">
+    <!-- STEP 3: Success -->
+    <div id="auth-step-success" class="p-8 hidden text-center">
       <div class="w-14 h-14 rounded-full bg-teal-50 flex items-center justify-center mx-auto mb-4">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-7 h-7 text-teal-500"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
       </div>
       <h3 class="font-display font-bold text-xl text-navy-900 mb-1">You're in!</h3>
       <p id="auth-success-msg" class="text-sm text-slate-500 mb-5"></p>
-      <button onclick="closeAuthModal()" class="px-6 py-2.5 rounded-xl bg-navy-900 text-white font-bold text-sm">Continue Shopping</button>
+      <button onclick="closeAuthModal()" class="px-6 py-2.5 rounded-xl bg-navy-900 text-white font-bold text-sm">Start Ordering</button>
     </div>
-
-    <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-lg">✕</button>
   </div>
 </div>
 
@@ -2004,26 +2003,27 @@ function closeSidebar() {
 }
 
 /* ============================================================
-   AUTH — Email/Password via Supabase Auth REST API
+   AUTH — Google OAuth via Supabase
    ============================================================ */
 let CURRENT_USER = null;
 let CURRENT_PROFILE = null;
 
-async function authFetch(path, body) {
-  const res = await fetch(SUPABASE_URL + '/auth/v1' + path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-    body: JSON.stringify(body)
-  });
-  return res.json();
-}
-
 async function initAuth() {
-  // Check localStorage for existing session
+  // Check for OAuth callback (hash contains access_token)
+  const hash = window.location.hash;
+  if (hash && hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.replace('#', ''));
+    const token = params.get('access_token');
+    if (token) {
+      localStorage.setItem('medibo_session', JSON.stringify({ access_token: token }));
+      window.location.hash = ''; // clean URL
+    }
+  }
+
+  // Restore session
   try {
     const session = JSON.parse(localStorage.getItem('medibo_session') || 'null');
-    if (session && session.access_token) {
-      // Verify token still valid
+    if (session?.access_token) {
       const res = await fetch(SUPABASE_URL + '/auth/v1/user', {
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + session.access_token }
       });
@@ -2031,6 +2031,14 @@ async function initAuth() {
         const user = await res.json();
         CURRENT_USER = { ...user, access_token: session.access_token };
         await loadProfile();
+        // New user — no profile yet, show profile form
+        if (!CURRENT_PROFILE) {
+          openAuthModal();
+          showStep('profile');
+          // Pre-fill name from Google
+          const gName = user.user_metadata?.full_name || user.user_metadata?.name || '';
+          if (gName) document.getElementById('prof-name').value = gName;
+        }
         updateAuthUI();
         return;
       }
@@ -2050,6 +2058,54 @@ async function loadProfile() {
   } catch(e) {}
 }
 
+function signInWithGoogle() {
+  // Redirect to Supabase Google OAuth — redirects back to medibo.in with token in hash
+  const redirectTo = encodeURIComponent(window.location.origin + window.location.pathname);
+  window.location.href = SUPABASE_URL + '/auth/v1/authorize?provider=google&redirect_to=' + redirectTo;
+}
+
+async function saveProfile() {
+  const name = document.getElementById('prof-name').value.trim();
+  const phone = document.getElementById('prof-phone').value.trim();
+  const business = document.getElementById('prof-business').value.trim();
+  const drug = document.getElementById('prof-drug').value.trim();
+  const gstin = document.getElementById('prof-gstin').value.trim();
+  const city = document.getElementById('prof-city').value.trim();
+  const errEl = document.getElementById('prof-error');
+  errEl.classList.add('hidden');
+
+  if (!name || !phone || !business || !drug || !city) {
+    errEl.textContent = 'Please fill all required fields';
+    errEl.classList.remove('hidden');
+    return;
+  }
+
+  const res = await fetch(SUPABASE_URL + '/rest/v1/user_profiles', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + CURRENT_USER.access_token, 'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({ id: CURRENT_USER.id, full_name: name, phone, business_name: business, drug_license: drug, gstin, city })
+  });
+
+  if (res.ok || res.status === 201) {
+    CURRENT_PROFILE = { full_name: name, phone, business_name: business, drug_license: drug, gstin, city };
+    updateAuthUI();
+    document.getElementById('auth-success-msg').textContent = 'Welcome to Medibo, ' + name.split(' ')[0] + '! You can now place orders.';
+    showStep('success');
+  } else {
+    errEl.textContent = 'Could not save profile. Try again.';
+    errEl.classList.remove('hidden');
+  }
+}
+
+function showStep(step) {
+  ['google','profile','success'].forEach(s => {
+    document.getElementById('auth-step-' + s).classList.toggle('hidden', s !== step);
+  });
+}
+
 function updateAuthUI() {
   const btn = document.getElementById('auth-btn');
   const label = document.getElementById('auth-btn-label');
@@ -2058,8 +2114,8 @@ function updateAuthUI() {
     label.textContent = CURRENT_PROFILE.full_name.split(' ')[0];
     btn.onclick = showUserMenu;
   } else if (CURRENT_USER) {
-    label.textContent = 'Account';
-    btn.onclick = showUserMenu;
+    label.textContent = 'Setup';
+    btn.onclick = () => { openAuthModal(); showStep('profile'); };
   } else {
     label.textContent = 'Login';
     btn.onclick = openAuthModal;
@@ -2067,9 +2123,10 @@ function updateAuthUI() {
 }
 
 function openAuthModal() {
-  document.getElementById('auth-modal').style.display = 'flex';
+  const modal = document.getElementById('auth-modal');
+  modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  switchAuthTab('login');
+  showStep('google');
 }
 
 function closeAuthModal() {
@@ -2077,107 +2134,18 @@ function closeAuthModal() {
   document.body.style.overflow = '';
 }
 
-function switchAuthTab(tab) {
-  document.getElementById('auth-login-form').classList.toggle('hidden', tab !== 'login');
-  document.getElementById('auth-signup-form').classList.toggle('hidden', tab !== 'signup');
-  document.getElementById('auth-success').classList.add('hidden');
-  document.getElementById('tab-login').className = `flex-1 py-4 text-sm font-bold border-b-2 ${tab==='login'?'text-navy-900 border-navy-900':'text-slate-400 border-transparent'}`;
-  document.getElementById('tab-signup').className = `flex-1 py-4 text-sm font-bold border-b-2 ${tab==='signup'?'text-navy-900 border-navy-900':'text-slate-400 border-transparent'}`;
-}
-
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const errEl = document.getElementById('login-error');
-  errEl.classList.add('hidden');
-  if (!email || !password) { errEl.textContent = 'Please enter email and password'; errEl.classList.remove('hidden'); return; }
-
-  const data = await authFetch('/token?grant_type=password', { email, password });
-  if (data.error || data.error_code) {
-    errEl.textContent = data.error_description || data.msg || 'Invalid email or password';
-    errEl.classList.remove('hidden');
-    return;
-  }
-  localStorage.setItem('medibo_session', JSON.stringify({ access_token: data.access_token }));
-  CURRENT_USER = { ...data.user, access_token: data.access_token };
-  await loadProfile();
-  updateAuthUI();
-  document.getElementById('auth-success-msg').textContent = 'Welcome back, ' + (CURRENT_PROFILE?.full_name || email) + '!';
-  document.getElementById('auth-login-form').classList.add('hidden');
-  document.getElementById('auth-success').classList.remove('hidden');
-}
-
-async function doSignup() {
-  const name = document.getElementById('signup-name').value.trim();
-  const phone = document.getElementById('signup-phone').value.trim();
-  const business = document.getElementById('signup-business').value.trim();
-  const drug = document.getElementById('signup-drug').value.trim();
-  const gstin = document.getElementById('signup-gstin').value.trim();
-  const city = document.getElementById('signup-city').value.trim();
-  const email = document.getElementById('signup-email').value.trim();
-  const password = document.getElementById('signup-password').value;
-  const errEl = document.getElementById('signup-error');
-  errEl.classList.add('hidden');
-
-  if (!name || !phone || !business || !drug || !city || !email || !password) {
-    errEl.textContent = 'Please fill all required fields'; errEl.classList.remove('hidden'); return;
-  }
-  if (password.length < 6) {
-    errEl.textContent = 'Password must be at least 6 characters'; errEl.classList.remove('hidden'); return;
-  }
-
-  // Create auth user
-  const data = await authFetch('/signup', { email, password });
-  if (data.error || data.error_code) {
-    errEl.textContent = data.msg || data.error_description || 'Signup failed. Email may already exist.';
-    errEl.classList.remove('hidden');
-    return;
-  }
-
-  const token = data.access_token || (data.session && data.session.access_token);
-  const userId = data.user?.id || data.id;
-
-  if (token && userId) {
-    // Save profile — locked, no updates allowed
-    await fetch(SUPABASE_URL + '/rest/v1/user_profiles', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + token, 'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ id: userId, full_name: name, phone, business_name: business, drug_license: drug, gstin, city })
-    });
-    localStorage.setItem('medibo_session', JSON.stringify({ access_token: token }));
-    CURRENT_USER = { id: userId, email, access_token: token };
-    CURRENT_PROFILE = { full_name: name, phone, business_name: business, drug_license: drug, gstin, city };
-    updateAuthUI();
-    document.getElementById('auth-success-msg').textContent = 'Account created! Welcome to Medibo, ' + name.split(' ')[0] + '!';
-    document.getElementById('auth-signup-form').classList.add('hidden');
-    document.getElementById('auth-success').classList.remove('hidden');
-  } else {
-    // Email confirmation required
-    document.getElementById('auth-success-msg').textContent = 'Check your email to confirm your account, then login.';
-    document.getElementById('auth-signup-form').classList.add('hidden');
-    document.getElementById('auth-success').classList.remove('hidden');
-  }
-}
-
 function showUserMenu() {
   if (!CURRENT_USER) { openAuthModal(); return; }
   const name = CURRENT_PROFILE?.full_name || CURRENT_USER.email;
   const biz = CURRENT_PROFILE?.business_name || '';
-  const confirmed = confirm(`Logged in as:\n${name}\n${biz}\n\nClick OK to logout`);
-  if (confirmed) {
+  const drug = CURRENT_PROFILE?.drug_license || '';
+  const city = CURRENT_PROFILE?.city || '';
+  const info = `${name}\n${biz}\nDrug License: ${drug}\nCity: ${city}\n\nClick OK to logout`;
+  if (confirm(info)) {
     localStorage.removeItem('medibo_session');
     CURRENT_USER = null; CURRENT_PROFILE = null;
     updateAuthUI();
   }
-}
-
-// Gate checkout — require login to proceed
-function requireLogin(action) {
-  if (!CURRENT_USER) { openAuthModal(); return false; }
-  return true;
 }
 
 function openMobileFilter() {
