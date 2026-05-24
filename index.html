@@ -819,7 +819,7 @@
   <!-- Products -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
     <div class="flex items-center justify-between mb-3">
-      <div class="text-sm text-slate-600">
+      <div id="result-count-wrap" class="text-sm text-slate-600 invisible">
         Showing <span id="result-count" class="font-bold text-navy-900">0</span> products
       </div>
       <div class="flex items-center gap-2">
@@ -839,7 +839,13 @@
         </div>
       </div>
     </div>
-    <div id="products-grid" class="mt-1"></div>
+    <!-- Placeholder shown while fetching -->
+    <div id="catalog-placeholder" class="flex flex-col items-center justify-center py-24 gap-4 text-center">
+      <svg class="w-10 h-10 text-teal-400 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+      <p class="text-navy-900 font-semibold text-base">Please wait, we are loading some products</p>
+      <p class="text-slate-400 text-sm">This usually takes just a moment</p>
+    </div>
+    <div id="products-grid" class="mt-1 hidden"></div>
   </div>
 </section>
 
@@ -1193,6 +1199,11 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
     <!-- Featured deals -->
     <h2 class="font-display font-bold text-2xl text-navy-900 mb-5">Featured wholesale offers</h2>
+    <div id="deals-placeholder" class="flex flex-col items-center justify-center py-24 gap-4 text-center">
+      <svg class="w-10 h-10 text-teal-400 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+      <p class="text-navy-900 font-semibold text-base">Please wait, we are loading some products</p>
+      <p class="text-slate-400 text-sm">This usually takes just a moment</p>
+    </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5" id="featured-deals"></div>
 
     <h2 class="font-display font-bold text-2xl text-navy-900 mt-12 mb-5">All deals</h2>
@@ -2040,6 +2051,13 @@ async function fetchProducts(page, append) {
 
     renderProducts(append);
     renderLoadMore();
+    // Show grid, hide placeholder, show count — only after first successful load
+    const placeholder = document.getElementById('catalog-placeholder');
+    const grid = document.getElementById('products-grid');
+    const countWrap = document.getElementById('result-count-wrap');
+    if (placeholder) placeholder.classList.add('hidden');
+    if (grid) grid.classList.remove('hidden');
+    if (countWrap) countWrap.classList.remove('invisible');
     document.getElementById('result-count').textContent = sbTotalCount.toLocaleString();
   } catch (err) {
     console.error('Fetch error:', err);
@@ -2255,10 +2273,10 @@ function navigate(route) {
   try { localStorage.setItem('medibo_route', route); } catch(e) {}
   const gsb = document.getElementById('global-search-bar');
   if (gsb) gsb.style.display = (route === 'cart') ? 'none' : '';
-  if (route === 'catalog') { _fetchRetries = 0; renderProducts(); renderCategoryScrollBar(); }
+  if (route === 'catalog') { _fetchRetries = 0; const _ph=document.getElementById('catalog-placeholder'); const _pg=document.getElementById('products-grid'); const _cw=document.getElementById('result-count-wrap'); if(_ph)_ph.classList.remove('hidden'); if(_pg)_pg.classList.add('hidden'); if(_cw)_cw.classList.add('invisible'); fetchProducts(0); renderCategoryScrollBar(); }
   if (route === 'cart') { renderCart(); syncCartWithSupabase(); }
   if (route === 'orders') renderOrders();
-  if (route === 'deals') renderDeals();
+  if (route === 'deals') { const _dp=document.getElementById('deals-placeholder'); if(_dp)_dp.classList.remove('hidden'); renderDeals(); }
   if (route === 'categories') { navigate('catalog'); return; }
   if (route === 'profile') renderProfile();
 }
@@ -3428,6 +3446,9 @@ function renderDeals() {
     const bi = b.images && b.images.length > 0 ? 0 : 1;
     return ai - bi;
   });
+  // Hide placeholder once deals are ready
+  const dp = document.getElementById('deals-placeholder');
+  if (dp) dp.classList.add('hidden');
   const featured = sorted.slice(0, 3);
   document.getElementById('featured-deals').innerHTML = featured.map((p, idx) => `
     <div class="rounded-3xl bg-gradient-to-br ${idx===0?'from-navy-900 to-navy-800':idx===1?'from-teal-600 to-teal-700':'from-navy-700 to-teal-700'} text-white p-6 relative overflow-hidden">
