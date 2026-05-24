@@ -1969,6 +1969,9 @@ async function fetchProducts(page, append) {
 
   sbIsLoading = true;
   showCatalogLoading(true);
+  // Cancel any pending auto-load
+  const lmBtn = document.getElementById('load-more-btn');
+  if (lmBtn) clearTimeout(lmBtn._autoLoad);
 
   try {
     const from = page * PAGE_SIZE;
@@ -2147,13 +2150,46 @@ function renderLoadMore() {
   if (!el) {
     el = document.createElement('div');
     el.id = 'load-more-btn';
-    el.className = 'col-span-full flex justify-center mt-6';
+    el.className = 'col-span-full flex flex-col items-center gap-2 mt-6';
     const grid = document.getElementById('products-grid');
     if (grid && grid.parentNode) grid.parentNode.appendChild(el);
   }
+
+  // Clear any existing auto-load timer
+  clearTimeout(el._autoLoad);
+
   const loaded = (sbCurrentPage + 1) * PAGE_SIZE;
   if (loaded < sbTotalCount) {
-    el.innerHTML = '<button onclick="fetchProducts(' + (sbCurrentPage + 1) + ', true)" class="px-8 py-3 rounded-xl bg-white border border-slate-200 text-navy-900 font-semibold text-sm hover:border-teal-400 hover:shadow-card transition">Load more · ' + (sbTotalCount - loaded).toLocaleString() + ' remaining</button>';
+    const remaining = sbTotalCount - loaded;
+    el.innerHTML = `
+      <div class="flex flex-col items-center gap-2">
+        <div class="w-48 h-1 bg-slate-100 rounded-full overflow-hidden">
+          <div id="autoload-bar" class="h-full bg-teal-400 rounded-full" style="width:0%;transition:width 5s linear;"></div>
+        </div>
+        <p class="text-xs text-slate-400 font-medium">Loading more in <span id="autoload-count">5</span>s · ${remaining.toLocaleString()} remaining</p>
+      </div>`;
+
+    // Start progress bar
+    requestAnimationFrame(() => {
+      const bar = document.getElementById('autoload-bar');
+      if (bar) bar.style.width = '100%';
+    });
+
+    // Countdown
+    let sec = 5;
+    const countdown = setInterval(() => {
+      sec--;
+      const countEl = document.getElementById('autoload-count');
+      if (countEl) countEl.textContent = sec;
+      if (sec <= 0) clearInterval(countdown);
+    }, 1000);
+
+    // Auto-load after 5s
+    el._autoLoad = setTimeout(() => {
+      clearInterval(countdown);
+      fetchProducts(sbCurrentPage + 1, true);
+    }, 5000);
+
   } else if (sbTotalCount > 0) {
     el.innerHTML = '<p class="text-xs text-slate-400 font-medium">' + sbTotalCount.toLocaleString() + ' medicines shown</p>';
   }
