@@ -1587,15 +1587,27 @@ async function fetchProducts(page, append) {
 
     let mapped = (rows || []).map((r, i) => rowToProduct(r, page * PAGE_SIZE + i));
 
-    // Simple prefix-first sort — lightweight, no loop overhead
     if (filters.search && filters.search.length >= 2 && mapped.length > 0) {
+      // Search: relevance first, then within same relevance bucket — images first
       const q = filters.search.toLowerCase().trim();
       mapped.sort((a, b) => {
         const an = (a.name || '').toLowerCase();
         const bn = (b.name || '').toLowerCase();
-        const as = an.startsWith(q) ? 0 : an.includes(q) ? 1 : 2;
-        const bs = bn.startsWith(q) ? 0 : bn.includes(q) ? 1 : 2;
-        return as - bs;
+        const ar = an.startsWith(q) ? 0 : an.includes(q) ? 1 : 2;
+        const br = bn.startsWith(q) ? 0 : bn.includes(q) ? 1 : 2;
+        if (ar !== br) return ar - br;
+        // Same relevance → images first
+        const ai = (a.images && a.images.length > 0) ? 0 : 1;
+        const bi = (b.images && b.images.length > 0) ? 0 : 1;
+        return ai - bi;
+      });
+    } else {
+      // No search → images first, then alphabetical
+      mapped.sort((a, b) => {
+        const ai = (a.images && a.images.length > 0) ? 0 : 1;
+        const bi = (b.images && b.images.length > 0) ? 0 : 1;
+        if (ai !== bi) return ai - bi;
+        return (a.name || '').localeCompare(b.name || '');
       });
     }
 
