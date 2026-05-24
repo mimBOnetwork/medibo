@@ -1983,8 +1983,13 @@ async function fetchProducts(page, append) {
 
     let rawParams = '';
     if (filters.search && filters.search.length >= 2) {
+      // SEARCH: show all products (with or without image), search by prefix first
       const q = filters.search.replace(/[%*'"()]/g, '').trim();
+      // Use OR: prefix match OR contains match — both go to DB, sorted client-side
       rawParams = 'product_name=ilike.%25' + q + '%25';
+    } else {
+      // BROWSE/CATEGORY: only show products WITH images
+      rawParams = 'image_url_1=not.is.null';
     }
     if (filters.manufacturers.size > 0) {
       const list = [...filters.manufacturers].map(m => '"' + m.replace(/"/g,'\\"') + '"').join(',');
@@ -2008,11 +2013,18 @@ async function fetchProducts(page, append) {
       mapped.sort((a, b) => {
         const an = (a.name || '').toLowerCase();
         const bn = (b.name || '').toLowerCase();
-        const ar = an.startsWith(q) ? 0 : an.includes(q) ? 1 : 2;
-        const br = bn.startsWith(q) ? 0 : bn.includes(q) ? 1 : 2;
-        if (ar !== br) return ar - br;
-        const ai = (a.images && a.images.length > 0) ? 0 : 1;
-        const bi = (b.images && b.images.length > 0) ? 0 : 1;
+        // Priority: 0=exact prefix, 1=word starts with q, 2=contains, 3=rest
+        const score = (n) => {
+          if (n.startsWith(q)) return 0;
+          if (n.split(/\s+/).some(w => w.startsWith(q))) return 1;
+          if (n.includes(q)) return 2;
+          return 3;
+        };
+        const as = score(an), bs = score(bn);
+        if (as !== bs) return as - bs;
+        // Within same score: images first
+        const ai = a.images && a.images.length > 0 ? 0 : 1;
+        const bi = b.images && b.images.length > 0 ? 0 : 1;
         return ai - bi;
       });
 
@@ -3339,15 +3351,13 @@ function repeatOrder() {
 function renderDeals() {
   if (PRODUCTS.length === 0) {
     document.getElementById('featured-deals').innerHTML = '<div class="col-span-3 flex justify-center py-12"><svg class="animate-spin w-6 h-6 text-teal-500" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg></div>';
-    // Fetch directly for deals — don't wait for catalog
     sbRest('MEDICINE', {
       select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,url,status,image_url_1,image_url_2,image_url_3,image_url_4,image_url_5',
       order: 'product_name.asc',
       'mrp': 'not.is.null',
-      
-    }, { range: '0-23' }).then(({ data: rows }) => {
+    }, { range: '0-47', rawParams: 'image_url_1=not.is.null' }).then(({ data: rows }) => {
       if (rows && rows.length > 0) {
-        const mapped = rows.map((r, i) => rowToProduct(r, i)).filter(p => p.mrp > 0);
+        const mapped = rows.map((r, i) => rowToProduct(r, i)).filter(p => p.mrp > 0 && p.images && p.images.length > 0);
         if (PRODUCTS.length === 0) PRODUCTS.push(...mapped);
         renderDeals();
       }
@@ -3356,8 +3366,10 @@ function renderDeals() {
     });
     return;
   }
+  // Only products with images
+  const withImages = PRODUCTS.filter(p => p.images && p.images.length > 0);
   // Featured = 3 big cards
-  const featured = PRODUCTS.slice(0,3);
+  const featured = withImages.slice(0, 3);
   document.getElementById('featured-deals').innerHTML = featured.map((p, idx) => `
     <div class="rounded-3xl bg-gradient-to-br ${idx===0?'from-navy-900 to-navy-800':idx===1?'from-teal-600 to-teal-700':'from-navy-700 to-teal-700'} text-white p-6 relative overflow-hidden">
       <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-3xl"></div>
@@ -3376,8 +3388,8 @@ function renderDeals() {
     </div>
   `).join('');
 
-  // All
-  document.getElementById('all-deals').innerHTML = PRODUCTS.slice(0,24).map(productCardGrid).join('');
+  // All deals — only with images
+  document.getElementById('all-deals').innerHTML = withImages.slice(0, 24).map(productCardGrid).join('');
 }
 
 /* -------------------------------------------------------------
