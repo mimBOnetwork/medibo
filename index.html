@@ -1795,11 +1795,18 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
    query language via URL params and works everywhere. */
 async function sbRest(table, params, opts) {
   opts = opts || {};
-  // Build query string — rawParams are appended without encoding
-  const raw = opts.rawParams || '';
-  const qs = new URLSearchParams(params).toString();
-  const fullQs = [qs, raw].filter(Boolean).join('&');
-  const url = SUPABASE_URL + '/rest/v1/' + encodeURIComponent(table) + (fullQs ? '?' + fullQs : '');
+
+  // Build query string — PostgREST needs unencoded dots in filter values
+  // Separate standard params (select, order, eq.X) from filter params
+  const parts = [];
+  for (const [k, v] of Object.entries(params)) {
+    // Don't encode the PostgREST operators (eq., not.is., ilike. etc.)
+    parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
+  }
+  if (opts.rawParams) parts.push(opts.rawParams);
+  const qs = parts.join('&');
+
+  const url = SUPABASE_URL + '/rest/v1/' + table + (qs ? '?' + qs : '');
   const headers = {
     'apikey': SUPABASE_ANON_KEY,
     'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
@@ -1807,18 +1814,28 @@ async function sbRest(table, params, opts) {
   };
   if (opts.count) headers['Prefer'] = 'count=exact';
   if (opts.range) headers['Range'] = opts.range;
-  const res = await fetch(url, { headers });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error('Supabase ' + res.status + ': ' + body);
+
+  // Single fetch with 15s timeout — no auto-retry (caller handles retry)
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    const res = await fetch(url, { headers, signal: controller.signal });
+    clearTimeout(timer);
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error('Supabase ' + res.status + ': ' + body);
+    }
+    const data = await res.json();
+    let total = null;
+    if (opts.count) {
+      const cr = res.headers.get('content-range');
+      if (cr && cr.includes('/')) total = parseInt(cr.split('/')[1], 10);
+    }
+    return { data, total };
+  } catch(e) {
+    clearTimeout(timer);
+    throw e;
   }
-  const data = await res.json();
-  let total = null;
-  if (opts.count) {
-    const cr = res.headers.get('content-range');
-    if (cr && cr.indexOf('/') !== -1) total = parseInt(cr.split('/')[1], 10);
-  }
-  return { data, total };
 }
 
 // Map a raw DB row → internal product shape
@@ -2039,8 +2056,9 @@ async function fetchProducts(page, append) {
     console.error('Fetch error:', err);
     sbIsLoading = false;
     _fetchRetries++;
-    if (_fetchRetries <= 3) {
-      setTimeout(() => fetchProducts(page, append), 2000);
+    if (_fetchRetries <= 1) {
+      // Single retry after 3 seconds
+      setTimeout(() => fetchProducts(page, append), 3000);
     } else {
       _fetchRetries = 0;
       showCatalogLoading(false);
