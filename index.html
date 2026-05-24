@@ -815,113 +815,100 @@
      VIEW: BULK UPLOAD
      ========================================================= -->
 <section id="view-bulk" class="view">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
-    <div class="flex items-center gap-2 text-xs text-slate-500 mb-3">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+
+    <!-- Header -->
+    <div class="flex items-center gap-2 text-xs text-slate-500 mb-4">
       <a href="#" data-route="home" class="route-link hover:text-navy-900">Home</a>
       <span>›</span>
-      <span class="text-navy-900 font-semibold">Bulk Upload</span>
+      <span class="text-navy-900 font-semibold">Bulk Order</span>
     </div>
-    <h1 class="font-display font-extrabold text-3xl lg:text-5xl text-navy-900 tracking-tight">Upload Your Bulk Order</h1>
-    <p class="text-slate-600 mt-3 max-w-2xl">Drop in your weekly procurement sheet — Excel, CSV, or PDF. Our matcher reads it, finds the SKUs, and shows you what's in stock at the best price.</p>
+    <h1 class="font-display font-extrabold text-2xl lg:text-4xl text-navy-900 tracking-tight">Place Bulk Order</h1>
+    <p class="text-slate-500 mt-1.5 text-sm">Choose how you'd like to send your order</p>
 
-    <div class="mt-10 grid lg:grid-cols-3 gap-8">
-      <div class="lg:col-span-2">
-        <!-- Drop zone -->
-        <div id="drop-zone" class="drop-zone relative rounded-3xl border-2 border-dashed border-slate-300 bg-white p-10 lg:p-16 text-center transition">
-          <div class="absolute inset-0 dotgrid opacity-30 rounded-3xl pointer-events-none"></div>
-          <div class="relative">
-            <div class="mx-auto w-20 h-20 rounded-2xl bg-teal-50 flex items-center justify-center mb-5">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" class="w-10 h-10">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/>
-              </svg>
+    <!-- Two options -->
+    <div class="mt-8 grid sm:grid-cols-2 gap-5">
+
+      <!-- Option 1: WhatsApp -->
+      <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden flex flex-col">
+        <div class="bg-gradient-to-br from-[#25d366] to-[#128c7e] p-6 text-white">
+          <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.862L.054 23.25a.75.75 0 0 0 .917.97l5.443-1.489A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.715 9.715 0 0 1-4.95-1.35l-.355-.212-3.67 1.004 1.004-3.592-.231-.368A9.715 9.715 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+          </div>
+          <h2 class="font-display font-extrabold text-xl">Send on WhatsApp</h2>
+          <p class="text-white/80 text-sm mt-1">Take a photo of your order list and send directly</p>
+        </div>
+        <div class="p-5 flex-1 flex flex-col">
+          <ul class="space-y-2.5 text-sm text-slate-600 flex-1">
+            <li class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg></span> Send photo of handwritten list</li>
+            <li class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg></span> Your details sent automatically</li>
+            <li class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg></span> Fastest way to order</li>
+          </ul>
+          <!-- Static button wrapper -->
+          <div class="relative mt-5">
+            <div id="wa-toast" class="hidden absolute bottom-full left-0 right-0 mb-2">
+              <div class="bg-rose-500 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl text-center shadow-lg"></div>
             </div>
-            <h2 class="font-display font-bold text-2xl text-navy-900">Drag & drop your order file</h2>
-            <p class="text-slate-500 mt-2 text-sm">or click to browse · Excel, CSV, or PDF · up to 25 MB</p>
-            <button onclick="simulateUpload()" class="mt-6 btn-primary px-6 py-3 rounded-xl font-semibold inline-flex items-center gap-2">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-              Choose file
+            <button onclick="sendWhatsAppOrder()" class="w-full py-3.5 rounded-2xl bg-[#25d366] hover:bg-[#1fb859] text-white font-bold text-sm flex items-center justify-center gap-2 transition active:scale-95">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.532 5.862L.054 23.25a.75.75 0 0 0 .917.97l5.443-1.489A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.715 9.715 0 0 1-4.95-1.35l-.355-.212-3.67 1.004 1.004-3.592-.231-.368A9.715 9.715 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+              Send Order on WhatsApp
             </button>
-            <div class="mt-6 flex items-center justify-center gap-2 flex-wrap text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-              <span>Supported:</span>
-              <span class="px-2 py-1 rounded-md bg-slate-100">.xlsx</span>
-              <span class="px-2 py-1 rounded-md bg-slate-100">.csv</span>
-              <span class="px-2 py-1 rounded-md bg-slate-100">.pdf</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Preview table -->
-        <div id="upload-preview" class="mt-8 hidden">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h3 class="font-display font-bold text-xl text-navy-900">Smart match preview</h3>
-              <p class="text-xs text-slate-500 mt-0.5">8 items matched · 1 partial · 0 unrecognized</p>
-            </div>
-            <button onclick="addBulkToCart()" class="btn-teal px-5 py-2.5 rounded-xl text-sm font-semibold">Add matched to cart</button>
-          </div>
-          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  <tr>
-                    <th class="px-4 py-3 text-left">Your line item</th>
-                    <th class="px-4 py-3 text-left">Matched SKU</th>
-                    <th class="px-4 py-3 text-right">Qty</th>
-                    <th class="px-4 py-3 text-right">Price</th>
-                    <th class="px-4 py-3 text-center">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="preview-tbody"></tbody>
-              </table>
-            </div>
           </div>
         </div>
       </div>
 
-      <!-- Side info -->
-      <div class="space-y-4">
-        <div class="rounded-2xl bg-navy-900 text-white p-6 relative overflow-hidden">
-          <div class="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-teal-500/20 blur-2xl"></div>
-          <div class="relative">
-            <div class="text-[11px] font-bold uppercase tracking-wider text-teal-300 mb-2">How it works</div>
-            <h3 class="font-display font-bold text-xl mb-4">Three steps to a packed cart.</h3>
-            <ol class="space-y-3 text-sm">
-              <li class="flex gap-3">
-                <span class="w-6 h-6 rounded-full bg-teal-500 text-navy-900 flex items-center justify-center font-bold text-xs flex-shrink-0">1</span>
-                <span class="text-slate-300">Drop your file. We read brand name, salt, pack size & qty.</span>
-              </li>
-              <li class="flex gap-3">
-                <span class="w-6 h-6 rounded-full bg-teal-500 text-navy-900 flex items-center justify-center font-bold text-xs flex-shrink-0">2</span>
-                <span class="text-slate-300">Smart matcher pairs each line to the best in-stock SKU.</span>
-              </li>
-              <li class="flex gap-3">
-                <span class="w-6 h-6 rounded-full bg-teal-500 text-navy-900 flex items-center justify-center font-bold text-xs flex-shrink-0">3</span>
-                <span class="text-slate-300">Review, edit, and push to cart in one click.</span>
-              </li>
-            </ol>
+      <!-- Option 2: File Upload -->
+      <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden flex flex-col">
+        <div class="bg-gradient-to-br from-navy-900 to-navy-700 p-6 text-white">
+          <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-7 h-7"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/></svg>
           </div>
+          <h2 class="font-display font-extrabold text-xl">Upload Order File</h2>
+          <p class="text-white/80 text-sm mt-1">Upload Excel, CSV or PDF for smart matching</p>
         </div>
+        <div class="p-5 flex-1 flex flex-col">
+          <ul class="space-y-2.5 text-sm text-slate-600 flex-1">
+            <li class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg></span> Excel, CSV or PDF supported</li>
+            <li class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg></span> Smart SKU matching (99.4% accuracy)</li>
+            <li class="flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0"><svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg></span> Review & add to cart in one click</li>
+          </ul>
 
-        <div class="rounded-2xl bg-white border border-slate-200 p-6">
-          <h3 class="font-display font-bold text-navy-900 mb-3">Need a template?</h3>
-          <p class="text-sm text-slate-600 mb-4">Download our example sheet to ensure perfect matches every time.</p>
-          <button class="w-full px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-navy-900 text-sm font-semibold flex items-center justify-center gap-2 transition">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9 4.5-4.5 4.5 4.5M12 3v13.5"/></svg>
-            Download .xlsx template
-          </button>
-        </div>
-
-        <div class="rounded-2xl bg-teal-50 border border-teal-200 p-6">
-          <div class="flex items-start gap-3">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2" class="w-5 h-5 flex-shrink-0 mt-0.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75"/></svg>
-            <div>
-              <div class="font-semibold text-navy-900 text-sm">99.4% match accuracy</div>
-              <div class="text-xs text-teal-800 mt-1">Trained on 14M+ pharmacy orders. Handles brand aliases, regional names, and partial spellings.</div>
-            </div>
+          <div id="drop-zone" class="mt-5 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 text-center hover:border-navy-400 transition cursor-pointer" onclick="simulateUpload()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" class="w-8 h-8 mx-auto mb-2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/></svg>
+            <p class="text-xs font-semibold text-slate-500">Drag & drop or click to browse</p>
+            <p class="text-[11px] text-slate-400 mt-1">.xlsx · .csv · .pdf · up to 25MB</p>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Preview table (file upload result) -->
+    <div id="upload-preview" class="mt-8 hidden">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-display font-bold text-xl text-navy-900">Smart match preview</h3>
+          <p class="text-xs text-slate-500 mt-0.5">8 items matched · 1 partial · 0 unrecognized</p>
+        </div>
+        <button onclick="addBulkToCart()" class="btn-teal px-5 py-2.5 rounded-xl text-sm font-semibold">Add matched to cart</button>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <tr>
+                <th class="px-4 py-3 text-left">Your line item</th>
+                <th class="px-4 py-3 text-left">Matched SKU</th>
+                <th class="px-4 py-3 text-right">Qty</th>
+                <th class="px-4 py-3 text-right">Price</th>
+                <th class="px-4 py-3 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody id="preview-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -2406,6 +2393,47 @@ function formatCustomerId(input) {
 }
 
 let _confirmShown = false;
+
+function showWaToast(msg) {
+  const toast = document.getElementById('wa-toast');
+  if (!toast) return;
+  toast.querySelector('div').textContent = msg;
+  toast.classList.remove('hidden');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.add('hidden'), 3500);
+}
+
+function sendWhatsAppOrder() {
+  // Not logged in
+  if (!CURRENT_USER) {
+    showWaToast('⚠️ Login required to send orders');
+    return;
+  }
+  // Logged in but not verified
+  if (!CURRENT_PROFILE || !CURRENT_PROFILE.approved) {
+    showWaToast('🔒 Only verified users can send WhatsApp orders');
+    return;
+  }
+
+  // Build pre-filled message
+  const p = CURRENT_PROFILE;
+  const lines = [
+    'Hello Sir, I am placing a new order.',
+    '',
+    `*Customer ID:* ${p.customer_id || '—'}`,
+    `*Name:* ${p.full_name || '—'}`,
+    `*Pharmacy:* ${p.business_name || '—'}`,
+    `*Contact:* ${p.whatsapp_number || p.phone || '—'}`,
+    `*Address:* ${p.address_line || '—'}, ${p.city || ''}, ${p.state || ''} - ${p.pincode || ''}`,
+    `*Drug License 1:* ${p.dl1 || p.drug_license || '—'}`,
+    `*Drug License 2:* ${p.dl2 || '—'}`,
+  ];
+  if (p.gstin) lines.push(`*GSTIN:* ${p.gstin}`);
+  lines.push('', 'Please find my order list attached.');
+
+  const msg = encodeURIComponent(lines.join('\n'));
+  window.open('https://wa.me/918357881873?text=' + msg, '_blank');
+}
 
 function showFormError(msg) {
   const toast = document.getElementById('prof-error-toast');
