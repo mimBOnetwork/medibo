@@ -1796,7 +1796,7 @@
 /* -------------------------------------------------------------
    DATA LAYER  — Direct Supabase connection
 ------------------------------------------------------------- */
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 9;
 
 const SUPABASE_URL = 'https://qkcuoaqrpnmdnejzahdv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrY3VvYXFycG5tZG5lanphaGR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzk3NjYsImV4cCI6MjA5NDk1NTc2Nn0.IBj9QYmYjfaHYU40lfTvuTj8YO4Brz4P-6k7TWcM_hE';
@@ -2173,7 +2173,7 @@ function renderLoadMore() {
     el.innerHTML = `
       <div class="flex flex-col items-center gap-2">
         <div class="w-48 h-1 bg-slate-100 rounded-full overflow-hidden">
-          <div id="autoload-bar" class="h-full bg-teal-400 rounded-full" style="width:0%;transition:width 5s linear;"></div>
+          <div id="autoload-bar" class="h-full bg-teal-400 rounded-full" style="width:0%;transition:width 4s linear;"></div>
         </div>
       </div>`;
 
@@ -2186,7 +2186,7 @@ function renderLoadMore() {
     // Auto-load after 5s
     el._autoLoad = setTimeout(() => {
       fetchProducts(sbCurrentPage + 1, true);
-    }, 5000);
+    }, 4000);
 
   } else if (sbTotalCount > 0) {
     el.innerHTML = '<p class="text-xs text-slate-400 font-medium">' + sbTotalCount.toLocaleString() + ' medicines shown</p>';
@@ -2346,27 +2346,46 @@ function renderCategoryCard(c) {
 function renderCategoryGrid() {
   const grid = document.getElementById('category-grid');
   if (!grid) return;
-  const colorMap = {
-    'red':'#e11d48','rose':'#f43f5e','pink':'#ec4899','fuchsia':'#d946ef',
-    'purple':'#9333ea','indigo':'#6366f1','blue':'#3b82f6','cyan':'#06b6d4',
-    'teal':'#14b8a6','emerald':'#10b981','green':'#22c55e','yellow':'#eab308',
-    'amber':'#f59e0b','orange':'#f97316','navy':'#0f1f44','slate':'#64748b'
+  const gradMap = {
+    'red':     ['#e11d48','#f43f5e'],
+    'rose':    ['#f43f5e','#fb7185'],
+    'pink':    ['#ec4899','#f472b6'],
+    'fuchsia': ['#d946ef','#e879f9'],
+    'purple':  ['#9333ea','#a855f7'],
+    'indigo':  ['#6366f1','#818cf8'],
+    'blue':    ['#3b82f6','#60a5fa'],
+    'cyan':    ['#06b6d4','#22d3ee'],
+    'teal':    ['#14b8a6','#2dd4bf'],
+    'emerald': ['#10b981','#34d399'],
+    'green':   ['#22c55e','#4ade80'],
+    'yellow':  ['#eab308','#facc15'],
+    'amber':   ['#f59e0b','#fbbf24'],
+    'orange':  ['#f97316','#fb923c'],
+    'navy':    ['#0f1f44','#1e3a5f'],
+    'slate':   ['#475569','#64748b'],
   };
-  function gradColor(colorClass) {
-    const m = colorClass.match(/from-(\w+)-/);
-    return m ? (colorMap[m[1]] || '#0f1f44') : '#0f1f44';
+  function getGrad(colorClass) {
+    const from = (colorClass.match(/from-(\w+)-/) || [])[1];
+    const to   = (colorClass.match(/to-(\w+)-/)   || [])[1];
+    const fc = gradMap[from] || ['#0f1f44','#1e3a5f'];
+    const tc = gradMap[to]   || fc;
+    return 'linear-gradient(135deg,' + fc[0] + ',' + tc[1] + ')';
   }
   grid.innerHTML = CATEGORIES.map(c => `
     <button onclick="selectCategory('${c.dbClass.replace(/'/g,"\\'")}','${c.name.replace(/'/g,"\\'")}',${c.count})"
-      class="bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-3 hover:shadow-md hover:border-teal-300 transition-all text-left active:scale-95">
-      <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center" style="background:linear-gradient(135deg,${gradColor(c.color)},${gradColor(c.color.replace('from','to'))}99)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="${c.icon}"/></svg>
+      class="bg-white rounded-3xl border border-slate-200 overflow-hidden flex flex-col hover:shadow-lg transition-all active:scale-95 text-left">
+      <!-- Gradient header -->
+      <div class="p-5 w-full" style="background:${getGrad(c.color)}">
+        <div class="w-11 h-11 bg-white/20 rounded-2xl flex items-center justify-center mb-3">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="${c.icon}"/></svg>
+        </div>
+        <div class="font-display font-extrabold text-white text-base leading-tight">${c.name}</div>
       </div>
-      <div class="min-w-0">
-        <div class="font-display font-bold text-navy-900 text-sm leading-tight">${c.name}</div>
-        <div class="text-xs text-teal-600 font-semibold mt-0.5">${c.count.toLocaleString()} products</div>
+      <!-- Count footer -->
+      <div class="px-5 py-3 flex items-center justify-between">
+        <div class="text-xs font-semibold text-teal-600">${c.count.toLocaleString()} products</div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
       </div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" class="w-4 h-4 flex-shrink-0 ml-auto"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
     </button>`).join('');
 }
 
