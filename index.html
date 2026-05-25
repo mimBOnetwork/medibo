@@ -1952,207 +1952,103 @@ function lsSet(key, data) {} // disabled
 
 const _catCache = {}; // fast in-memory cache per category
 
+let _lastCursor = null; // keyset cursor — last product_name from previous page
+
 async function fetchProducts(page, append) {
   page = page || 0;
   append = append || false;
   if (sbIsLoading) return;
 
-  // Fast cache for category page 0 — instant on repeat visits
-  const cacheKey = (sbActiveThClass || 'all') + '|' + page;
-  if (!append && page === 0 && _catCache[cacheKey]) {
+  // Fast cache for first page
+  const cacheKey = (sbActiveThClass || 'search:' + filters.search) + '|0';
+  if (!append && page === 0 && !filters.search && _catCache[cacheKey]) {
     const cached = _catCache[cacheKey];
     PRODUCTS.length = 0; PRODUCTS.push(...cached);
-    sbCurrentPage = 0;
-    _renderedCount = 0;
-    renderProducts(false);
-    renderLoadMore();
-    const placeholder = document.getElementById('catalog-placeholder');
-    const pgrid = document.getElementById('products-grid');
-    if (placeholder) { placeholder.classList.add('hidden'); placeholder.style.display = ''; }
-    if (pgrid) pgrid.classList.remove('hidden');
+    sbCurrentPage = 0; _renderedCount = 0; _lastCursor = cached.length ? cached[cached.length-1].name : null;
+    renderProducts(false); renderLoadMore();
+    const ph = document.getElementById('catalog-placeholder');
+    const pg = document.getElementById('products-grid');
+    if (ph) { ph.classList.add('hidden'); ph.style.display = ''; }
+    if (pg) pg.classList.remove('hidden');
     return;
   }
 
-  // Always fetch fresh — no stale cache
-
   sbIsLoading = true;
-  // Show loading bar only during search, not on regular browse
   if (filters.search && filters.search.length >= 2) showCatalogLoading(true);
-  // Cancel any pending auto-load
   const lmBtn = document.getElementById('load-more-btn');
   if (lmBtn) clearTimeout(lmBtn._autoLoad);
-  // Reset rendered count on fresh (non-append) fetch
-  if (!append) _renderedCount = 0;
+  if (!append) { _renderedCount = 0; _lastCursor = null; }
 
   try {
-    const from = page * PAGE_SIZE;
-    const to   = from + PAGE_SIZE - 1;
+    let rows;
+    const cursor = append ? _lastCursor : null;
 
-    // Only fetch columns we actually render — fewer bytes = faster
-    const params = {
-      select: 'product_name,salt_composition,marketer,mrp,pack_size,pack_qty,pack_type,therapeutic_class,rx_required,status,image_url_1,image_url_2',
-      order: 'product_name.asc'
-    };
-    if (sbActiveThClass) params['therapeutic_class'] = 'eq.' + sbActiveThClass;
-
-    let rawParams = '';
     if (filters.search && filters.search.length >= 2) {
-      // SEARCH: show all products (with or without image), search by prefix first
-      const q = filters.search.replace(/[%*'"()]/g, '').trim();
-      // Use OR: prefix match OR contains match — both go to DB, sorted client-side
-      rawParams = 'product_name=ilike.%25' + q + '%25';
+      // Search via RPC
+      const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/search_medicines', {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_query: filters.search.trim(), p_limit: PAGE_SIZE, p_after: cursor })
+      });
+      rows = await res.json();
+    } else if (sbActiveThClass) {
+      // Category browse via RPC — keyset, no OFFSET
+      const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/get_medicines_by_category', {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_class: sbActiveThClass, p_limit: PAGE_SIZE, p_after: cursor })
+      });
+      rows = await res.json();
     } else {
-      // BROWSE/CATEGORY: only show products WITH images
-      rawParams = 'image_url_1=not.is.null';
-    }
-    if (filters.manufacturers.size > 0) {
-      const list = [...filters.manufacturers].map(m => '"' + m.replace(/"/g,'\\"') + '"').join(',');
-      params['marketer'] = 'in.(' + list + ')';
+      rows = [];
     }
 
-    const { data: rows } = await sbRest('MEDICINE', params, {
-      range: from + '-' + to,
-      rawParams
-    });
+    if (!Array.isArray(rows)) rows = [];
 
-    // Use known category count instead of expensive COUNT(*) query
-    const cat = sbActiveThClass ? CATEGORIES.find(c => c.dbClass === sbActiveThClass) : null;
-    sbTotalCount = cat ? cat.count : (rows ? rows.length + from : 0);
+    sbIsLoading = false;
+    showCatalogLoading(false);
     sbCurrentPage = page;
     _fetchRetries = 0;
 
-    let mapped = (rows || []).map((r, i) => rowToProduct(r, page * PAGE_SIZE + i));
+    const mapped = rows.map((r, i) => rowToProduct(r, (page * PAGE_SIZE) + i));
 
-    if (filters.search && filters.search.length >= 2 && mapped.length > 0) {
-      const q = filters.search.toLowerCase().trim();
-      mapped.sort((a, b) => {
-        const an = (a.name || '').toLowerCase();
-        const bn = (b.name || '').toLowerCase();
-        // Priority: 0=exact prefix, 1=word starts with q, 2=contains, 3=rest
-        const score = (n) => {
-          if (n.startsWith(q)) return 0;
-          if (n.split(/\s+/).some(w => w.startsWith(q))) return 1;
-          if (n.includes(q)) return 2;
-          return 3;
-        };
-        const as = score(an), bs = score(bn);
-        if (as !== bs) return as - bs;
-        // Within same score: images first
-        const ai = a.images && a.images.length > 0 ? 0 : 1;
-        const bi = b.images && b.images.length > 0 ? 0 : 1;
-        return ai - bi;
-      });
+    // Update cursor to last product_name
+    if (mapped.length > 0) _lastCursor = rows[rows.length - 1].product_name;
 
-    } else {
-      // No search → images first, then alphabetical
-      mapped.sort((a, b) => {
-        const ai = (a.images && a.images.length > 0) ? 0 : 1;
-        const bi = (b.images && b.images.length > 0) ? 0 : 1;
-        if (ai !== bi) return ai - bi;
-        return (a.name || '').localeCompare(b.name || '');
-      });
-    }
-
-    const filtered = mapped.filter(p => p.mrp > 0 && (p.b2b <= filters.maxPrice || p.mrp === 0));
+    // Estimate total from category count
+    const cat = sbActiveThClass ? CATEGORIES.find(c => c.dbClass === sbActiveThClass) : null;
+    sbTotalCount = cat ? cat.count : (rows.length < PAGE_SIZE ? (page * PAGE_SIZE) + rows.length : (page + 2) * PAGE_SIZE);
 
     if (append) {
-      PRODUCTS.push(...filtered);
+      PRODUCTS.push(...mapped);
     } else {
       PRODUCTS.length = 0;
-      PRODUCTS.push(...filtered);
-      // Cache first page per category for instant repeat visits
-      if (page === 0) _catCache[(sbActiveThClass || 'all') + '|0'] = filtered.slice();
+      PRODUCTS.push(...mapped);
+      if (page === 0 && !filters.search) _catCache[cacheKey] = mapped.slice();
     }
 
     renderProducts(append);
     renderLoadMore();
-    // Hide spinner, show grid
-    const placeholder = document.getElementById('catalog-placeholder');
-    const pgrid = document.getElementById('products-grid');
-    if (placeholder) { placeholder.classList.add('hidden'); placeholder.style.display = ''; }
-    if (pgrid) pgrid.classList.remove('hidden');
-  } catch (err) {
+    const ph = document.getElementById('catalog-placeholder');
+    const pg = document.getElementById('products-grid');
+    if (ph) { ph.classList.add('hidden'); ph.style.display = ''; }
+    if (pg) pg.classList.remove('hidden');
+
+  } catch(err) {
     console.error('Fetch error:', err);
     sbIsLoading = false;
+    showCatalogLoading(false);
     _fetchRetries++;
     if (_fetchRetries <= 1) {
-      // Single retry after 3 seconds
       setTimeout(() => fetchProducts(page, append), 3000);
     } else {
       _fetchRetries = 0;
-      showCatalogLoading(false);
       document.getElementById('products-grid').innerHTML =
-        `<div class="col-span-3 text-center py-12 text-slate-400">
+        `<div class="col-span-3 text-center py-12">
           <p class="font-semibold text-navy-900 mb-3">Could not load products</p>
           <button onclick="_fetchRetries=0;fetchProducts(0)" class="px-4 py-2 rounded-xl bg-navy-900 text-white text-sm font-semibold">Retry</button>
         </div>`;
     }
-    return;
-  } finally {
-    sbIsLoading = false;
-    showCatalogLoading(false);
-  }
-}
-
-function showCatalogLoading(show) {
-  let overlay = document.getElementById('catalog-loading');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'catalog-loading';
-    overlay.className = 'col-span-full';
-    overlay.innerHTML = `
-      <div class="py-16 flex flex-col items-center gap-5">
-        <!-- Browser-style progress bar -->
-        <div class="w-full max-w-sm">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-semibold text-slate-500">Loading products</span>
-            <span id="load-percent" class="text-xs font-bold text-teal-600 font-mono">0%</span>
-          </div>
-          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-            <div id="load-bar" class="h-full bg-gradient-to-r from-teal-400 to-teal-600 rounded-full transition-all duration-100" style="width:0%"></div>
-          </div>
-        </div>
-        <!-- Skeleton cards -->
-        <div class="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 w-full mt-2">
-          ${Array(6).fill(0).map(() => `
-            <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden animate-pulse">
-              <div class="bg-slate-100 h-40"></div>
-              <div class="p-3 space-y-2">
-                <div class="h-3 bg-slate-100 rounded w-3/4"></div>
-                <div class="h-3 bg-slate-100 rounded w-1/2"></div>
-                <div class="h-3 bg-slate-100 rounded w-1/3"></div>
-              </div>
-            </div>`).join('')}
-        </div>
-      </div>`;
-    const grid = document.getElementById('products-grid');
-    if (grid && grid.parentNode) grid.parentNode.appendChild(overlay);
-  }
-
-  if (show) {
-    overlay.classList.remove('hidden');
-    // Animate 1→95% during load, snap to 100 when done
-    let pct = 1;
-    clearInterval(overlay._timer);
-    const bar = overlay.querySelector('#load-bar');
-    const pctEl = overlay.querySelector('#load-percent');
-    if (bar) { bar.style.width = '1%'; }
-    if (pctEl) pctEl.textContent = '1%';
-    overlay._timer = setInterval(() => {
-      // Ease: fast at start, slow near end
-      const step = pct < 30 ? 4 : pct < 60 ? 2.5 : pct < 85 ? 1.2 : 0.4;
-      pct = Math.min(95, pct + step);
-      if (bar) bar.style.width = pct + '%';
-      if (pctEl) pctEl.textContent = Math.round(pct) + '%';
-    }, 80);
-  } else {
-    // Snap to 100% then hide
-    clearInterval(overlay._timer);
-    const bar = overlay.querySelector('#load-bar');
-    const pctEl = overlay.querySelector('#load-percent');
-    if (bar) bar.style.width = '100%';
-    if (pctEl) pctEl.textContent = '100%';
-    setTimeout(() => overlay.classList.add('hidden'), 300);
   }
 }
 
