@@ -43,7 +43,7 @@
   });
 </script>
 <script>
-  // Immediately clear token from URL before any render — runs synchronously
+  // Immediately clear token from URL before any render
   (function() {
     try {
       if (window.location.hash && window.location.hash.includes('access_token')) {
@@ -55,9 +55,6 @@
           localStorage.setItem('medibo_fresh_login', '1');
         }
         history.replaceState(null, '', window.location.pathname);
-      } else if (window.location.search && window.location.search.includes('code=')) {
-        // PKCE — will be exchanged in initAuth, just clean URL now
-        // Don't clear yet — initAuth needs the code
       }
     } catch(e) {}
   })();
@@ -2557,87 +2554,72 @@ function closeAuthModal() {
   m.style.display = '';
   document.body.style.overflow = '';
 }
-
 function showAuthStep(step) {
   ['auth-step-login','auth-step-register','auth-step-success'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.add('hidden');
   });
-  const target = document.getElementById('auth-step-' + step);
-  if (target) target.classList.remove('hidden');
+  const t = document.getElementById('auth-step-' + step);
+  if (t) t.classList.remove('hidden');
 }
 
 /* ---------- Google OAuth ---------- */
 function signInWithGoogle() {
-  const redirectTo = encodeURIComponent(window.location.origin + '/');
+  const redirectTo = encodeURIComponent('https://www.medibo.in/');
   window.location.href = SUPABASE_URL + '/auth/v1/authorize?provider=google&redirect_to=' + redirectTo + '&flow_type=implicit';
 }
 
-/* ---------- Session handling ---------- */
+/* ---------- Session ---------- */
 async function initAuth() {
-  // 1. Exchange PKCE code if present (already cleaned from URL in inline script)
-  const code = new URLSearchParams(window.location.search).get('code');
-  if (code) {
-    try {
-      history.replaceState(null, '', window.location.pathname);
-      const r = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=pkce', {
-        method: 'POST',
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ auth_code: code })
-      });
-      const d = await r.json();
-      if (d.access_token) {
-        localStorage.setItem('medibo_session', JSON.stringify({ access_token: d.access_token, refresh_token: d.refresh_token }));
-        localStorage.setItem('medibo_fresh_login', '1');
-      }
-    } catch(e) {}
-  }
-
-  // 2. Try to restore session
   try {
     const raw = localStorage.getItem('medibo_session');
     if (!raw) { updateAuthUI(); return; }
     const session = JSON.parse(raw);
     if (!session?.access_token) { updateAuthUI(); return; }
 
-    // Verify token with Supabase
-    const res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + session.access_token }
-    });
+    // Decode JWT payload — no network call needed to get user info
+    const parts = session.access_token.split('.');
+    if (parts.length !== 3) { localStorage.removeItem('medibo_session'); updateAuthUI(); return; }
+    const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
 
-    if (!res.ok) {
-      // Token expired — clear and show login
+    // Check expiry
+    if (payload.exp && payload.exp < Math.floor(Date.now()/1000)) {
       localStorage.removeItem('medibo_session');
       localStorage.removeItem('medibo_fresh_login');
       updateAuthUI();
       return;
     }
 
-    const user = await res.json();
-    CURRENT_USER = { ...user, access_token: session.access_token };
+    // Build user object from JWT — no network call
+    CURRENT_USER = {
+      id: payload.sub,
+      email: payload.email,
+      access_token: session.access_token,
+      user_metadata: payload.user_metadata || {}
+    };
 
-    // 3. Load profile
+    // Load profile from Supabase
     await loadProfile();
 
-    // 4. Fresh login + no profile → show registration form
+    // Fresh login + no profile → show registration
     const freshLogin = localStorage.getItem('medibo_fresh_login') === '1';
     localStorage.removeItem('medibo_fresh_login');
 
-    if (!CURRENT_PROFILE) {
-      // New user — show pharmacy registration
+    if (freshLogin && !CURRENT_PROFILE) {
       setTimeout(() => {
         openAuthModal();
         showAuthStep('register');
-        const email = CURRENT_USER.email || '';
-        const name = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.user_metadata?.name || '';
         const emailEl = document.getElementById('reg-email');
         const nameEl = document.getElementById('reg-name');
-        if (emailEl) emailEl.value = email;
-        if (nameEl && name) nameEl.value = name;
-      }, 400);
+        if (emailEl) emailEl.value = CURRENT_USER.email || '';
+        if (nameEl && !nameEl.value) {
+          const name = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.user_metadata?.name || '';
+          if (name) nameEl.value = name;
+        }
+      }, 300);
     }
   } catch(e) {
-    console.error('initAuth error:', e);
+    console.error('initAuth:', e);
   }
   updateAuthUI();
 }
@@ -2645,30 +2627,33 @@ async function initAuth() {
 async function loadProfile() {
   if (!CURRENT_USER) return;
   try {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/user_profiles?id=eq.' + CURRENT_USER.id + '&select=*', {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/user_profiles?id=eq.' + CURRENT_USER.id + '&select=*&limit=1', {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + CURRENT_USER.access_token }
     });
+    if (!res.ok) return;
     const data = await res.json();
     if (Array.isArray(data) && data.length > 0) CURRENT_PROFILE = data[0];
   } catch(e) {}
 }
 
 function updateAuthUI() {
-  const btn = document.getElementById('auth-btn');
-  const userDiv = document.getElementById('user-menu-btn');
-  if (!btn || !userDiv) return;
+  const loginBtn = document.getElementById('auth-btn');
+  const userBtn = document.getElementById('user-menu-btn');
+  if (!loginBtn || !userBtn) return;
   if (CURRENT_USER) {
-    btn.classList.add('hidden');
-    userDiv.classList.remove('hidden');
-    const name = CURRENT_PROFILE?.full_name || CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || '';
-    const firstName = name.split(' ')[0];
-    const avatarEl = document.getElementById('header-avatar');
-    const nameEl = document.getElementById('header-name');
-    if (avatarEl) avatarEl.textContent = firstName.charAt(0).toUpperCase();
-    if (nameEl) nameEl.textContent = firstName;
+    loginBtn.classList.add('hidden');
+    userBtn.classList.remove('hidden');
+    userBtn.style.display = 'flex';
+    const name = CURRENT_PROFILE?.full_name || CURRENT_USER.user_metadata?.full_name || CURRENT_USER.user_metadata?.name || CURRENT_USER.email || '';
+    const first = name.split(' ')[0];
+    const av = document.getElementById('header-avatar');
+    const nm = document.getElementById('header-name');
+    if (av) av.textContent = first.charAt(0).toUpperCase();
+    if (nm) nm.textContent = first;
   } else {
-    btn.classList.remove('hidden');
-    userDiv.classList.add('hidden');
+    loginBtn.classList.remove('hidden');
+    userBtn.classList.add('hidden');
+    userBtn.style.display = '';
   }
 }
 
@@ -2681,29 +2666,26 @@ function showUserMenu() {
 function doLogout() {
   localStorage.removeItem('medibo_session');
   localStorage.removeItem('medibo_fresh_login');
-  CURRENT_USER = null;
-  CURRENT_PROFILE = null;
+  CURRENT_USER = null; CURRENT_PROFILE = null;
   updateAuthUI();
   navigate('home');
 }
 
-/* ---------- Registration form helpers ---------- */
+/* ---------- Registration ---------- */
 function regSelect(btn, group, value) {
   document.querySelectorAll('[data-group="' + group + '"]').forEach(b => {
-    b.classList.remove('border-teal-500', 'bg-teal-50', 'text-teal-700');
-    b.classList.add('border-slate-200', 'bg-white', 'text-slate-600');
+    b.classList.remove('border-teal-500','bg-teal-50','text-teal-700');
+    b.classList.add('border-slate-200','bg-white','text-slate-600');
   });
-  btn.classList.add('border-teal-500', 'bg-teal-50', 'text-teal-700');
-  btn.classList.remove('border-slate-200', 'bg-white', 'text-slate-600');
+  btn.classList.add('border-teal-500','bg-teal-50','text-teal-700');
+  btn.classList.remove('border-slate-200','bg-white','text-slate-600');
   document.getElementById(group).value = value;
 }
-
 function regFormatId(input) {
-  let v = input.value.replace(/\D/g, '').slice(0, 4);
-  if (v.length > 2) v = v.slice(0,2) + ' ' + v.slice(2);
+  let v = input.value.replace(/\D/g,'').slice(0,4);
+  if (v.length > 2) v = v.slice(0,2)+' '+v.slice(2);
   input.value = v;
 }
-
 let _regIdTimer = null;
 async function regCheckId(val) {
   const status = document.getElementById('reg-id-status');
@@ -2716,125 +2698,84 @@ async function regCheckId(val) {
   clearTimeout(_regIdTimer);
   _regIdTimer = setTimeout(async () => {
     try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/user_profiles?customer_id=eq.' + encodeURIComponent(clean) + '&select=customer_id', {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/user_profiles?customer_id=eq.' + clean + '&select=customer_id', {
         headers: { 'apikey': SUPABASE_ANON_KEY }
       });
       const data = await res.json();
       if (data && data.length > 0) {
         status.className = 'text-xs mt-1 text-rose-500 font-semibold';
-        status.textContent = '✗ ID already taken — choose another';
+        status.textContent = '✗ ID taken — try another';
       } else {
         status.className = 'text-xs mt-1 text-teal-600 font-semibold';
-        status.textContent = '✓ ID available';
+        status.textContent = '✓ Available';
       }
     } catch(e) { status.classList.add('hidden'); }
   }, 500);
 }
-
 let _regConfirmShown = false;
 async function regSubmit() {
-  const get = id => (document.getElementById(id) || {}).value || '';
-  const name = get('reg-name').trim();
-  const custId = get('reg-customer-id').replace(/\s/g,'');
-  const whatsapp = get('reg-whatsapp').trim();
-  const otherContact = get('reg-other-contact').trim();
-  const business = get('reg-business').trim();
-  const range = get('reg-range');
-  const storeType = get('reg-store-type');
-  const payment = get('reg-payment');
-  const address = get('reg-address').trim();
-  const city = get('reg-city').trim();
-  const state = get('reg-state').trim();
-  const pincode = get('reg-pincode').trim();
-  const dl1 = get('reg-dl1').trim();
-  const dl2 = get('reg-dl2').trim();
-  const gstin = get('reg-gstin').trim();
-  const mapLink = get('reg-map').trim();
-  const email = get('reg-email').trim();
+  const g = id => (document.getElementById(id)||{}).value||'';
+  const name=g('reg-name').trim(), custId=g('reg-customer-id').replace(/\s/g,''),
+    whatsapp=g('reg-whatsapp').trim(), other=g('reg-other-contact').trim(),
+    business=g('reg-business').trim(), range=g('reg-range'), storeType=g('reg-store-type'),
+    payment=g('reg-payment'), address=g('reg-address').trim(), city=g('reg-city').trim(),
+    state=g('reg-state').trim(), pincode=g('reg-pincode').trim(),
+    dl1=g('reg-dl1').trim(), dl2=g('reg-dl2').trim(),
+    gstin=g('reg-gstin').trim(), mapLink=g('reg-map').trim();
 
-  const showError = (msg) => {
-    const el = document.getElementById('reg-error');
-    const msgEl = document.getElementById('reg-error-msg');
-    if (el && msgEl) { msgEl.textContent = msg; el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 4000); }
+  const err = msg => {
+    const el=document.getElementById('reg-error'), ml=document.getElementById('reg-error-msg');
+    if(el&&ml){ml.textContent=msg;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),4000);}
   };
+  if(!name) return err('Enter your name');
+  if(custId.length!==4) return err('Customer ID must be 4 digits');
+  if(!whatsapp||whatsapp.length<10) return err('Enter valid WhatsApp number');
+  if(!other||other.length<10) return err('Enter valid other contact');
+  if(!business) return err('Enter pharmacy/business name');
+  if(!range) return err('Select your range');
+  if(!storeType) return err('Select store type');
+  if(!payment) return err('Select payment term');
+  if(!address) return err('Enter address');
+  if(!city) return err('Enter city');
+  if(!state) return err('Enter state');
+  if(!pincode||pincode.length<6) return err('Enter valid 6-digit pincode');
+  if(!dl1) return err('Enter Drug License 1');
+  if(!dl2) return err('Enter Drug License 2');
 
-  if (!name) return showError('Please enter your name');
-  if (custId.length !== 4) return showError('Customer ID must be 4 digits');
-  if (!whatsapp || whatsapp.length < 10) return showError('Enter valid WhatsApp number');
-  if (!otherContact || otherContact.length < 10) return showError('Enter valid other contact number');
-  if (!business) return showError('Enter pharmacy/business name');
-  if (!range) return showError('Select your range');
-  if (!storeType) return showError('Select store type');
-  if (!payment) return showError('Select payment term');
-  if (!address) return showError('Enter address');
-  if (!city) return showError('Enter city');
-  if (!state) return showError('Enter state');
-  if (!pincode || pincode.length < 6) return showError('Enter valid 6-digit pincode');
-  if (!dl1) return showError('Enter Drug License 1');
-  if (!dl2) return showError('Enter Drug License 2');
-
-  // Confirm step
-  if (!_regConfirmShown) {
-    _regConfirmShown = true;
-    document.getElementById('reg-confirm').classList.remove('hidden');
-    setTimeout(() => {
-      document.getElementById('reg-confirm').classList.add('hidden');
-      _regConfirmShown = false;
-    }, 4000);
+  if(!_regConfirmShown) {
+    _regConfirmShown=true;
+    const c=document.getElementById('reg-confirm');
+    if(c)c.classList.remove('hidden');
+    setTimeout(()=>{if(c)c.classList.add('hidden');_regConfirmShown=false;},4000);
     return;
   }
-  _regConfirmShown = false;
-  document.getElementById('reg-confirm').classList.add('hidden');
+  _regConfirmShown=false;
+  const c=document.getElementById('reg-confirm');
+  if(c)c.classList.add('hidden');
 
-  const btn = document.getElementById('reg-submit-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+  const btn=document.getElementById('reg-submit-btn');
+  if(btn){btn.disabled=true;btn.textContent='Submitting…';}
 
   try {
-    const payload = {
-      id: CURRENT_USER.id,
-      full_name: name,
-      customer_id: custId,
-      whatsapp_number: whatsapp,
-      other_contact: otherContact,
-      business_name: business,
-      range: range,
-      store_type: storeType,
-      payment_term: payment,
-      address_line: address,
-      city: city,
-      state: state,
-      pincode: pincode,
-      dl1: dl1,
-      dl2: dl2,
-      gstin: gstin || null,
-      google_map_link: mapLink || null,
-      phone: whatsapp,
-      approved: false
-    };
-
-    const res = await fetch(SUPABASE_URL + '/rest/v1/user_profiles', {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + CURRENT_USER.access_token,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
-      body: JSON.stringify(payload)
+    const res = await fetch(SUPABASE_URL+'/rest/v1/user_profiles',{
+      method:'POST',
+      headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+CURRENT_USER.access_token,'Content-Type':'application/json','Prefer':'return=representation'},
+      body:JSON.stringify({
+        id:CURRENT_USER.id, full_name:name, customer_id:custId,
+        whatsapp_number:whatsapp, other_contact:other, business_name:business,
+        range, store_type:storeType, payment_term:payment, address_line:address,
+        city, state, pincode, dl1, dl2,
+        gstin:gstin||null, google_map_link:mapLink||null, phone:whatsapp, approved:false
+      })
     });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || err.details || 'Submission failed');
-    }
-
-    const saved = await res.json();
-    CURRENT_PROFILE = Array.isArray(saved) ? saved[0] : saved;
+    if(!res.ok){const e=await res.json();throw new Error(e.message||e.details||'Failed');}
+    const saved=await res.json();
+    CURRENT_PROFILE=Array.isArray(saved)?saved[0]:saved;
     showAuthStep('success');
     updateAuthUI();
   } catch(e) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Submit Registration →'; }
-    showError(e.message || 'Something went wrong. Please try again.');
+    if(btn){btn.disabled=false;btn.textContent='Submit Registration →';}
+    err(e.message||'Something went wrong. Try again.');
   }
 }
 
