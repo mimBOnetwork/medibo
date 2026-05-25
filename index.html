@@ -43,7 +43,24 @@
   });
 </script>
 <script>
-  // Always show homepage on load — no route restoration
+  // Immediately clear token from URL before any render — runs synchronously
+  (function() {
+    try {
+      if (window.location.hash && window.location.hash.includes('access_token')) {
+        var params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        var token = params.get('access_token');
+        var refresh = params.get('refresh_token');
+        if (token) {
+          localStorage.setItem('medibo_session', JSON.stringify({ access_token: token, refresh_token: refresh }));
+          localStorage.setItem('medibo_fresh_login', '1');
+        }
+        history.replaceState(null, '', window.location.pathname);
+      } else if (window.location.search && window.location.search.includes('code=')) {
+        // PKCE — will be exchanged in initAuth, just clean URL now
+        // Don't clear yet — initAuth needs the code
+      }
+    } catch(e) {}
+  })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2546,15 +2563,13 @@ let CURRENT_USER = null;
 let CURRENT_PROFILE = null;
 
 async function initAuth() {
-  // Handle Supabase OAuth callback — supports both PKCE (code=) and legacy (hash access_token)
+  // Hash token already extracted synchronously at page load (see inline script above)
+  // Handle PKCE code flow if present
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get('code');
-  const hash = window.location.hash;
-
-  // PKCE flow: exchange code for session
   if (code) {
     try {
-      history.replaceState(null, '', window.location.pathname); // clean URL immediately
+      history.replaceState(null, '', window.location.pathname);
       const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=pkce', {
         method: 'POST',
         headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
@@ -2566,18 +2581,6 @@ async function initAuth() {
         localStorage.setItem('medibo_fresh_login', '1');
       }
     } catch(e) { console.error('PKCE exchange failed:', e); }
-  }
-
-  // Legacy implicit flow: token in hash
-  if (hash && hash.includes('access_token')) {
-    const params = new URLSearchParams(hash.replace(/^#/, ''));
-    const token = params.get('access_token');
-    const refreshToken = params.get('refresh_token');
-    if (token) {
-      localStorage.setItem('medibo_session', JSON.stringify({ access_token: token, refresh_token: refreshToken }));
-      localStorage.setItem('medibo_fresh_login', '1');
-      history.replaceState(null, '', window.location.pathname);
-    }
   }
 
   const freshLogin = localStorage.getItem('medibo_fresh_login') === '1';
