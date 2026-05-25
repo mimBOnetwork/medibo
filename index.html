@@ -2546,8 +2546,29 @@ let CURRENT_USER = null;
 let CURRENT_PROFILE = null;
 
 async function initAuth() {
-  // Check for fresh Google OAuth callback FIRST before hash disappears
+  // Handle Supabase OAuth callback — supports both PKCE (code=) and legacy (hash access_token)
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
   const hash = window.location.hash;
+
+  // PKCE flow: exchange code for session
+  if (code) {
+    try {
+      history.replaceState(null, '', window.location.pathname); // clean URL immediately
+      const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=pkce', {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ auth_code: code })
+      });
+      const data = await res.json();
+      if (data.access_token) {
+        localStorage.setItem('medibo_session', JSON.stringify({ access_token: data.access_token, refresh_token: data.refresh_token }));
+        localStorage.setItem('medibo_fresh_login', '1');
+      }
+    } catch(e) { console.error('PKCE exchange failed:', e); }
+  }
+
+  // Legacy implicit flow: token in hash
   if (hash && hash.includes('access_token')) {
     const params = new URLSearchParams(hash.replace(/^#/, ''));
     const token = params.get('access_token');
@@ -2555,7 +2576,6 @@ async function initAuth() {
     if (token) {
       localStorage.setItem('medibo_session', JSON.stringify({ access_token: token, refresh_token: refreshToken }));
       localStorage.setItem('medibo_fresh_login', '1');
-      // Clear hash without page reload
       history.replaceState(null, '', window.location.pathname);
     }
   }
@@ -2619,9 +2639,9 @@ async function loadProfile() {
 }
 
 function signInWithGoogle() {
-  // Redirect to Supabase Google OAuth — redirects back to medibo.in with token in hash
   const redirectTo = encodeURIComponent(window.location.origin + window.location.pathname);
-  window.location.href = SUPABASE_URL + '/auth/v1/authorize?provider=google&redirect_to=' + redirectTo;
+  // Use implicit flow — returns access_token in URL hash, no code exchange needed
+  window.location.href = SUPABASE_URL + '/auth/v1/authorize?provider=google&redirect_to=' + redirectTo + '&flow_type=implicit';
 }
 
 function selectOption(btn, group, value) {
