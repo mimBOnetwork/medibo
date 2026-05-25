@@ -74,7 +74,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -433,16 +432,7 @@
           <span class="w-1.5 h-1.5 rounded-full bg-teal-500 pulse-dot"></span>
           Live stock
         </button>
-        <!-- Auth button -->
-        <button id="auth-btn" onclick="openAuthModal()" class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-navy-900 text-sm font-semibold hover:bg-slate-200 transition">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
-          Login
-        </button>
-        <!-- User menu (shown when logged in) -->
-        <button id="user-menu-btn" onclick="showUserMenu()" class="hidden items-center gap-2 px-3 py-2 rounded-xl bg-teal-50 text-navy-900 text-sm font-semibold hover:bg-teal-100 transition sm:flex">
-          <span id="header-avatar" class="w-6 h-6 rounded-full bg-navy-900 text-white text-xs font-bold flex items-center justify-center">?</span>
-          <span id="header-name" class="hidden sm:block">Me</span>
-        </button>
+
         <a href="javascript:void(0)" data-route="cart" class="route-link relative flex items-center gap-1.5 px-3 py-2 rounded-xl bg-navy-900 text-white hover:bg-navy-800 transition">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218a.75.75 0 0 0 .72-.54l1.892-6.18a.75.75 0 0 0-.72-.96H5.106M7.5 14.25l-1.135-4.255"/>
@@ -1579,210 +1569,6 @@
   </div>
 </footer>
 
-<!-- AUTH MODAL -->
-
-<!-- AUTH MODAL -->
-<div id="auth-modal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);" onclick="if(event.target===this)closeAuthModal()">
-  <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl relative" style="max-height:92vh;overflow-y:auto;">
-    <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 z-10 text-lg">✕</button>
-
-    <!-- STEP 1: Google Login -->
-    <div id="auth-step-login" class="p-8 text-center">
-      <div class="w-16 h-16 rounded-2xl bg-navy-900 flex items-center justify-center mx-auto mb-5">
-        <svg viewBox="0 0 100 100" width="38" height="38"><rect x="2" y="2" width="96" height="96" rx="22" fill="#0f1f44"/><rect x="16" y="43" width="68" height="15" rx="7.5" fill="#34d399"/><rect x="43" y="16" width="15" height="68" rx="7.5" fill="#34d399"/></svg>
-      </div>
-      <h2 class="font-display font-extrabold text-2xl text-navy-900 mb-1">Welcome to mediBO</h2>
-      <p class="text-sm text-slate-500 mb-8">B2B pharma ordering for pharmacies & hospitals</p>
-      <button onclick="signInWithGoogle()" class="w-full flex items-center justify-center gap-3 px-5 py-4 rounded-2xl border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 active:scale-95 transition font-semibold text-slate-700 text-sm">
-        <svg viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Continue with Google
-      </button>
-      <p class="text-xs text-slate-400 mt-4">No password needed · Secure Google login</p>
-    </div>
-
-    <!-- STEP 2: Pharmacy Registration (new users only) -->
-    <div id="auth-step-register" class="hidden">
-      <div class="sticky top-0 bg-white z-10 px-6 pt-5 pb-4 border-b border-slate-100 rounded-t-3xl">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-navy-900 flex items-center justify-center flex-shrink-0">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"/></svg>
-          </div>
-          <div>
-            <div class="font-display font-extrabold text-lg text-navy-900">Pharmacy Registration</div>
-            <div class="text-xs text-slate-400">Fill all required details to create your account</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="px-6 py-5 space-y-5">
-
-        <!-- Personal Info -->
-        <div class="bg-slate-50 rounded-2xl p-4 space-y-3">
-          <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Personal Info</div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Customer Name *</label>
-            <input id="reg-name" type="text" placeholder="Full name" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Customer ID * <span class="font-normal text-slate-400">(4 digits, e.g. 33 22)</span></label>
-            <input id="reg-customer-id" type="tel" placeholder="Ex: 33 22" maxlength="5"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono tracking-widest"
-              style="font-size:16px" oninput="regFormatId(this);regCheckId(this.value)"/>
-            <p id="reg-id-status" class="text-xs mt-1 hidden"></p>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">WhatsApp Number *</label>
-            <input id="reg-whatsapp" type="tel" placeholder="10-digit mobile" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Other Contact Number *</label>
-            <input id="reg-other-contact" type="tel" placeholder="Alternate number" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Email</label>
-            <input id="reg-email" type="email" readonly class="w-full px-3.5 py-2.5 rounded-xl border border-slate-100 bg-slate-100 text-sm text-slate-400" style="font-size:16px"/>
-          </div>
-        </div>
-
-        <!-- Business Info -->
-        <div class="bg-slate-50 rounded-2xl p-4 space-y-3">
-          <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Business Info</div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Pharmacy / Business Name *</label>
-            <input id="reg-business" type="text" placeholder="e.g. Sharma Medical Store" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1.5 block">Range *</label>
-            <div class="grid grid-cols-2 gap-2">
-              <button type="button" onclick="regSelect(this,'reg-range','INSIDE RAIPUR CITY')" data-group="reg-range" class="py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-teal-300">🏙️ Inside Raipur</button>
-              <button type="button" onclick="regSelect(this,'reg-range','OUTSIDE RAIPUR CITY')" data-group="reg-range" class="py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-teal-300">🗺️ Outside Raipur</button>
-            </div>
-            <input type="hidden" id="reg-range"/>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1.5 block">Store Type *</label>
-            <div class="grid grid-cols-3 gap-2">
-              <button type="button" onclick="regSelect(this,'reg-store-type','PHARMACY')" data-group="reg-store-type" class="py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-teal-300">💊 Pharmacy</button>
-              <button type="button" onclick="regSelect(this,'reg-store-type','HOSPITAL PHARMACY')" data-group="reg-store-type" class="py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-teal-300">🏥 Hospital</button>
-              <button type="button" onclick="regSelect(this,'reg-store-type','CLINIC')" data-group="reg-store-type" class="py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-teal-300">🩺 Clinic</button>
-            </div>
-            <input type="hidden" id="reg-store-type"/>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1.5 block">Payment Term *</label>
-            <div class="grid grid-cols-2 gap-2">
-              <button type="button" onclick="regSelect(this,'reg-payment','ADVANCE PAYMENT')" data-group="reg-payment" class="py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-teal-300">💳 Advance</button>
-              <button type="button" onclick="regSelect(this,'reg-payment','COD')" data-group="reg-payment" class="py-2.5 rounded-xl border-2 border-slate-200 bg-white text-xs font-bold text-slate-600 transition hover:border-teal-300">💵 COD</button>
-            </div>
-            <input type="hidden" id="reg-payment"/>
-            <div class="mt-2 flex gap-2"><span class="text-amber-500 text-xs mt-0.5">ℹ️</span><p class="text-xs text-slate-500 leading-relaxed"><strong>Note —</strong> Advance payment offers higher discounts. We do not provide credit, but COD is available.</p></div>
-          </div>
-        </div>
-
-        <!-- Address -->
-        <div class="bg-slate-50 rounded-2xl p-4 space-y-3">
-          <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Address</div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Address Line *</label>
-            <textarea id="reg-address" placeholder="Shop no, building, street, area" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 resize-none" style="font-size:16px"></textarea>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-xs font-semibold text-slate-600 mb-1 block">City *</label>
-              <input id="reg-city" type="text" placeholder="e.g. Raipur" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-slate-600 mb-1 block">State *</label>
-              <input id="reg-state" type="text" placeholder="e.g. Chhattisgarh" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
-            </div>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Pincode *</label>
-            <input id="reg-pincode" type="tel" maxlength="6" placeholder="6-digit pincode" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Google Map Link <span class="text-slate-400 font-normal">(optional)</span></label>
-            <input id="reg-map" type="url" placeholder="https://maps.google.com/..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50" style="font-size:16px"/>
-          </div>
-        </div>
-
-        <!-- Licenses -->
-        <div class="bg-slate-50 rounded-2xl p-4 space-y-3">
-          <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Licenses & Compliance</div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Drug License 1 *</label>
-            <input id="reg-dl1" type="text" placeholder="DL number 1" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono" style="font-size:16px"/>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">Drug License 2 *</label>
-            <input id="reg-dl2" type="text" placeholder="DL number 2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono" style="font-size:16px"/>
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-slate-600 mb-1 block">GST Number <span class="text-slate-400 font-normal">(optional)</span></label>
-            <input id="reg-gstin" type="text" placeholder="15-digit GSTIN" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-50 font-mono" style="font-size:16px"/>
-          </div>
-        </div>
-
-        <!-- Submit -->
-        <div class="relative mt-2">
-          <div id="reg-error" class="hidden absolute bottom-full left-0 right-0 mb-2">
-            <div class="bg-rose-500 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl text-center shadow-lg" id="reg-error-msg"></div>
-          </div>
-          <div id="reg-confirm" class="hidden absolute bottom-full left-0 right-0 mb-2">
-            <div class="bg-orange-500 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl text-center shadow-lg">⚠️ Once submitted, you cannot edit these details. Tap again to confirm.</div>
-          </div>
-          <button id="reg-submit-btn" onclick="regSubmit()" class="w-full py-4 rounded-2xl bg-navy-900 text-white font-bold text-base hover:bg-navy-800 active:scale-95 transition">Submit Registration →</button>
-        </div>
-        <div class="h-4"></div>
-      </div>
-    </div>
-
-    <!-- STEP 3: Success -->
-    <div id="auth-step-success" class="hidden p-8 text-center">
-      <div class="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center mx-auto mb-4">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-      </div>
-      <h3 class="font-display font-bold text-2xl text-navy-900 mb-2">Registration Submitted!</h3>
-      <p class="text-sm text-slate-500 mb-6">Your details have been sent for approval. You will be notified once approved. You can browse products in the meantime.</p>
-      <button onclick="closeAuthModal()" class="px-8 py-3 rounded-2xl bg-navy-900 text-white font-bold text-sm">Start Browsing</button>
-    </div>
-  </div>
-</div>
-
-<!-- APPROVAL PENDING MODAL -->
-<div id="approval-modal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);">
-  <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl p-8 text-center">
-    <div class="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-8 h-8 text-amber-500"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
-    </div>
-    <h3 class="font-display font-extrabold text-xl text-navy-900 mb-2">Verification Pending</h3>
-    <p class="text-sm text-slate-500 mb-2">Your account is under review. Our team will verify your drug license and business details.</p>
-    <p class="text-sm text-slate-500 mb-6">You'll be able to place orders once approved. This usually takes <span class="font-semibold text-navy-900">24–48 hours</span>.</p>
-    <div class="bg-slate-50 rounded-2xl px-4 py-3 mb-6 text-left space-y-1.5">
-      <div class="flex items-center gap-2 text-xs text-slate-600">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3.5 h-3.5 text-teal-500 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75"/></svg>
-        Account created successfully
-      </div>
-      <div class="flex items-center gap-2 text-xs text-slate-600">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3.5 h-3.5 text-teal-500 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75"/></svg>
-        Profile details submitted
-      </div>
-      <div class="flex items-center gap-2 text-xs text-amber-600 font-medium">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-3.5 h-3.5 text-amber-500 flex-shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5"/><circle cx="12" cy="12" r="9"/></svg>
-        Admin verification in progress
-      </div>
-    </div>
-    <button onclick="document.getElementById('approval-modal').style.display='none';document.body.style.overflow='';" class="w-full py-3 rounded-2xl bg-navy-900 text-white font-bold text-sm">Got it</button>
-  </div>
-</div>
-
-<!-- Toast -->
-<div id="toast" class="toast"></div>
 
 <!-- =========================================================
      DATA + LOGIC
@@ -1796,8 +1582,6 @@ const PAGE_SIZE = 9;
 const SUPABASE_URL = 'https://qkcuoaqrpnmdnejzahdv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrY3VvYXFycG5tZG5lanphaGR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzk3NjYsImV4cCI6MjA5NDk1NTc2Nn0.IBj9QYmYjfaHYU40lfTvuTj8YO4Brz4P-6k7TWcM_hE';
 
-// Official Supabase JS client — handles ALL auth automatically
-const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* Plain-fetch REST wrapper.
    The supabase-js client triggers a DataCloneError inside iframe sandboxes
@@ -2554,173 +2338,18 @@ function closeSidebar() {
    AUTH — Rebuilt from scratch
    ============================================================ */
 
-/* ============================================================
-   AUTH — Official Supabase JS SDK
-   ============================================================ */
+
+/* AUTH REMOVED — stubs to prevent errors */
 let CURRENT_USER = null;
 let CURRENT_PROFILE = null;
-
-function openAuthModal() {
-  const m = document.getElementById('auth-modal');
-  m.classList.remove('hidden'); m.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  showAuthStep('login');
-}
-function closeAuthModal() {
-  const m = document.getElementById('auth-modal');
-  m.classList.add('hidden'); m.style.display = '';
-  document.body.style.overflow = '';
-}
-function showAuthStep(step) {
-  ['auth-step-login','auth-step-register','auth-step-success'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-  });
-  const t = document.getElementById('auth-step-' + step);
-  if (t) t.classList.remove('hidden');
-}
-function signInWithGoogle() {
-  _sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: 'https://www.medibo.in' } });
-}
-async function initAuth() {
-  const { data: { session } } = await _sb.auth.getSession();
-  if (session) {
-    CURRENT_USER = { ...session.user, access_token: session.access_token };
-    await loadProfile();
-    if (!CURRENT_PROFILE) {
-      openAuthModal(); showAuthStep('register');
-      const emailEl = document.getElementById('reg-email');
-      const nameEl = document.getElementById('reg-name');
-      if (emailEl) emailEl.value = CURRENT_USER.email || '';
-      if (nameEl) nameEl.value = CURRENT_USER.user_metadata?.full_name || '';
-    }
-  }
-  if (window.location.hash && window.location.hash.includes('access_token'))
-    history.replaceState(null, '', window.location.pathname);
-  updateAuthUI();
-  _sb.auth.onAuthStateChange(async (event, session) => {
-    if (session) {
-      CURRENT_USER = { ...session.user, access_token: session.access_token };
-      await loadProfile();
-      if (event === 'SIGNED_IN' && !CURRENT_PROFILE) {
-        openAuthModal(); showAuthStep('register');
-        const emailEl = document.getElementById('reg-email');
-        const nameEl = document.getElementById('reg-name');
-        if (emailEl) emailEl.value = CURRENT_USER.email || '';
-        if (nameEl) nameEl.value = CURRENT_USER.user_metadata?.full_name || '';
-      }
-    } else { CURRENT_USER = null; CURRENT_PROFILE = null; }
-    updateAuthUI();
-  });
-}
-async function loadProfile() {
-  if (!CURRENT_USER) return;
-  try {
-    const { data } = await _sb.from('user_profiles').select('*').eq('id', CURRENT_USER.id).maybeSingle();
-    if (data) CURRENT_PROFILE = data;
-  } catch(e) {}
-}
-function updateAuthUI() {
-  const loginBtn = document.getElementById('auth-btn');
-  const userBtn = document.getElementById('user-menu-btn');
-  if (!loginBtn || !userBtn) return;
-  if (CURRENT_USER) {
-    loginBtn.classList.add('hidden');
-    userBtn.classList.remove('hidden'); userBtn.style.display = 'flex';
-    const name = CURRENT_PROFILE?.full_name || CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || '';
-    const first = name.split(' ')[0];
-    const av = document.getElementById('header-avatar');
-    const nm = document.getElementById('header-name');
-    if (av) av.textContent = first.charAt(0).toUpperCase();
-    if (nm) nm.textContent = first;
-  } else {
-    loginBtn.classList.remove('hidden');
-    userBtn.classList.add('hidden'); userBtn.style.display = '';
-  }
-}
-function showUserMenu() { if (!CURRENT_USER) { openAuthModal(); return; } renderProfile(); navigate('profile'); }
-async function doLogout() { await _sb.auth.signOut(); CURRENT_USER = null; CURRENT_PROFILE = null; updateAuthUI(); navigate('home'); }
-function regSelect(btn, group, value) {
-  document.querySelectorAll('[data-group="' + group + '"]').forEach(b => {
-    b.classList.remove('border-teal-500','bg-teal-50','text-teal-700');
-    b.classList.add('border-slate-200','bg-white','text-slate-600');
-  });
-  btn.classList.add('border-teal-500','bg-teal-50','text-teal-700');
-  btn.classList.remove('border-slate-200','bg-white','text-slate-600');
-  document.getElementById(group).value = value;
-}
-function regFormatId(input) {
-  let v = input.value.replace(/\D/g,'').slice(0,4);
-  if (v.length > 2) v = v.slice(0,2)+' '+v.slice(2);
-  input.value = v;
-}
-let _regIdTimer = null;
-async function regCheckId(val) {
-  const status = document.getElementById('reg-id-status');
-  if (!status) return;
-  const clean = val.replace(/\s/g,'');
-  if (clean.length < 4) { status.classList.add('hidden'); return; }
-  status.classList.remove('hidden'); status.textContent = 'Checking…';
-  clearTimeout(_regIdTimer);
-  _regIdTimer = setTimeout(async () => {
-    const { data } = await _sb.from('user_profiles').select('customer_id').eq('customer_id', clean);
-    if (data && data.length > 0) { status.className='text-xs mt-1 text-rose-500 font-semibold'; status.textContent='✗ ID taken'; }
-    else { status.className='text-xs mt-1 text-teal-600 font-semibold'; status.textContent='✓ Available'; }
-  }, 500);
-}
-let _regConfirmShown = false;
-async function regSubmit() {
-  const g = id => (document.getElementById(id)||{}).value||'';
-  const name=g('reg-name').trim(), custId=g('reg-customer-id').replace(/\s/g,''),
-    whatsapp=g('reg-whatsapp').trim(), other=g('reg-other-contact').trim(),
-    business=g('reg-business').trim(), range=g('reg-range'), storeType=g('reg-store-type'),
-    payment=g('reg-payment'), address=g('reg-address').trim(), city=g('reg-city').trim(),
-    state=g('reg-state').trim(), pincode=g('reg-pincode').trim(),
-    dl1=g('reg-dl1').trim(), dl2=g('reg-dl2').trim(),
-    gstin=g('reg-gstin').trim(), mapLink=g('reg-map').trim();
-  const err = msg => {
-    const el=document.getElementById('reg-error'), ml=document.getElementById('reg-error-msg');
-    if(el&&ml){ml.textContent=msg;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),4000);}
-  };
-  if(!name) return err('Enter your name');
-  if(custId.length!==4) return err('Customer ID must be 4 digits');
-  if(!whatsapp||whatsapp.length<10) return err('Enter valid WhatsApp number');
-  if(!other||other.length<10) return err('Enter valid other contact');
-  if(!business) return err('Enter pharmacy/business name');
-  if(!range) return err('Select your range');
-  if(!storeType) return err('Select store type');
-  if(!payment) return err('Select payment term');
-  if(!address) return err('Enter address');
-  if(!city) return err('Enter city');
-  if(!state) return err('Enter state');
-  if(!pincode||pincode.length<6) return err('Enter valid 6-digit pincode');
-  if(!dl1) return err('Enter Drug License 1');
-  if(!dl2) return err('Enter Drug License 2');
-  if(!_regConfirmShown) {
-    _regConfirmShown=true;
-    const c=document.getElementById('reg-confirm');
-    if(c)c.classList.remove('hidden');
-    setTimeout(()=>{if(c)c.classList.add('hidden');_regConfirmShown=false;},4000);
-    return;
-  }
-  _regConfirmShown=false;
-  const c=document.getElementById('reg-confirm'); if(c)c.classList.add('hidden');
-  const btn=document.getElementById('reg-submit-btn');
-  if(btn){btn.disabled=true;btn.textContent='Submitting…';}
-  const { error } = await _sb.from('user_profiles').insert({
-    id:CURRENT_USER.id, full_name:name, customer_id:custId,
-    whatsapp_number:whatsapp, other_contact:other, business_name:business,
-    range, store_type:storeType, payment_term:payment, address_line:address,
-    city, state, pincode, dl1, dl2,
-    gstin:gstin||null, google_map_link:mapLink||null, phone:whatsapp, approved:false
-  });
-  if(error) {
-    if(btn){btn.disabled=false;btn.textContent='Submit Registration →';}
-    err(error.message||'Something went wrong. Try again.'); return;
-  }
-  await loadProfile();
-  showAuthStep('success'); updateAuthUI();
-}
+function openAuthModal() {}
+function closeAuthModal() {}
+function doLogout() { navigate('home'); }
+function showUserMenu() { navigate('home'); }
+function updateAuthUI() {}
+async function initAuth() {}
+async function loadProfile() {}
+function showApprovalPending() {}
 
 function showApprovalPending() {
   document.getElementById('approval-modal').style.display = 'flex';
@@ -3467,7 +3096,7 @@ document.addEventListener('change', e => {
   renderAllCategories();
   renderActivity();
   updateCartBadge(); saveCart();
-  initAuth();
+  // auth removed
 
   // Render the current view's dynamic content
   if (currentView === 'cart') renderCart();
