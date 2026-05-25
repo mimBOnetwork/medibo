@@ -74,6 +74,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
@@ -1795,6 +1796,9 @@ const PAGE_SIZE = 9;
 const SUPABASE_URL = 'https://qkcuoaqrpnmdnejzahdv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrY3VvYXFycG5tZG5lanphaGR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzk3NjYsImV4cCI6MjA5NDk1NTc2Nn0.IBj9QYmYjfaHYU40lfTvuTj8YO4Brz4P-6k7TWcM_hE';
 
+// Official Supabase JS client — handles ALL auth automatically
+const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 /* Plain-fetch REST wrapper.
    The supabase-js client triggers a DataCloneError inside iframe sandboxes
    (postMessage cannot clone Headers). The REST endpoint takes the same
@@ -2549,21 +2553,22 @@ function closeSidebar() {
 /* ============================================================
    AUTH — Rebuilt from scratch
    ============================================================ */
+
+/* ============================================================
+   AUTH — Official Supabase JS SDK
+   ============================================================ */
 let CURRENT_USER = null;
 let CURRENT_PROFILE = null;
 
-/* ---------- Modal open/close ---------- */
 function openAuthModal() {
   const m = document.getElementById('auth-modal');
-  m.classList.remove('hidden');
-  m.style.display = 'flex';
+  m.classList.remove('hidden'); m.style.display = 'flex';
   document.body.style.overflow = 'hidden';
   showAuthStep('login');
 }
 function closeAuthModal() {
   const m = document.getElementById('auth-modal');
-  m.classList.add('hidden');
-  m.style.display = '';
+  m.classList.add('hidden'); m.style.display = '';
   document.body.style.overflow = '';
 }
 function showAuthStep(step) {
@@ -2574,83 +2579,55 @@ function showAuthStep(step) {
   const t = document.getElementById('auth-step-' + step);
   if (t) t.classList.remove('hidden');
 }
-
-/* ---------- Google OAuth ---------- */
 function signInWithGoogle() {
-  window.location.href = SUPABASE_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent('https://www.medibo.in') + '&flow_type=implicit';
+  _sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: 'https://www.medibo.in' } });
 }
-
-/* ---------- Session ---------- */
 async function initAuth() {
-  try {
-    const raw = localStorage.getItem('medibo_session');
-    if (!raw) { updateAuthUI(); return; }
-    const session = JSON.parse(raw);
-    if (!session?.access_token) { updateAuthUI(); return; }
-
-    // Decode JWT locally — no network call needed
-    let payload = {};
-    try {
-      payload = JSON.parse(atob(session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-    } catch(e2) { localStorage.removeItem('medibo_session'); updateAuthUI(); return; }
-
-    // Expired?
-    if (payload.exp && payload.exp < Math.floor(Date.now()/1000)) {
-      localStorage.removeItem('medibo_session');
-      localStorage.removeItem('medibo_fresh_login');
-      updateAuthUI(); return;
-    }
-
-    // Supabase puts Google profile data in user_metadata
-    const meta = payload.user_metadata || {};
-
-    CURRENT_USER = {
-      id: payload.sub,
-      email: payload.email || meta.email || '',
-      access_token: session.access_token,
-      user_metadata: meta
-    };
-
-    // Load profile from DB
+  const { data: { session } } = await _sb.auth.getSession();
+  if (session) {
+    CURRENT_USER = { ...session.user, access_token: session.access_token };
     await loadProfile();
-
-    // Fresh login with no profile → show registration immediately
-    const isNew = localStorage.getItem('medibo_fresh_login') === '1';
-    localStorage.removeItem('medibo_fresh_login');
-
-    if (isNew && !CURRENT_PROFILE) {
-      openAuthModal();
-      showAuthStep('register');
+    if (!CURRENT_PROFILE) {
+      openAuthModal(); showAuthStep('register');
       const emailEl = document.getElementById('reg-email');
       const nameEl = document.getElementById('reg-name');
       if (emailEl) emailEl.value = CURRENT_USER.email || '';
-      if (nameEl) nameEl.value = meta.full_name || meta.name || '';
+      if (nameEl) nameEl.value = CURRENT_USER.user_metadata?.full_name || '';
     }
-  } catch(e) { console.error('initAuth:', e); }
+  }
+  if (window.location.hash && window.location.hash.includes('access_token'))
+    history.replaceState(null, '', window.location.pathname);
   updateAuthUI();
+  _sb.auth.onAuthStateChange(async (event, session) => {
+    if (session) {
+      CURRENT_USER = { ...session.user, access_token: session.access_token };
+      await loadProfile();
+      if (event === 'SIGNED_IN' && !CURRENT_PROFILE) {
+        openAuthModal(); showAuthStep('register');
+        const emailEl = document.getElementById('reg-email');
+        const nameEl = document.getElementById('reg-name');
+        if (emailEl) emailEl.value = CURRENT_USER.email || '';
+        if (nameEl) nameEl.value = CURRENT_USER.user_metadata?.full_name || '';
+      }
+    } else { CURRENT_USER = null; CURRENT_PROFILE = null; }
+    updateAuthUI();
+  });
 }
-
 async function loadProfile() {
   if (!CURRENT_USER) return;
   try {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/user_profiles?id=eq.' + CURRENT_USER.id + '&select=*&limit=1', {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + CURRENT_USER.access_token }
-    });
-    if (!res.ok) return;
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) CURRENT_PROFILE = data[0];
+    const { data } = await _sb.from('user_profiles').select('*').eq('id', CURRENT_USER.id).maybeSingle();
+    if (data) CURRENT_PROFILE = data;
   } catch(e) {}
 }
-
 function updateAuthUI() {
   const loginBtn = document.getElementById('auth-btn');
   const userBtn = document.getElementById('user-menu-btn');
   if (!loginBtn || !userBtn) return;
   if (CURRENT_USER) {
     loginBtn.classList.add('hidden');
-    userBtn.classList.remove('hidden');
-    userBtn.style.display = 'flex';
-    const name = CURRENT_PROFILE?.full_name || CURRENT_USER.user_metadata?.full_name || CURRENT_USER.user_metadata?.name || CURRENT_USER.email || '';
+    userBtn.classList.remove('hidden'); userBtn.style.display = 'flex';
+    const name = CURRENT_PROFILE?.full_name || CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || '';
     const first = name.split(' ')[0];
     const av = document.getElementById('header-avatar');
     const nm = document.getElementById('header-name');
@@ -2658,26 +2635,11 @@ function updateAuthUI() {
     if (nm) nm.textContent = first;
   } else {
     loginBtn.classList.remove('hidden');
-    userBtn.classList.add('hidden');
-    userBtn.style.display = '';
+    userBtn.classList.add('hidden'); userBtn.style.display = '';
   }
 }
-
-function showUserMenu() {
-  if (!CURRENT_USER) { openAuthModal(); return; }
-  renderProfile();
-  navigate('profile');
-}
-
-function doLogout() {
-  localStorage.removeItem('medibo_session');
-  localStorage.removeItem('medibo_fresh_login');
-  CURRENT_USER = null; CURRENT_PROFILE = null;
-  updateAuthUI();
-  navigate('home');
-}
-
-/* ---------- Registration ---------- */
+function showUserMenu() { if (!CURRENT_USER) { openAuthModal(); return; } renderProfile(); navigate('profile'); }
+async function doLogout() { await _sb.auth.signOut(); CURRENT_USER = null; CURRENT_PROFILE = null; updateAuthUI(); navigate('home'); }
 function regSelect(btn, group, value) {
   document.querySelectorAll('[data-group="' + group + '"]').forEach(b => {
     b.classList.remove('border-teal-500','bg-teal-50','text-teal-700');
@@ -2698,24 +2660,12 @@ async function regCheckId(val) {
   if (!status) return;
   const clean = val.replace(/\s/g,'');
   if (clean.length < 4) { status.classList.add('hidden'); return; }
-  status.classList.remove('hidden');
-  status.className = 'text-xs mt-1 text-slate-400';
-  status.textContent = 'Checking…';
+  status.classList.remove('hidden'); status.textContent = 'Checking…';
   clearTimeout(_regIdTimer);
   _regIdTimer = setTimeout(async () => {
-    try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/user_profiles?customer_id=eq.' + clean + '&select=customer_id', {
-        headers: { 'apikey': SUPABASE_ANON_KEY }
-      });
-      const data = await res.json();
-      if (data && data.length > 0) {
-        status.className = 'text-xs mt-1 text-rose-500 font-semibold';
-        status.textContent = '✗ ID taken — try another';
-      } else {
-        status.className = 'text-xs mt-1 text-teal-600 font-semibold';
-        status.textContent = '✓ Available';
-      }
-    } catch(e) { status.classList.add('hidden'); }
+    const { data } = await _sb.from('user_profiles').select('customer_id').eq('customer_id', clean);
+    if (data && data.length > 0) { status.className='text-xs mt-1 text-rose-500 font-semibold'; status.textContent='✗ ID taken'; }
+    else { status.className='text-xs mt-1 text-teal-600 font-semibold'; status.textContent='✓ Available'; }
   }, 500);
 }
 let _regConfirmShown = false;
@@ -2728,7 +2678,6 @@ async function regSubmit() {
     state=g('reg-state').trim(), pincode=g('reg-pincode').trim(),
     dl1=g('reg-dl1').trim(), dl2=g('reg-dl2').trim(),
     gstin=g('reg-gstin').trim(), mapLink=g('reg-map').trim();
-
   const err = msg => {
     const el=document.getElementById('reg-error'), ml=document.getElementById('reg-error-msg');
     if(el&&ml){ml.textContent=msg;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),4000);}
@@ -2747,7 +2696,6 @@ async function regSubmit() {
   if(!pincode||pincode.length<6) return err('Enter valid 6-digit pincode');
   if(!dl1) return err('Enter Drug License 1');
   if(!dl2) return err('Enter Drug License 2');
-
   if(!_regConfirmShown) {
     _regConfirmShown=true;
     const c=document.getElementById('reg-confirm');
@@ -2756,33 +2704,22 @@ async function regSubmit() {
     return;
   }
   _regConfirmShown=false;
-  const c=document.getElementById('reg-confirm');
-  if(c)c.classList.add('hidden');
-
+  const c=document.getElementById('reg-confirm'); if(c)c.classList.add('hidden');
   const btn=document.getElementById('reg-submit-btn');
   if(btn){btn.disabled=true;btn.textContent='Submitting…';}
-
-  try {
-    const res = await fetch(SUPABASE_URL+'/rest/v1/user_profiles',{
-      method:'POST',
-      headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+CURRENT_USER.access_token,'Content-Type':'application/json','Prefer':'return=representation'},
-      body:JSON.stringify({
-        id:CURRENT_USER.id, full_name:name, customer_id:custId,
-        whatsapp_number:whatsapp, other_contact:other, business_name:business,
-        range, store_type:storeType, payment_term:payment, address_line:address,
-        city, state, pincode, dl1, dl2,
-        gstin:gstin||null, google_map_link:mapLink||null, phone:whatsapp, approved:false
-      })
-    });
-    if(!res.ok){const e=await res.json();throw new Error(e.message||e.details||'Failed');}
-    const saved=await res.json();
-    CURRENT_PROFILE=Array.isArray(saved)?saved[0]:saved;
-    showAuthStep('success');
-    updateAuthUI();
-  } catch(e) {
+  const { error } = await _sb.from('user_profiles').insert({
+    id:CURRENT_USER.id, full_name:name, customer_id:custId,
+    whatsapp_number:whatsapp, other_contact:other, business_name:business,
+    range, store_type:storeType, payment_term:payment, address_line:address,
+    city, state, pincode, dl1, dl2,
+    gstin:gstin||null, google_map_link:mapLink||null, phone:whatsapp, approved:false
+  });
+  if(error) {
     if(btn){btn.disabled=false;btn.textContent='Submit Registration →';}
-    err(e.message||'Something went wrong. Try again.');
+    err(error.message||'Something went wrong. Try again.'); return;
   }
+  await loadProfile();
+  showAuthStep('success'); updateAuthUI();
 }
 
 function showApprovalPending() {
