@@ -43,7 +43,7 @@
   });
 </script>
 <script>
-  // Immediately clear token from URL before any render
+  // Immediately save token + user info from URL hash — SYNCHRONOUS, before page renders
   (function() {
     try {
       if (window.location.hash && window.location.hash.includes('access_token')) {
@@ -51,7 +51,19 @@
         var token = params.get('access_token');
         var refresh = params.get('refresh_token');
         if (token) {
-          localStorage.setItem('medibo_session', JSON.stringify({ access_token: token, refresh_token: refresh }));
+          var payload = {};
+          try {
+            var b64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+            payload = JSON.parse(atob(b64));
+          } catch(e2) {}
+          localStorage.setItem('medibo_session', JSON.stringify({
+            access_token: token,
+            refresh_token: refresh,
+            user_id: payload.sub || '',
+            email: payload.email || '',
+            exp: payload.exp || 0,
+            user_metadata: payload.user_metadata || {}
+          }));
           localStorage.setItem('medibo_fresh_login', '1');
         }
         history.replaceState(null, '', window.location.pathname);
@@ -2576,27 +2588,33 @@ async function initAuth() {
     const session = JSON.parse(raw);
     if (!session?.access_token) { updateAuthUI(); return; }
 
-    // Decode JWT locally — no network call
-    const payload = JSON.parse(atob(session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    // Decode JWT locally — no network call needed
+    let payload = {};
+    try {
+      payload = JSON.parse(atob(session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    } catch(e2) { localStorage.removeItem('medibo_session'); updateAuthUI(); return; }
 
     // Expired?
-    if (payload.exp < Math.floor(Date.now()/1000)) {
+    if (payload.exp && payload.exp < Math.floor(Date.now()/1000)) {
       localStorage.removeItem('medibo_session');
       localStorage.removeItem('medibo_fresh_login');
       updateAuthUI(); return;
     }
 
+    // Supabase puts Google profile data in user_metadata
+    const meta = payload.user_metadata || {};
+
     CURRENT_USER = {
       id: payload.sub,
-      email: payload.email,
+      email: payload.email || meta.email || '',
       access_token: session.access_token,
-      user_metadata: payload.user_metadata || {}
+      user_metadata: meta
     };
 
-    // Check profile
+    // Load profile from DB
     await loadProfile();
 
-    // New user: show registration
+    // Fresh login with no profile → show registration immediately
     const isNew = localStorage.getItem('medibo_fresh_login') === '1';
     localStorage.removeItem('medibo_fresh_login');
 
@@ -2606,7 +2624,7 @@ async function initAuth() {
       const emailEl = document.getElementById('reg-email');
       const nameEl = document.getElementById('reg-name');
       if (emailEl) emailEl.value = CURRENT_USER.email || '';
-      if (nameEl) nameEl.value = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.user_metadata?.name || '';
+      if (nameEl) nameEl.value = meta.full_name || meta.name || '';
     }
   } catch(e) { console.error('initAuth:', e); }
   updateAuthUI();
