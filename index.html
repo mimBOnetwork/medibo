@@ -2565,8 +2565,7 @@ function showAuthStep(step) {
 
 /* ---------- Google OAuth ---------- */
 function signInWithGoogle() {
-  const redirectTo = encodeURIComponent('https://www.medibo.in/');
-  window.location.href = SUPABASE_URL + '/auth/v1/authorize?provider=google&redirect_to=' + redirectTo + '&flow_type=implicit';
+  window.location.href = SUPABASE_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent('https://www.medibo.in') + '&flow_type=implicit';
 }
 
 /* ---------- Session ---------- */
@@ -2577,20 +2576,16 @@ async function initAuth() {
     const session = JSON.parse(raw);
     if (!session?.access_token) { updateAuthUI(); return; }
 
-    // Decode JWT payload — no network call needed to get user info
-    const parts = session.access_token.split('.');
-    if (parts.length !== 3) { localStorage.removeItem('medibo_session'); updateAuthUI(); return; }
-    const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+    // Decode JWT locally — no network call
+    const payload = JSON.parse(atob(session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
 
-    // Check expiry
-    if (payload.exp && payload.exp < Math.floor(Date.now()/1000)) {
+    // Expired?
+    if (payload.exp < Math.floor(Date.now()/1000)) {
       localStorage.removeItem('medibo_session');
       localStorage.removeItem('medibo_fresh_login');
-      updateAuthUI();
-      return;
+      updateAuthUI(); return;
     }
 
-    // Build user object from JWT — no network call
     CURRENT_USER = {
       id: payload.sub,
       email: payload.email,
@@ -2598,29 +2593,22 @@ async function initAuth() {
       user_metadata: payload.user_metadata || {}
     };
 
-    // Load profile from Supabase
+    // Check profile
     await loadProfile();
 
-    // Fresh login + no profile → show registration
-    const freshLogin = localStorage.getItem('medibo_fresh_login') === '1';
+    // New user: show registration
+    const isNew = localStorage.getItem('medibo_fresh_login') === '1';
     localStorage.removeItem('medibo_fresh_login');
 
-    if (freshLogin && !CURRENT_PROFILE) {
-      setTimeout(() => {
-        openAuthModal();
-        showAuthStep('register');
-        const emailEl = document.getElementById('reg-email');
-        const nameEl = document.getElementById('reg-name');
-        if (emailEl) emailEl.value = CURRENT_USER.email || '';
-        if (nameEl && !nameEl.value) {
-          const name = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.user_metadata?.name || '';
-          if (name) nameEl.value = name;
-        }
-      }, 300);
+    if (isNew && !CURRENT_PROFILE) {
+      openAuthModal();
+      showAuthStep('register');
+      const emailEl = document.getElementById('reg-email');
+      const nameEl = document.getElementById('reg-name');
+      if (emailEl) emailEl.value = CURRENT_USER.email || '';
+      if (nameEl) nameEl.value = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.user_metadata?.name || '';
     }
-  } catch(e) {
-    console.error('initAuth:', e);
-  }
+  } catch(e) { console.error('initAuth:', e); }
   updateAuthUI();
 }
 
